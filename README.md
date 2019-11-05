@@ -32,7 +32,7 @@ There is a variety of options. Some examples follow.
       <Property name='key-encryption'>RSA-OAEP-256</Property>
       <Property name='content-encryption'>A256GCM</Property>
       <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
-      <Property name='expires'>1h</Property>
+      <Property name='expiry'>1h</Property>
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
@@ -62,7 +62,7 @@ These are the properties available on the policy:
 | payload            | required. name of a variable containing a JSON string that includes properties for the payload of the JWT.          |
 | key-encryption     | required. name of the key encryption algorithm. Must be RSA-OAEP-256.                                               |
 | content-encryption | required. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms. |
-| expires            | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
+| expiry             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
 | not-before         | optional. an interval as above, expressing the not-before time of the JWT, measured from now.                       |
 | output             | optional. name of the variable in which to store the output. Defaults to ejwt_output.                               |
 
