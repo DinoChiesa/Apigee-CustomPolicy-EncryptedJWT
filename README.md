@@ -114,6 +114,29 @@ Errors can result at runtime if:
 * You use VerifyEncryptedJwt and the inbound JWT uses an alg or enc that is not
   consistent with the policy configuration.
 
+## Example Bundle
+
+There is an [example bundle](./bundle) that demonstrates the use of the API
+Proxy. 
+
+Example request to generate an encrypted JWT: 
+
+```
+ORG=myorg
+ENV=myenv
+curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/generate1 -d ''
+```
+
+Example request to verify an encrypted JWT: 
+
+```
+ORG=myorg
+ENV=myenv
+curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/verify1 -d ''
+```
+
+
+
 ## Building the Jar
 
 You do not need to build the Jar in order to use the custom policy. The custom policy is
