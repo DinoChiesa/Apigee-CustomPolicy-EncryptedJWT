@@ -1,0 +1,10 @@
+<AssignMessage name='AM-SuccessGenerateResponse'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <Set>
+    <Payload contentType='text/plain'>{ejwt_output}
+
+</Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+</AssignMessage>

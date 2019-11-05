@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="default">
+  <Description>Default Proxy</Description>
+
+  <HTTPProxyConnection>
+    <BasePath>/encrypted-jwt</BasePath>
+    <Properties/>
+    <VirtualHost>secure</VirtualHost>
+  </HTTPProxyConnection>
+
+  <FaultRules/>
+
+  <PreFlow>
+    <Request>
+        <Step>
+          <Name>AM-DemoVariables</Name>
+        </Step>
+    </Request>
+    <Response>
+        <Step>
+          <Name>AM-CleanHeaders</Name>
+        </Step>
+    </Response>
+  </PreFlow>
+
+  <Flows>
+
+    <Flow name="generate 1">
+      <Description>generate an encrypted JWT</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWT</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-SuccessGenerateResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate1") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="verify 1">
+      <Description>verify an encrypted JWT</Description>
+      <Request>
+        <Step>
+          <Name>Java-VerifyJWT</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-SuccessVerifyResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify1") and (request.verb = "POST")</Condition>
+    </Flow>
+
+
+    <Flow name='unknown'>
+      <Description>unknown request</Description>
+      <Request>
+        <Step>
+          <Name>RF-UnknownRequest</Name>
+        </Step>
+      </Request>
+    </Flow>
+  </Flows>
+
+  <RouteRule name="Loopback"/>
+
+</ProxyEndpoint>

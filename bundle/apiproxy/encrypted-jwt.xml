@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="1" name="encrypted-jwt">
+    <ConfigurationVersion minorVersion="0" majorVersion="4"/>
+    <CreatedAt>1358216854854</CreatedAt>
+    <CreatedBy>orgAdmin</CreatedBy>
+    <Description>An example API Proxy that demonstrates how to decrypt Encrypted JWT</Description>
+    <DisplayName>encrypted-jwt</DisplayName>
+    <LastModifiedAt>1463848403570</LastModifiedAt>
+    <LastModifiedBy>orgAdmin</LastModifiedBy>
+    <TargetEndpoints/>
+</APIProxy>
