@@ -32,8 +32,8 @@ There is a variety of options. Some examples follow.
       <Property name='key-encryption'>RSA-OAEP-256</Property>
       <Property name='content-encryption'>A256GCM</Property>
       <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
-      <Property name='expires>1h</Property>
-      <Property name='public-key>{my_public_key}</Property>
+      <Property name='expires'>1h</Property>
+      <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
     <ResourceURL>java://edge-callout-encrypted-jwt-20191104.jar</ResourceURL>
@@ -73,7 +73,7 @@ These are the properties available on the policy:
   <JavaCallout name="Java-JWTVerification1">
     <Properties>
       <Property name='key-encryption'>RSA-OAEP-256</Property>
-      <Property name='private-key>{private.my_private_key}</Property>
+      <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
     <ResourceURL>java://edge-callout-encrypted-jwt-20191104.jar</ResourceURL>
