@@ -2,7 +2,7 @@
 
 This directory contains the Java source code for
 Java callouts for Apigee Edge that performs Generates or Verifies encrypted JWT
-that use RSA encryption.
+that use RSA encryption (RSA-OAEP or RSA-OAEP-256).
 
 ## License
 
@@ -17,7 +17,7 @@ This example is not an official Google product, nor is it part of an official Go
 You do not need to build the Jar in order to use the custom policy.
 
 When you use the policy to generate an encrypted JWT, the resulting JWT can be
-decrypted by other systems with the matching private key. Likewise, when you use
+decrypted by other systems that have access to the matching private key. Likewise, when you use
 the policy to verify an encrypted JWT, the policy will work with any compliant
 encrypted JWT that uses alg = RSA-OAEP-256 or alg = RSA-OAEP.
 
