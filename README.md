@@ -1,7 +1,8 @@
 # Encrypted JWT callout
 
 This directory contains the Java source code for
-Java callouts for Apigee Edge that performs Generates or Verifies encrypted JWT.
+Java callouts for Apigee Edge that performs Generates or Verifies encrypted JWT
+that use RSA encryption.
 
 ## License
 
@@ -18,7 +19,7 @@ You do not need to build the Jar in order to use the custom policy.
 When you use the policy to generate an encrypted JWT, the resulting JWT can be
 decrypted by other systems with the matching private key. Likewise, when you use
 the policy to verify an encrypted JWT, the policy will work with any compliant
-encrypted JWT that uses alg = RSA-OAEP-256.
+encrypted JWT that uses alg = RSA-OAEP-256 or alg = RSA-OAEP.
 
 ## Policy Configuration
 
@@ -36,7 +37,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191104.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191106.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -59,12 +60,14 @@ These are the properties available on the policy:
 | Property           | Description                                                                                                         |
 |--------------------|---------------------------------------------------------------------------------------------------------------------|
 | public-key         | required. a PEM string representing the public key.                                                                 |
-| payload            | required. name of a variable containing a JSON string that includes properties for the payload of the JWT.          |
-| key-encryption     | required. name of the key encryption algorithm. Must be RSA-OAEP-256.                                               |
+| key-encryption     | required. name of the key encryption algorithm. Must be RSA-OAEP-256 or RSA-OAEP.                                   |
 | content-encryption | required. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms. |
+| payload            | optional. a JSON string that includes additional properties for the payload of the JWT.                             |
+| header             | optional. a JSON string that includes additional properties for the header of the JWT.                              |
 | expiry             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
 | not-before         | optional. an interval as above, expressing the not-before time of the JWT, measured from now.                       |
-| output             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                               |
+| generate-id        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim.                               |
+| output             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                             |
 
 
 ### Example: Basic Verification of an Encrypted JWT
@@ -76,16 +79,19 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191104.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191106.jar</ResourceURL>
   </JavaCallout>
   ```
 
 * the class is VerifyEncryptedJwt, so the policy will Verify an encrypted JWT
-* The policy will deserialize the private key  from the PEM string contained in
-  the variable `private.my_private_key`
-* The policy will verify the effective times on the JWT (exp and nbf)
 * There is no 'source' property defined so the JWT is retrieved from the
   Authorization header
+* the key encryption is specified as RSA-OAEP-256, so the policy will verify
+  that the inbound JWT uses that encryption, and will reject a JWT with any other alg.
+* The policy will deserialize the private key from the PEM string contained in
+  the variable `private.my_private_key`, and will decrypt with that key.
+* If decryption succeeds, the policy will verify the effective times on the JWT
+  (exp and nbf), if they exist.
 
 ### Example: Verification of an Encrypted JWT with a specific content encryption
 
@@ -97,7 +103,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191104.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191106.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -115,10 +121,35 @@ These are the properties available on the policy:
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | private-key          | required when action = "decrypt". a PEM string representing the private key.                                                              |
 | private-key-password | optional. a password to use with an encrypted private key.                                                                                |
-| key-encryption       | required. name of the key encryption algorithm. Must be RSA-OAEP-256.                                                                     |
+| key-encryption       | required. name of the key encryption algorithm. Must be RSA-OAEP-256 or RSA-OAEP.                                                         |
 | content-encryption   | optional. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms.                       |
 | source               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `message.header.authorization`. |
 | crit-headers         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
+
+
+## About PEM-encoded Keys
+
+Private keys should look like:
+```
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDXk9k01JrhGQf1
+8xaz45QmARgwI/g25gO8hP9iBABk3iNBY96+Kr65ReY8Ivof6Y2yha0ZPEwEfehQ
+...
+hHYu+QiRZnABbpD9C1+Akh4dG97Woyfd5igBsT1Ovs9PDCN0rO4I2nJHrNLJSPte
+OtpRWoF2/LERvp6RNeXthgs=
+-----END PRIVATE KEY-----
+```
+
+Public keys should look like:
+```
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA15PZNNSa4RkH9eAeJ8ph
+57WhvUmANpBEDqP0SuHzNl3HmxbEiUPBoBNQAtRpVlOWM0t+FltMORjGXtntjSBs
+...
+I3DFmXb0ny3uCUCfCRtHnpAU0gfjWBiwkZ/R2OhZOW877GGcNMKVTnFT6911gGMi
+SwIDAQAB
+-----END PUBLIC KEY-----
+```
 
 
 ## About crit-headers
@@ -154,9 +185,9 @@ Errors can result at runtime if:
 ## Example Bundle
 
 There is an [example bundle](./bundle) that demonstrates the use of the API
-Proxy. 
+Proxy.
 
-Example request to generate an encrypted JWT: 
+Example request to generate an encrypted JWT:
 
 ```
 ORG=myorg
@@ -164,14 +195,11 @@ ENV=myenv
 curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/generate1 -d ''
 ```
 
-Example request to verify an encrypted JWT: 
+Example request to verify an encrypted JWT:
 
 ```
-ORG=myorg
-ENV=myenv
 curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/verify1 -d ''
 ```
-
 
 
 ## Building the Jar
@@ -181,7 +209,10 @@ ready to use, with policy configuration. You need to re-build the jar only if yo
 to modify the behavior of the custom policy. Before you do that, be sure you understand
 all the configuration options - the policy may be usable for you without modification.
 
-If you do wish to build the jar, you can use [maven](https://maven.apache.org/download.cgi) to do so. The build requires JDK8. Before you run the build the first time, you need to download the Apigee Edge dependencies into your local maven repo.
+If you do wish to build the jar, you can use
+[maven](https://maven.apache.org/download.cgi) to do so. The build requires
+JDK8. Before you run the build the first time, you need to download the Apigee
+Edge dependencies into your local maven repo.
 
 Preparation, first time only: `./buildsetup.sh`
 
@@ -189,7 +220,7 @@ To build: `mvn clean package`
 
 The Jar source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20191104.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20191106.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
 
 
 ## Build Dependencies

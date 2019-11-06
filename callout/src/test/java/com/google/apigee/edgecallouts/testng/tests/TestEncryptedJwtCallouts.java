@@ -37,10 +37,12 @@ package com.google.apigee.edgecalluts.testng.tests;
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.message.MessageContext;
-import com.google.apigee.edgecallouts.VerifyEncryptedJwt;
 import com.google.apigee.edgecallouts.GenerateEncryptedJwt;
+import com.google.apigee.edgecallouts.VerifyEncryptedJwt;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import mockit.Mock;
 import mockit.MockUp;
 import org.testng.Assert;
@@ -290,7 +292,7 @@ public class TestEncryptedJwtCallouts {
     properties.put("public-key", publicKey1);
     properties.put("key-encryption", "RSA-OAEP-256");
     properties.put("content-encryption", "A256GCM");
-    properties.put("payload", "{ \"sub\": \"dino\", \"unk\" : \"D6B455B4-D252-4F4B-82B3-DA908FDB5BD3\"}");
+    properties.put("payload", "{ \"sub\": \"dino\", \"something\" : \"D6B455B4-D252-4F4B-82B3-DA908FDB5BD3\"}");
     properties.put("debug", "true");
 
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
@@ -306,18 +308,39 @@ public class TestEncryptedJwtCallouts {
     Assert.assertNotNull(output);
   }
 
+  static class StringGen {
+    public final static char[] CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
+    private final static Random random = new SecureRandom();
+
+    public static String randomString(char[] characterSet, int length) {
+        char[] result = new char[length];
+        for (int i = 0; i < result.length; i++) {
+            // picks a random index out of character set > random character
+            int randomCharIndex = random.nextInt(characterSet.length);
+            result[i] = characterSet[randomCharIndex];
+        }
+        return new String(result);
+    }
+
+    public static String randomString(int length) {
+        return randomString(CHARSET, length);
+    }
+  }
+  
   @Test()
-  public void encrypt2() {
+  public void encrypt2_with_expiry() {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("testname", "encrypt2");
     properties.put("public-key", publicKey1);
     properties.put("key-encryption", "RSA-OAEP-256");
     properties.put("content-encryption", "A256GCM");
-    properties.put("payload", "{ \"sub\": \"dino\", \"unk\" : \"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52\"}");
+    properties.put("payload", "{ \"sub\": \"dino\", \"rand\" : \"{random1}\"}");
     properties.put("debug", "true");
     properties.put("expiry", "1h");
     properties.put("not-before", "1m");
 
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+      
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
@@ -332,9 +355,9 @@ public class TestEncryptedJwtCallouts {
   }
 
   @Test()
-  public void encrypt2_missing_ContentEncryption() {
+  public void encrypt3_missing_ContentEncryption() {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "encrypt2");
+    properties.put("testname", "encrypt3");
     properties.put("public-key", publicKey1);
     properties.put("key-encryption", "RSA-OAEP-256");
     //properties.put("content-encryption", "A256GCM");
@@ -354,4 +377,64 @@ public class TestEncryptedJwtCallouts {
     Assert.assertEquals(error, "missing content-encryption.");
   }
 
+
+  @Test()
+  public void encrypt4_RSA_OAEP() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt4");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A128GCM");
+    properties.put("payload", "{ \"sub\": \"dino\", \"unk\" : \"{random1}\"}");
+    properties.put("header", "{ \"p1.org\": \"{random2}\"}");
+    properties.put("debug", "true");
+    properties.put("expiry", "1h");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+      
+    GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("ejwt_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariable("ejwt_output");
+    Assert.assertNotNull(output);
+  }
+
+
+  @Test()
+  public void encrypt5_with_id() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt5");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A128GCM");
+    properties.put("payload", "{ \"sub\": \"dino\", \"rand\" : \"{random1}\"}");
+    properties.put("generate-id", "true");
+    properties.put("debug", "true");
+    properties.put("expiry", "1h");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+      
+    GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("ejwt_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariable("ejwt_output");
+    Assert.assertNotNull(output);
+    String id = msgCtxt.getVariable("ejwt_jti");
+    Assert.assertNotNull(id);
+  }
+
+  
 }

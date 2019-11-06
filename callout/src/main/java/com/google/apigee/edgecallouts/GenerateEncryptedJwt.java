@@ -43,6 +43,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @IOIntensive
 public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution {
@@ -97,8 +98,17 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
     EncryptionMethod enc = EncryptionMethod.parse(policyConfig.contentEncryptionAlgorithm);
     if (enc == null) throw new IllegalStateException("invalid content-encryption.");
 
+    msgCtxt.setVariable(varName("alg"), alg.toString());
+    msgCtxt.setVariable(varName("enc"), enc.toString());
+
     JWEHeader.Builder headerBuilder = new JWEHeader.Builder(alg, enc);
     headerBuilder.type(JOSEObjectType.JWT);
+    if (policyConfig.header != null) {
+      JSONObjectUtils.parse(policyConfig.header)
+        .forEach((key, value) -> headerBuilder.customParam(key, value) );
+      // Map<String, Object> map = JSONObjectUtils.parse(policyConfig.header);
+      // map.forEach((key, value) -> headerBuilder.customParam(key, value) );
+    }
 
     JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder();
     if (policyConfig.payload != null) {
@@ -108,7 +118,13 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
         Object value = entry.getValue();
         claimsBuilder.claim(key, value);
       }
+      if (!map.containsKey("jti") && policyConfig.generateId) {
+        String id = UUID.randomUUID().toString();
+        claimsBuilder.jwtID(id);
+        msgCtxt.setVariable(varName("jti"), id);
+      }
     }
+
     Instant now = Instant.now();
     claimsBuilder.issueTime(Date.from(now));
 
@@ -120,7 +136,13 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
       Instant nbf = now.plus(policyConfig.notBefore, ChronoUnit.SECONDS);
       claimsBuilder.notBeforeTime(Date.from(nbf));
     }
-    EncryptedJWT encryptedJWT = new EncryptedJWT(headerBuilder.build(), claimsBuilder.build());
+
+    JWEHeader header = headerBuilder.build();
+    JWTClaimsSet claims = claimsBuilder.build();
+    msgCtxt.setVariable(varName("header"), header.toString());
+    msgCtxt.setVariable(varName("payload"), claims.toString());
+
+    EncryptedJWT encryptedJWT = new EncryptedJWT(header, claims);
     RSAEncrypter encrypter = new RSAEncrypter((RSAPublicKey) policyConfig.publicKey);
 
     encryptedJWT.encrypt(encrypter);
@@ -130,10 +152,12 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
 
   static class PolicyConfig {
     public boolean debug;
+    public boolean generateId;
     public String keyEncryptionAlgorithm;
     public String contentEncryptionAlgorithm;
     public PublicKey publicKey;
     public String payload;
+    public String header;
     public String outputVar;
     public int lifetime;
     public int notBefore;
@@ -145,9 +169,11 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
     config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
     config.publicKey = getPublicKey(msgCtxt);
     config.payload = _getOptionalString(msgCtxt, "payload");
+    config.header = _getOptionalString(msgCtxt, "header");
     config.outputVar = _getStringProp(msgCtxt, "output", varName("output"));
     config.lifetime = getExpiry(msgCtxt);
     config.notBefore = getNotBefore(msgCtxt);
+    config.generateId = _getBooleanProperty(msgCtxt, "generate-id", false);
     return config;
   }
 

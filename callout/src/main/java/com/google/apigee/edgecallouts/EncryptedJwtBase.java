@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
 public abstract class EncryptedJwtBase {
   protected static final String varprefix = "ejwt_";
   private static final Pattern kekNamePattern =
-      Pattern.compile("^(RSA-OAEP-256)$", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("^(RSA-OAEP-256|RSA-OAEP)$", Pattern.CASE_INSENSITIVE);
   private static final Pattern cekNamePattern =
       Pattern.compile(
           "^(A128CBC-HS256|A192CBC-HS384|A256CBC-HS512|A128GCM|A192GCM|A256GCM)$",
