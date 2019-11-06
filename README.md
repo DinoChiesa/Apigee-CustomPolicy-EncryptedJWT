@@ -86,6 +86,25 @@ These are the properties available on the policy:
 * The policy will verify the effective times on the JWT (exp and nbf)
 * There is no 'source' property defined so the JWT is retrieved from the
   Authorization header
+  
+### Example: Verification of an Encrypted JWT with a specific content encryption
+
+  ```xml
+  <JavaCallout name="Java-JWTVerification1">
+    <Properties>
+      <Property name='key-encryption'>RSA-OAEP-256</Property>
+      <Property name='content-encryption'>A256GCM</Property>
+      <Property name='private-key'>{private.my_private_key}</Property>
+    </Properties>
+    <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191104.jar</ResourceURL>
+  </JavaCallout>
+  ```
+
+* all options as the previous example
+* the one new option `content-encryption`, tells the policy to require that the
+  inbound JWT uses the `A256GCM` encryption method. If the inbound JWT uses any
+  other encryption, the verification will fail.
 
 
 ### Properties for Verification
