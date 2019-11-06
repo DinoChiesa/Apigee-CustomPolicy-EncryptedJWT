@@ -64,7 +64,7 @@ These are the properties available on the policy:
 | content-encryption | required. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms. |
 | expiry             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
 | not-before         | optional. an interval as above, expressing the not-before time of the JWT, measured from now.                       |
-| output             | optional. name of the variable in which to store the output. Defaults to ejwt_output.                               |
+| output             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                               |
 
 
 ### Example: Basic Verification of an Encrypted JWT
@@ -117,7 +117,7 @@ These are the properties available on the policy:
 | private-key-password | optional. a password to use with an encrypted private key.                                                                                |
 | key-encryption       | required. name of the key encryption algorithm. Must be RSA-OAEP-256.                                                                     |
 | content-encryption   | optional. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms.                       |
-| source               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `.message.header.authorization`. |
+| source               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `message.header.authorization`. |
 | crit-headers         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
 
 
@@ -141,11 +141,12 @@ If your inbound JWT do not include a `crit` header
 
 ## Detecting Success and Errors
 
-The policy will return ABORT and set the context variable `crypto_error` if there has been any error at runtime. Your proxy bundles can check this variable in `FaultRules`.
+The policy will return ABORT and set the context variable `ejwt_error` if there has been any error at runtime. Your proxy bundles can check this variable in `FaultRules`.
 
 Errors can result at runtime if:
 
-* you specify an invalid configuration
+* you specify an invalid configuration, for example an unsupported value for
+  key-encryption or content-encryption
 * You use VerifyEncryptedJwt and the inbound JWT is expired
 * You use VerifyEncryptedJwt and the inbound JWT uses an alg or enc that is not
   consistent with the policy configuration.
