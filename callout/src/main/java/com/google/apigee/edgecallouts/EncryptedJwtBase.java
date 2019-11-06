@@ -174,6 +174,13 @@ public abstract class EncryptedJwtBase {
     return sw.toString();
   }
 
+  protected void setVariables(
+      Map<String, Object> payloadClaims, Map<String, Object> headerClaims, MessageContext msgCtxt)
+    throws Exception {
+    payloadClaims.forEach((key, value) -> msgCtxt.setVariable(varName("payload_" + key), value.toString()) );
+    headerClaims.forEach((key, value) -> msgCtxt.setVariable(varName("header_" + key), value.toString()) );
+  }
+
   protected void setExceptionVariables(Exception exc1, MessageContext msgCtxt) {
     String error = exc1.toString().replaceAll("\n", " ");
     msgCtxt.setVariable(varName("exception"), error);

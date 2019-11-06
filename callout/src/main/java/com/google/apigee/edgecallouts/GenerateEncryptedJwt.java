@@ -77,17 +77,6 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
     return ((Long) (durationInMilliseconds / 1000L)).intValue();
   }
 
-  void setVariables(
-      Map<String, Object> payloadClaims, Map<String, Object> headerClaims, MessageContext msgCtxt)
-      throws Exception {
-
-    for (Map.Entry<String, Object> entry : payloadClaims.entrySet()) {
-      String key = entry.getKey();
-      Object value = entry.getValue();
-      msgCtxt.setVariable(varName("payload_" + key), value.toString());
-    }
-  }
-
   void encryptJwt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");
@@ -106,18 +95,12 @@ public class GenerateEncryptedJwt extends EncryptedJwtBase implements Execution 
     if (policyConfig.header != null) {
       JSONObjectUtils.parse(policyConfig.header)
         .forEach((key, value) -> headerBuilder.customParam(key, value) );
-      // Map<String, Object> map = JSONObjectUtils.parse(policyConfig.header);
-      // map.forEach((key, value) -> headerBuilder.customParam(key, value) );
     }
 
     JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder();
     if (policyConfig.payload != null) {
       Map<String, Object> map = JSONObjectUtils.parse(policyConfig.payload);
-      for (Map.Entry<String, Object> entry : map.entrySet()) {
-        String key = entry.getKey();
-        Object value = entry.getValue();
-        claimsBuilder.claim(key, value);
-      }
+      map.forEach((key, value) -> claimsBuilder.claim(key, value) );
       if (!map.containsKey("jti") && policyConfig.generateId) {
         String id = UUID.randomUUID().toString();
         claimsBuilder.jwtID(id);

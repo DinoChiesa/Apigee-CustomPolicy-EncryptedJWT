@@ -76,20 +76,6 @@ public class VerifyEncryptedJwt extends EncryptedJwtBase implements Execution {
     return new HashSet<String>(Arrays.asList(critHeaders.split("\\s*,\\s*")));
   }
 
-  void setVariables(Map<String, Object> payloadClaims, Map<String, Object> headerClaims, MessageContext msgCtxt) throws Exception {
-
-    for (Map.Entry<String, Object> entry : payloadClaims.entrySet()) {
-      String key = entry.getKey();
-      Object value = entry.getValue();
-      msgCtxt.setVariable(varName("payload_" + key), value.toString());
-    }
-    for (Map.Entry<String, Object> entry : headerClaims.entrySet()) {
-      String key = entry.getKey();
-      Object value = entry.getValue();
-      msgCtxt.setVariable(varName("header_" + key), value.toString());
-    }
-  }
-
   void decryptJwt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     Object v = msgCtxt.getVariable(policyConfig.source);
     if (v == null) throw new IllegalStateException("Cannot find JWT within source.");
