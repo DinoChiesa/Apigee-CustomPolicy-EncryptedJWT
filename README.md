@@ -86,7 +86,7 @@ These are the properties available on the policy:
 * The policy will verify the effective times on the JWT (exp and nbf)
 * There is no 'source' property defined so the JWT is retrieved from the
   Authorization header
-  
+
 ### Example: Verification of an Encrypted JWT with a specific content encryption
 
   ```xml
@@ -101,7 +101,7 @@ These are the properties available on the policy:
   </JavaCallout>
   ```
 
-* all options as the previous example
+* all options act as in the previous example
 * the one new option `content-encryption`, tells the policy to require that the
   inbound JWT uses the `A256GCM` encryption method. If the inbound JWT uses any
   other encryption, the verification will fail.
@@ -121,6 +121,23 @@ These are the properties available on the policy:
 | crit-headers         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
 
 
+## About crit-headers
+
+The JWT specification includes an option to specify ["critical
+headers"](https://tools.ietf.org/html/rfc7515#section-4.1.11) in the
+`crit` field of the header of the JWT. (See also the [JWE
+spec](https://tools.ietf.org/html/rfc7516#section-4.1.13)) . The value of the
+`crit` field is a list of header names. Via this notation, the JWT asserts that
+there are headers contained in the JWT which are critical and which MUST be
+understood by any consumer or reader. The reader MUST reject any JWT containing
+headers on the `crit` list that it does not understand.
+
+To communicate headers that are understood, configure the policy with the
+`crit-headers` property. When the VerifyEncryptedJwt callout process an inbound
+JWT that contains crit headers, the verification will succeed if and only if
+those headers are in the `crit-headers` list in the policy configuration,
+
+If your inbound JWT do not include a `crit` header
 
 ## Detecting Success and Errors
 
