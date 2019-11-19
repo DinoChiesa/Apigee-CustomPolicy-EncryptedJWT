@@ -37,7 +37,22 @@
           <Name>AM-SuccessGenerateResponse</Name>
         </Step>
       </Response>
-      <Condition>(proxy.pathsuffix MatchesPath "/generate1") and (request.verb = "POST")</Condition>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 2">
+      <Description>generate a JWE</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWE</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-SuccessGenerateResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe") and (request.verb = "POST")</Condition>
     </Flow>
 
     <Flow name="verify 1">
@@ -52,7 +67,22 @@
           <Name>AM-SuccessVerifyResponse</Name>
         </Step>
       </Response>
-      <Condition>(proxy.pathsuffix MatchesPath "/verify1") and (request.verb = "POST")</Condition>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify_jwt") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="verify 2">
+      <Description>verify a JWE</Description>
+      <Request>
+        <Step>
+          <Name>Java-VerifyJWE</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-SuccessVerifyResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe") and (request.verb = "POST")</Condition>
     </Flow>
 
 

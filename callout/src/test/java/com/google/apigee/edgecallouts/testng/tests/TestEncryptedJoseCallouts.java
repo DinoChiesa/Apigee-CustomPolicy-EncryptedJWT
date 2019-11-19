@@ -1,4 +1,4 @@
-// TestEncryptedJwtCallouts.java
+// TestEncryptedJoseCallouts.java
 //
 // Copyright (c) 2018-2019 Google LLC
 //
@@ -39,6 +39,8 @@ import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.edgecallouts.GenerateEncryptedJwt;
 import com.google.apigee.edgecallouts.VerifyEncryptedJwt;
+import com.google.apigee.edgecallouts.VerifyJwe;
+import com.google.apigee.edgecallouts.GenerateJwe;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +51,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class TestEncryptedJwtCallouts {
+public class TestEncryptedJoseCallouts {
 
   static {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -171,11 +173,69 @@ public class TestEncryptedJwtCallouts {
           + "SwIDAQAB\n"
           + "-----END PUBLIC KEY-----\n";
 
-  private String jwt1 =
+  private static final String jwt1 =
       "eyJ0eXAiOiJKV1QiLCJoZHIxIjoxMjMsImVuYyI6IkExMjhHQ00iLCJoZHIyIjp0cnVlLCJhbGciOiJSU0EtT0FFUC0yNTYifQ.n3CicDJeNIdfRHuS9XBAvP1Sep2eyiEIPgvodY4BxzUfUEKxPnWvPVSx-ikaxan5Oi_PSqipIdnPSBJ7pNN1Rt4aqFEBBW5m0WCUwsssyLP0A_MD8usUVg0VqRqBFXqokbTIEO7YCXxGP-bXs-I_1eeuqN12-OokkcWJtyf-n8-HHpp-DAc8xQkYB5oQZqC5rGGAWJh0tThSkynepvJzymaXETiO69B6vU6Oe2VL2PWgMYoB3YjfdEKSZelFe7dLd14G_G5sDKkA33vHjC3w9OPAHlubYpZnWuBdrLH9sV-YSkyLRtiWc-rG1eHIFODcbUXqiDBrhPSfWJlf6wd1_Q.mRqogt0pxtPdgyjt.73XlhsvhcsaIFJUrqZFyf0Hjgxx9A-rbPWoIdsup-ScsXuqO6RevhNdjBg.ESdhCa_eqd2FaI5e5IH2xQ";
 
-  private String jwt2 =
-    "eyJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.vqVKvZcGr7b7MWzSCmYUVXolSTXW-eCzN_ly03gzix47HBYkk7-nQ_kocdeLOr_qV3pTusJedfq6RyeSsccCu0aJionCureBxtn9udM2MZ1OCNmGIBJhWxDqAKIYOmB_IwTK6ATGRRiqOssw1y1x4PWH13QT_Jxf0VuWDZXm74Cz_ttL_dmtZp7zIM47imjUxRhOCdLdBtYkT2Q-9r__WHq1XOVuYiuLaMBnJ3YPtONhwHbyAJ1TshDgkffllivRs9qs7ONy6fvc9OlYkEoUs2zYGAupMUX1YHSnS62ASnEUMcq9lJsxK32Rvh-DmchgtTMvOH1hBoFnuzzi6p3crg.BRTKgJtcL3mLplCd.8lu-rdSOiH_Qvt0KOM6MxuYkf096ldFGuOiCJigzJxQWMyY4UTNkkkl_FFK4bO76w46c5Ub66l3AXWxT9OwwX4A3KwaDI9USEfRUBuXW3S7fSmVrjEu88NM-8shlyLpPXrEmcWBoPPMaDg_De_w.qS3YdrTaHLnpW9evdKTKCw";
+  private static final String jwt2 =
+      "eyJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.vqVKvZcGr7b7MWzSCmYUVXolSTXW-eCzN_ly03gzix47HBYkk7-nQ_kocdeLOr_qV3pTusJedfq6RyeSsccCu0aJionCureBxtn9udM2MZ1OCNmGIBJhWxDqAKIYOmB_IwTK6ATGRRiqOssw1y1x4PWH13QT_Jxf0VuWDZXm74Cz_ttL_dmtZp7zIM47imjUxRhOCdLdBtYkT2Q-9r__WHq1XOVuYiuLaMBnJ3YPtONhwHbyAJ1TshDgkffllivRs9qs7ONy6fvc9OlYkEoUs2zYGAupMUX1YHSnS62ASnEUMcq9lJsxK32Rvh-DmchgtTMvOH1hBoFnuzzi6p3crg.BRTKgJtcL3mLplCd.8lu-rdSOiH_Qvt0KOM6MxuYkf096ldFGuOiCJigzJxQWMyY4UTNkkkl_FFK4bO76w46c5Ub66l3AXWxT9OwwX4A3KwaDI9USEfRUBuXW3S7fSmVrjEu88NM-8shlyLpPXrEmcWBoPPMaDg_De_w.qS3YdrTaHLnpW9evdKTKCw";
+
+  private static final String jwt3 =
+    "eyJhbGciOiJSUzI1NiIsImtpZCI6IkFQUF9XUElfQVBJR0VFXzAxIiwicGkuYXRtIjoiMm9pZyJ9.eyJzY29wZSI6IiIsImNsaWVudF9pZCI6IndwaV9lMDA0MDBfYXBpZ2VlXzAxIiwiaXNzIjoidXJuOi8vYXBpZ2VlLWVkZ2UtSldULXBvbGljeS10ZXN0IiwiYXVkIjoidXJuOi8vYzYwNTExYzAtMTJhMi00NzNjLTgwZmQtNDI1MjhlYjY1YTZhIiwic3ViIjoiYXBpZ2VlLXNlYXR0bGUtaGF0cmFjay1tb250YWdlIiwiZXhwIjoxNTczNTc5MzYxfQ.A-GoVl4h0nys-5lI_p2_71iEfu2YUYPvJVeoZfWDwoDITAvJV0ejyQ0J9w2rgsA-t0cfTlY1t-dAPg3hfuExVBeg2QibNqwaJSy5YlxCadaSxIBF7jYCnYJbVAI300uygm3J4rYnjaeaS1wKpSHRYKCBMEbQonqk5L_xhR7q9oWcBewqiEWA0f4fqGVrTBhfb1bqb8Fynzf2ohtxScec1aJ2dHaGRy5rcmIgV_ezY6A6tT_aawgUEAylTs90hliaG5EJ5_FaMHG9phEgUjwXw695X8qkcmAu_PP2yjjVEAhIUCLNJvqD1tcHip71roLwHNZSBIJVuGk_xL6oFnA_oQ";
+
+  private static final String jwe1 =
+      "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00iLCJjdHkiOiJKV1QiLCJwaS5hdG0iOiIyb2lnIn0.ZJD2tK-HTL9NDxCY6_aL9WS7OrwxvnHpQ73wLQ9bZs4JXSb4Xr3LtKlDAQ-9FajhnKFB8K-wj_bpF4Ir3548ipVlihh8gNtC_LVIi2S3iSP3bBZ6ozmEu29Mow1wT6fHn7Qwok0n8misUzZnV0a81RmGj5WenQze8OLTkNtZDWaS6Gr1YjQz_M5vqXrIbIzNfSYbFmSL0poVcs966ok78Br3GIhH1RfsMlBdpodRzqh8nQ-LJ7hfciun06Udlb9CgvtT8ODxXULa57m22Y3-3q_ljIWVrTbVvZ9Targ23LSwfj6lXKTdYeiRZqiv9OEgm5TJuetl5WULV_sqrdgZ1w.dedzaIHfMzY7kjGJ.oHzVKnxUxdZrnrsiOCPg49Gi3N6HxW4XSupcMzUG81L9Bw-Ih49Jo_sDqLXkOpwP7RAqvhyF3-3uumd5oSqpknmTaSUE3eOqFQ3Es06vYUVATc2xwwH0ehJh4DJm4hzoXROrKOJzKMrZj0636pCl-Yj0X0sx-1ktC4IdlnJV4Uela7isi1JKqX-WaxCRRTYdwiVvBTNIuRRfGCs9I8B6yt_lNeU4kW-aZ56AyLMl3oETqenEFU7CM7v4UARwiShlh3eWWGHzsuT66ofRrwWgRNM0U7JoRV8yUFEpIaQeTuLkPqWPzrVyAHB62smnYMOy2JQKfXMW7IqzymadwL5hE4Gf2XZNrs8cm4ajqbHo0n0dNsHzjnaqb3dCp6pQnYk3Uy0uPkRw8DikM39IcfhuolaZghVYtQ3kyB6Ub3QoEurAEoNyRefJ3h-VHzF8yilNeI3Ay4aA57fzHI2H11M9Pu9YEBMGgpPa7DJnbFzV5nE1H-GkHzUjvJmj6_-rlmHcTC1_55eCzY-zHOHiUsgKiIwLVcqEBxtPxD2D_xZcwRHtSF_ixvUlreGTxYZC-8n2Hu2Ny8FlpRY1NSM-sJrtSyo2lh-a6mjAFGU0TltLcOdMbsroB8UmE0zSmKSXTn3QR60b44yjxHO_o77MbBFUuIOuXV9L-E1b-CmHFg2BV7_1vshdKcucbjvhEKvKZNZ9OQBdTeqPRiBqJlCbHd9NJPXu96OVamP7Oz5oLBhWBJksG1Z1wEJAwoT6SgbcZNZiIgBIb5jGHa894hz-B79UM6E9bmD5k497XXQNGdCeISssBeP9xXzGQs8ZZPJ2i8LnpJykvQJvrcfPfYrQnR6ozg_EY9p88eAbxvqWHGpIvgyvV6G6moV1yi17BtkGRjQVbfNHsK_L-wBt1A.vnBwrK3690tYkgmmM08wog";
+
+  private String privateKey3 =
+      "-----BEGIN PRIVATE KEY-----\n"
+          + "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDRAfA4ZxT2b2Hr\n"
+          + "kbcKXrcMuWJTjfyq50BL+C+VcXGHKmzqw/TAq+3XwATEC+7D9Cf0CssJ93sp/vu+\n"
+          + "vqDtIcokqaro+mU9otWHKLN4W2+emw244g/Zj0T3P5n+ikTcEjWoX4tiGoawBJVR\n"
+          + "InyKG58EvvZ59reHbTy/6UAYi95W1kGzeKqdNsSYWvHaPsOetMzWhnJlHGSLPjml\n"
+          + "1oxETp/5ALyCv92vREEu10ND6LehX7GYbE06FrPdTH0oKuFiwm0p6mhbQQPd1yXH\n"
+          + "00GMMVEx+aNUHy5qVZ5HYjTuXJ9Fg4UsCjF8gVTWnT+luMAkTjYTLvrHe/l7Fbkw\n"
+          + "j0Hp4Yv9AgMBAAECggEBAMs9B0rRciDwzlczqrn6wCUvX93ABCJsHKnC/QJk/fBh\n"
+          + "4OepBScWCIHzxq6cq+EAWpmEpUtby/haapJg7Duqz9Y25msGkcwNu3VirqIqx6+D\n"
+          + "NyTBLohwOK/0uNo7uhoF2wePYQpUoQQocMokrtXdZhRHXYXb0zttjdVQC3PTDrGA\n"
+          + "g8sP1cXsEYkXrngjlc6O2UJVo3AF3gaI2dpAOT5HniUgtyQcLjQksoE+12edbNyZ\n"
+          + "UZpHnQ31t54skilwamZbUkxPGyyBDbifjR9t7MwUatPUDmX+O9U9oiDjdxiGkAS7\n"
+          + "EGED8GvZXFneu1L8Q8N+akOigNI6fsNQ+deJmdChzAECgYEA+fieahm7/ibzhO3s\n"
+          + "mnD2O7KqYCpm3RxPeGF2jvGVm2UoIiS3UuvI4PErp6eHH+hDzXdjF8w9p3LZXO0p\n"
+          + "ZXnBNpDb2+EkUE2CK41Q0N2jJNuwrykP8hSknpt3ArdbeV2/MP0E/u/0PNwsUFsi\n"
+          + "IAh9wYRwNfr2sgg1GoOzqU9gec0CgYEA1gxmjpUVQgUAn1Bi0NvXeTnH/qrkhUMz\n"
+          + "AvEZygoGvQ34PYmY4+i/q+5Jnu1Yk5G/uwtGTZLLNRXI/lWawpVcxIvwgMwC4wXV\n"
+          + "kKHAiw7U6QKKocs95AJrbPEeU1TmohmZLlewGBHAB4LpruH8R0i7guHdBgRkj2ET\n"
+          + "JmLNIRQgavECgYA3HXxARKBQr2HuI0+R1epUy1YJkg/QHNfg4Qx1BAtKkglBTfsl\n"
+          + "y1slTcekVanTfTDF8tbkfmHxs779YEVKXIgfcd0oJAIPuqdC1wvEobnA/Ld+R31+\n"
+          + "kNKjLgAVlzwSDHuFX6RkWZ/uc1VJ+m4Rxg2ER6E+JbGTG4Ap8nQAlsHc2QKBgQDA\n"
+          + "d1wMXy9DMt5RYmXIKbWBcpxLePyMe1U2Evc+fW97tUD+jGgmnpUiktwuBHr+DjMZ\n"
+          + "i9TGUfVYoWMelnjW+Jj2vmIeXdNGsWtMZrWMFGULs9ZWDztyd16DEfhTs+bB4USk\n"
+          + "sAJOUj+aQXPAZcGDk3nQASnNjEujxQUEIhkS4lcX8QKBgDzlG9jCZJG74qP2H9sO\n"
+          + "a6oHhpK6VeJUE9BbrcQSz1wMqvwG2hO5BktkP1OB0feXVcKxpoYr1ICRFXxELOuH\n"
+          + "j4VXfJ+9BuUhLbrPdpEPbYp4zIbJSI1D2p4dz66qFROVBcxb3xhoySZw3lqtJ55+\n"
+          + "R73rOenoHWcqj+zNux9E58mV\n"
+          + "-----END PRIVATE KEY-----\n";
+
+  private static final String cert1 =
+      "-----BEGIN CERTIFICATE-----\n"
+          + "MIIDXDCCAkSgAwIBAgIGAWn9XZcJMA0GCSqGSIb3DQEBCwUAMG8xCzAJBgNVBAYT\n"
+          + "AlVTMRUwEwYDVQQIEwxQZW5uc3lsdmFuaWExEzARBgNVBAcTClBpdHRzYnVyZ2gx\n"
+          + "DDAKBgNVBAoTA1BOQzEMMAoGA1UECxMDSUFNMRgwFgYDVQQDEw9KV1RUb2tlblNp\n"
+          + "Z25pbmcwHhcNMTkwNDA4MTQzMjQzWhcNMjkwNDA1MTQzMjQzWjBvMQswCQYDVQQG\n"
+          + "EwJVUzEVMBMGA1UECBMMUGVubnN5bHZhbmlhMRMwEQYDVQQHEwpQaXR0c2J1cmdo\n"
+          + "MQwwCgYDVQQKEwNQTkMxDDAKBgNVBAsTA0lBTTEYMBYGA1UEAxMPSldUVG9rZW5T\n"
+          + "aWduaW5nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn4wHpttVyywq\n"
+          + "ovOj4BqJrkE7hiWXcj5fPcToSsNXObxYbSjIDAgF62Tdd3gDA0PNhLju7abjcF8d\n"
+          + "NU20G9ElsMe4SH9enHZ3wQANcUcQ454iFKwdAzycWI7iWBrwT5ro5Dy30NaN7vNu\n"
+          + "K/17C+eN0d7+rrB44SCya5ByUl//6BGtFiGh96+ZwADIKLjluBn+pMX/6LYA5rHV\n"
+          + "NXWomhTJ3ZjEiSCSaeRR7PkL+N9okIjAt30mE5MaPU0Lsn88nxk9qsYuYIhjfGOs\n"
+          + "k3pKErAvwSuRL37XMhnA4f5QbRuVOLPSQtPlVabbMPjunLeXJIQX6kkBo2D5xVLx\n"
+          + "anfpxOeerQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAclOdE2mUvxkvenKAntL3c\n"
+          + "54sMkJLe+WJSHhYLujctaLj3dSIh3rtn0HtW9HQc28vbWakCpold8E8OVCKiv4sI\n"
+          + "OlmNwZi9j4ZI3J7h4lShuicqgELEmlvusbvlyGS6fE3Zd4myKhceeglSIX4eYIMI\n"
+          + "+GK+2+oHnM823E8cAcuPUY3+L0u9S1wX7YOVUW+44Kl4RUnkC0fYEOpqe8yvR0sj\n"
+          + "NiOuwzlhEsDzzDZ6Hmnmh9GVubhmivJdp7/sROWawh6yUkvwgA9lf6no0bp/Wh55\n"
+          + "AUSfkBBboTdFvB4itkJOCxuRxO5is06M47F7aYL2XT6ESY+C+fZO3NLhCs+7XkWC\n"
+          + "-----END CERTIFICATE-----\n";
 
   private void reportThings(Map<String, String> props) {
     String test = props.get("testname");
@@ -292,7 +352,9 @@ public class TestEncryptedJwtCallouts {
     properties.put("public-key", publicKey1);
     properties.put("key-encryption", "RSA-OAEP-256");
     properties.put("content-encryption", "A256GCM");
-    properties.put("payload", "{ \"sub\": \"dino\", \"something\" : \"D6B455B4-D252-4F4B-82B3-DA908FDB5BD3\"}");
+    properties.put(
+        "payload",
+        "{ \"sub\": \"dino\", \"something\" : \"D6B455B4-D252-4F4B-82B3-DA908FDB5BD3\"}");
     properties.put("debug", "true");
 
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
@@ -309,24 +371,25 @@ public class TestEncryptedJwtCallouts {
   }
 
   static class StringGen {
-    public final static char[] CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
-    private final static Random random = new SecureRandom();
+    public static final char[] CHARSET =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
+    private static final Random random = new SecureRandom();
 
     public static String randomString(char[] characterSet, int length) {
-        char[] result = new char[length];
-        for (int i = 0; i < result.length; i++) {
-            // picks a random index out of character set > random character
-            int randomCharIndex = random.nextInt(characterSet.length);
-            result[i] = characterSet[randomCharIndex];
-        }
-        return new String(result);
+      char[] result = new char[length];
+      for (int i = 0; i < result.length; i++) {
+        // picks a random index out of character set > random character
+        int randomCharIndex = random.nextInt(characterSet.length);
+        result[i] = characterSet[randomCharIndex];
+      }
+      return new String(result);
     }
 
     public static String randomString(int length) {
-        return randomString(CHARSET, length);
+      return randomString(CHARSET, length);
     }
   }
-  
+
   @Test()
   public void encrypt2_with_expiry() {
     Map<String, String> properties = new HashMap<String, String>();
@@ -340,7 +403,7 @@ public class TestEncryptedJwtCallouts {
     properties.put("not-before", "1m");
 
     msgCtxt.setVariable("random1", StringGen.randomString(28));
-      
+
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
@@ -360,8 +423,9 @@ public class TestEncryptedJwtCallouts {
     properties.put("testname", "encrypt3");
     properties.put("public-key", publicKey1);
     properties.put("key-encryption", "RSA-OAEP-256");
-    //properties.put("content-encryption", "A256GCM");
-    properties.put("payload", "{ \"sub\": \"dino\", \"unk\" : \"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52\"}");
+    // properties.put("content-encryption", "A256GCM");
+    properties.put(
+        "payload", "{ \"sub\": \"dino\", \"unk\" : \"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52\"}");
     properties.put("debug", "true");
     properties.put("expiry", "1h");
     properties.put("not-before", "1m");
@@ -377,7 +441,6 @@ public class TestEncryptedJwtCallouts {
     Assert.assertEquals(error, "missing content-encryption.");
   }
 
-
   @Test()
   public void encrypt4_RSA_OAEP() {
     Map<String, String> properties = new HashMap<String, String>();
@@ -392,7 +455,7 @@ public class TestEncryptedJwtCallouts {
 
     msgCtxt.setVariable("random1", StringGen.randomString(28));
     msgCtxt.setVariable("random2", StringGen.randomString(7));
-      
+
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
@@ -405,7 +468,6 @@ public class TestEncryptedJwtCallouts {
     String output = msgCtxt.getVariable("ejwt_output");
     Assert.assertNotNull(output);
   }
-
 
   @Test()
   public void encrypt5_with_id() {
@@ -420,7 +482,7 @@ public class TestEncryptedJwtCallouts {
     properties.put("expiry", "1h");
 
     msgCtxt.setVariable("random1", StringGen.randomString(28));
-      
+
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
@@ -436,5 +498,81 @@ public class TestEncryptedJwtCallouts {
     Assert.assertNotNull(id);
   }
 
-  
+  @Test()
+  public void decrypt5_jwe() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "decrypt5");
+    properties.put("private-key", privateKey3);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("source", "message.content");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("message.content", jwe1);
+
+    VerifyJwe callout = new VerifyJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("ejwt_error");
+    Assert.assertNull(error);
+    String cty = msgCtxt.getVariable("ejwt_header_cty");
+    Assert.assertEquals(cty, "JWT");
+    String payload = msgCtxt.getVariable("ejwt_payload");
+    Assert.assertNotNull(payload);
+    Assert.assertTrue(payload.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
+  }
+
+  @Test()
+  public void decrypt6_jwe_wrongkey() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "decrypt6");
+    properties.put("private-key", privateKey1);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("source", "message.content");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("message.content", jwe1);
+
+    VerifyJwe callout = new VerifyJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariable("ejwt_error");
+    Assert.assertEquals(error, "Decryption error");
+  }
+
+  @Test()
+  public void encrypt6_JWE() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt6");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", jwt1);
+    properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("ejwt_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariable("ejwt_output");
+    Assert.assertNotNull(output);
+  }
+
+
 }

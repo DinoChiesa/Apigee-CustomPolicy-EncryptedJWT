@@ -22,61 +22,26 @@
 
 package com.google.apigee.edgecallouts;
 
-import com.apigee.flow.execution.ExecutionContext;
-import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
-import com.google.apigee.util.CalloutUtil;
-import com.google.apigee.util.KeyUtil;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.security.PrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @IOIntensive
-public class VerifyEncryptedJwt extends EncryptedJwtBase implements Execution {
+public class VerifyEncryptedJwt extends VerifyBase implements Execution {
   public VerifyEncryptedJwt(Map properties) {
     super(properties);
   }
 
-  private String getSourceVar() {
-    String source = this.properties.get("source");
-    if (source == null || source.equals("")) {
-      return "message.header.authorization";
-    }
-    return source;
-  }
-
-  private PrivateKey getPrivateKey(MessageContext msgCtxt) throws Exception {
-    return KeyUtil.decodePrivateKey(
-        _getRequiredString(msgCtxt, "private-key"),
-        _getOptionalString(msgCtxt, "private-key-password"));
-  }
-
-  private Set<String> getDeferredCriticalHeaders(MessageContext msgCtxt) throws Exception {
-    String critHeaders = _getStringProp(msgCtxt, "crit-headers", null);
-    if (critHeaders == null)
-      return new HashSet<String>(); // empty set
-
-    return new HashSet<String>(Arrays.asList(critHeaders.split("\\s*,\\s*")));
-  }
-
-  void decryptJwt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
+  void decrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     Object v = msgCtxt.getVariable(policyConfig.source);
     if (v == null) throw new IllegalStateException("Cannot find JWT within source.");
     String jweText = (String) v;
@@ -84,7 +49,8 @@ public class VerifyEncryptedJwt extends EncryptedJwtBase implements Execution {
       jweText = jweText.substring(7);
     }
     EncryptedJWT encryptedJWT = EncryptedJWT.parse(jweText);
-    RSADecrypter decrypter = new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders);
+    RSADecrypter decrypter =
+        new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders);
     encryptedJWT.decrypt(decrypter);
     if (encryptedJWT.getPayload() != null) {
       String payload = encryptedJWT.getPayload().toString();
@@ -100,26 +66,16 @@ public class VerifyEncryptedJwt extends EncryptedJwtBase implements Execution {
     setVariables(claims.getClaims(), header.toJSONObject(), msgCtxt);
 
     // verify configured Key Encryption Alg and maybe Content Encryption Alg
-    if (!header
-        .getAlgorithm()
-        .toString()
-        .equals(policyConfig.keyEncryptionAlgorithm))
+    if (!header.getAlgorithm().toString().equals(policyConfig.keyEncryptionAlgorithm))
       throw new IllegalStateException("JWT uses unacceptable Key Encryption Algorithm.");
 
-    msgCtxt.setVariable(varName("alg"), header
-                        .getAlgorithm()
-                        .toString());
+    msgCtxt.setVariable(varName("alg"), header.getAlgorithm().toString());
 
-    msgCtxt.setVariable(varName("enc"), header
-                        .getEncryptionMethod()
-                        .toString());
+    msgCtxt.setVariable(varName("enc"), header.getEncryptionMethod().toString());
 
     if (policyConfig.contentEncryptionAlgorithm != null
         && !policyConfig.contentEncryptionAlgorithm.equals("")) {
-      if (!header
-          .getEncryptionMethod()
-          .toString()
-          .equals(policyConfig.contentEncryptionAlgorithm))
+      if (!header.getEncryptionMethod().toString().equals(policyConfig.contentEncryptionAlgorithm))
         throw new IllegalStateException("JWT uses unacceptable Content Encryption Algorithm.");
     }
 
@@ -132,8 +88,7 @@ public class VerifyEncryptedJwt extends EncryptedJwtBase implements Execution {
       long secondsRemaining = now.until(expiry, ChronoUnit.SECONDS);
       msgCtxt.setVariable(varName("seconds_remaining"), Long.toString(secondsRemaining));
 
-      if (secondsRemaining <= 0L)
-        throw new IllegalStateException("JWT is expired.");
+      if (secondsRemaining <= 0L) throw new IllegalStateException("JWT is expired.");
     }
     Date nbfDate = claims.getNotBeforeTime();
     if (nbfDate != null) {
@@ -143,54 +98,14 @@ public class VerifyEncryptedJwt extends EncryptedJwtBase implements Execution {
       Instant now = Instant.now();
       long age = notBefore.until(now, ChronoUnit.SECONDS);
       msgCtxt.setVariable(varName("age"), Long.toString(age));
-      if (age <= 0L)
-        throw new IllegalStateException("JWT is not yet valid.");
+      if (age <= 0L) throw new IllegalStateException("JWT is not yet valid.");
     }
 
-    if (nbfDate!= null && expDate !=null) {
+    if (nbfDate != null && expDate != null) {
       Instant notBefore = nbfDate.toInstant();
       Instant expiry = expDate.toInstant();
       long lifetime = notBefore.until(expiry, ChronoUnit.SECONDS);
       msgCtxt.setVariable(varName("lifetime"), Long.toString(lifetime));
     }
-  }
-
-  static class PolicyConfig {
-    public boolean debug;
-    public String keyEncryptionAlgorithm;
-    public String contentEncryptionAlgorithm;
-    public RSAPrivateKey privateKey;
-    public Set<String> deferredCritHeaders;
-    public String source;
-  }
-
-  PolicyConfig getPolicyConfiguration(MessageContext msgCtxt) throws Exception {
-    PolicyConfig config = new PolicyConfig();
-    config.keyEncryptionAlgorithm = getKeyEncryption(msgCtxt);
-    config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
-    config.privateKey = (RSAPrivateKey) getPrivateKey(msgCtxt);
-    config.deferredCritHeaders = getDeferredCriticalHeaders(msgCtxt);
-    config.source = getSourceVar();
-    return config;
-  }
-
-  public ExecutionResult execute(MessageContext msgCtxt, ExecutionContext exeCtxt) {
-    boolean debug = true;
-    try {
-      debug = _getBooleanProperty(msgCtxt, "debug", false);
-      clearVariables(msgCtxt);
-      PolicyConfig policyConfig = getPolicyConfiguration(msgCtxt);
-      policyConfig.debug = debug;
-      decryptJwt(policyConfig, msgCtxt);
-    } catch (Exception e) {
-      if (debug) {
-        //e.printStackTrace();
-        String stacktrace = getStackTraceAsString(e);
-        msgCtxt.setVariable(varName("stacktrace"), stacktrace);
-      }
-      setExceptionVariables(e, msgCtxt);
-      return ExecutionResult.ABORT;
-    }
-    return ExecutionResult.SUCCESS;
   }
 }

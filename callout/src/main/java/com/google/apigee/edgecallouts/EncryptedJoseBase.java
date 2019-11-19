@@ -1,7 +1,4 @@
-// VerifyEncryptedJwt.java
-//
-// This is the callout class for the VerifyEncryptedJwt custom policy for Apigee Edge.
-// For full details see the Readme accompanying this source file.
+// EncryptedJoseBase.java
 //
 // Copyright (c) 2018-2019 Google LLC.
 //
@@ -22,31 +19,17 @@
 
 package com.google.apigee.edgecallouts;
 
-import com.apigee.flow.execution.ExecutionContext;
-import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.IOIntensive;
-import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.CalloutUtil;
-import com.google.apigee.util.KeyUtil;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.crypto.RSADecrypter;
-import com.nimbusds.jwt.EncryptedJWT;
-import com.nimbusds.jwt.JWTClaimsSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.PrivateKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @IOIntensive
-public abstract class EncryptedJwtBase {
+public abstract class EncryptedJoseBase {
   protected static final String varprefix = "ejwt_";
   private static final Pattern kekNamePattern =
       Pattern.compile("^(RSA-OAEP-256|RSA-OAEP)$", Pattern.CASE_INSENSITIVE);
@@ -61,7 +44,7 @@ public abstract class EncryptedJwtBase {
 
   protected final Map<String, String> properties;
 
-  public EncryptedJwtBase(Map properties) {
+  public EncryptedJoseBase(Map properties) {
     this.properties = CalloutUtil.genericizeMap(properties);
   }
 
@@ -104,10 +87,6 @@ public abstract class EncryptedJwtBase {
     return value;
   }
 
-  // private PublicKey getPublicKey(MessageContext msgCtxt) throws Exception {
-  //   return KeyUtil.decodePublicKey(_getRequiredString(msgCtxt, "public-key"));
-  // }
-
   protected String _getRequiredString(MessageContext msgCtxt, String name) throws Exception {
     String value = _getStringProp(msgCtxt, name, null);
     if (value == null)
@@ -147,8 +126,8 @@ public abstract class EncryptedJwtBase {
     return alg;
   }
 
-  protected boolean _getBooleanProperty(MessageContext msgCtxt, String propName, boolean defaultValue)
-      throws Exception {
+  protected boolean _getBooleanProperty(
+      MessageContext msgCtxt, String propName, boolean defaultValue) throws Exception {
     String flag = this.properties.get(propName);
     if (flag != null) flag = flag.trim();
     if (flag == null || flag.equals("")) {
@@ -176,9 +155,13 @@ public abstract class EncryptedJwtBase {
 
   protected void setVariables(
       Map<String, Object> payloadClaims, Map<String, Object> headerClaims, MessageContext msgCtxt)
-    throws Exception {
-    payloadClaims.forEach((key, value) -> msgCtxt.setVariable(varName("payload_" + key), value.toString()) );
-    headerClaims.forEach((key, value) -> msgCtxt.setVariable(varName("header_" + key), value.toString()) );
+      throws Exception {
+    if (payloadClaims != null) {
+      payloadClaims.forEach(
+          (key, value) -> msgCtxt.setVariable(varName("payload_" + key), value.toString()));
+    }
+    headerClaims.forEach(
+        (key, value) -> msgCtxt.setVariable(varName("header_" + key), value.toString()));
   }
 
   protected void setExceptionVariables(Exception exc1, MessageContext msgCtxt) {
@@ -191,5 +174,4 @@ public abstract class EncryptedJwtBase {
       msgCtxt.setVariable(varName("error"), error);
     }
   }
-
 }

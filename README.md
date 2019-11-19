@@ -1,8 +1,10 @@
 # Encrypted JWT callout
 
 This directory contains the Java source code for
-Java callouts for Apigee Edge that performs Generates or Verifies encrypted JWT
+Java callouts for Apigee that performs Generates or Verifies encrypted JWT
 that use RSA encryption (RSA-OAEP or RSA-OAEP-256).
+Also callouts that generate or verify JWE (JWE with non-JSON encrypted
+payloads). 
 
 ## License
 
@@ -37,7 +39,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191106.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -79,7 +81,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191106.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -103,7 +105,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191106.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -125,6 +127,44 @@ These are the properties available on the policy:
 | content-encryption   | optional. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms.                       |
 | source               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `message.header.authorization`. |
 | crit-headers         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
+
+
+### Verifying JWE
+
+You can verify JWE as well. While encrypted JWT are JWE with JSON payloads,
+generic JWE are JWE with JSON payloads. The options are the same. The callout
+class is different: 
+
+  ```xml
+  <JavaCallout name="Java-JWEVerification1">
+    <Properties>
+      <Property name='key-encryption'>RSA-OAEP</Property>
+      <Property name='content-encryption'>A256GCM</Property>
+      <Property name='private-key'>{private.my_private_key}</Property>
+    </Properties>
+    <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
+  </JavaCallout>
+  ```
+
+### Generating JWE
+
+You can generate JWE. While encrypted JWT are JWE with JSON payloads,
+generic JWE are JWE with JSON payloads. The options are the same. The callout
+class is different: 
+
+  ```xml
+  <JavaCallout name="Java-JWEGenerate">
+    <Properties>
+      <Property name='key-encryption'>RSA-OAEP</Property>
+      <Property name='content-encryption'>A256GCM</Property>
+      <Property name='payload'>anything-you-like-here</Property>
+      <Property name='public-key'>{my_public_key}</Property>
+    </Properties>
+    <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
+  </JavaCallout>
+  ```
 
 
 ## About PEM-encoded Keys
@@ -192,13 +232,13 @@ Example request to generate an encrypted JWT:
 ```
 ORG=myorg
 ENV=myenv
-curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/generate1 -d ''
+curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/generate_jwt -d ''
 ```
 
 Example request to verify an encrypted JWT:
 
 ```
-curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/verify1 -d ''
+curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/verify_jwt -d ''
 ```
 
 
@@ -220,7 +260,7 @@ To build: `mvn clean package`
 
 The Jar source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20191106.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20191119.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
 
 
 ## Build Dependencies

@@ -1,4 +1,4 @@
-// GenerateEncryptedJwt.java
+// GenerateJwe.java
 //
 // Copyright (c) 2018-2019 Google LLC.
 //
@@ -30,6 +30,8 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.JWEObject;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.EncryptedJWT;
@@ -43,8 +45,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @IOIntensive
-public class GenerateEncryptedJwt extends GenerateBase implements Execution {
-  public GenerateEncryptedJwt(Map properties) {
+public class GenerateJwe extends GenerateBase implements Execution {
+  public GenerateJwe(Map properties) {
     super(properties);
   }
 
@@ -62,45 +64,29 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     msgCtxt.setVariable(varName("enc"), enc.toString());
 
     JWEHeader.Builder headerBuilder = new JWEHeader.Builder(alg, enc);
-    headerBuilder.type(JOSEObjectType.JWT);
+    //headerBuilder.type(JOSEObjectType.JWT);
     if (policyConfig.header != null) {
       JSONObjectUtils.parse(policyConfig.header)
-          .forEach((key, value) -> headerBuilder.customParam(key, value));
-    }
-
-    JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder();
-    if (policyConfig.payload != null) {
-      Map<String, Object> map = JSONObjectUtils.parse(policyConfig.payload);
-      map.forEach((key, value) -> claimsBuilder.claim(key, value));
-      if (!map.containsKey("jti") && policyConfig.generateId) {
-        String id = UUID.randomUUID().toString();
-        claimsBuilder.jwtID(id);
-        msgCtxt.setVariable(varName("jti"), id);
-      }
-    }
-
-    Instant now = Instant.now();
-    claimsBuilder.issueTime(Date.from(now));
-
-    if (policyConfig.lifetime > 0) {
-      Instant exp = now.plus(policyConfig.lifetime, ChronoUnit.SECONDS);
-      claimsBuilder.expirationTime(Date.from(exp));
-    }
-    if (policyConfig.notBefore > 0) {
-      Instant nbf = now.plus(policyConfig.notBefore, ChronoUnit.SECONDS);
-      claimsBuilder.notBeforeTime(Date.from(nbf));
+          .forEach((key, value) -> {
+            switch(key) {
+              case "cty":
+                headerBuilder.contentType(value.toString());
+                break;
+              default:
+                headerBuilder.customParam(key, value);
+                break;
+            }
+          });
     }
 
     JWEHeader header = headerBuilder.build();
-    JWTClaimsSet claims = claimsBuilder.build();
     msgCtxt.setVariable(varName("header"), header.toString());
-    msgCtxt.setVariable(varName("payload"), claims.toString());
 
-    EncryptedJWT encryptedJWT = new EncryptedJWT(header, claims);
+    JWEObject jwe = new JWEObject(header, new Payload(policyConfig.payload));
     RSAEncrypter encrypter = new RSAEncrypter((RSAPublicKey) policyConfig.publicKey);
 
-    encryptedJWT.encrypt(encrypter);
-    String serialized = encryptedJWT.serialize();
+    jwe.encrypt(encrypter);
+    String serialized = jwe.serialize();
     msgCtxt.setVariable(policyConfig.outputVar, serialized);
   }
 }

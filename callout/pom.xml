@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>edge-callout-encrypted-jwt</artifactId>
-  <version>20191106</version>
+  <version>20191119</version>
   <name>EdgeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
