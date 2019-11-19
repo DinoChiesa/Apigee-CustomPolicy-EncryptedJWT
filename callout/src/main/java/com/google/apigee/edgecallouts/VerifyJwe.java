@@ -32,9 +32,12 @@ import java.util.Map;
 
 @IOIntensive
 public class VerifyJwe extends VerifyBase implements Execution {
+
   public VerifyJwe(Map properties) {
     super(properties);
   }
+
+  String getVarPrefix() { return "jwe_"; };
 
   void decrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     Object v = msgCtxt.getVariable(policyConfig.source);

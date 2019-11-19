@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 
 @IOIntensive
 public abstract class EncryptedJoseBase {
-  protected static final String varprefix = "ejwt_";
   private static final Pattern kekNamePattern =
       Pattern.compile("^(RSA-OAEP-256|RSA-OAEP)$", Pattern.CASE_INSENSITIVE);
   private static final Pattern cekNamePattern =
@@ -42,14 +41,16 @@ public abstract class EncryptedJoseBase {
       Pattern.compile("(.*?)\\{([^\\{\\} :][^\\{\\} ]*?)\\}(.*?)");
   private static final Pattern commonErrorPattern = Pattern.compile("^(.+?)[:;] (.+)$");
 
+  abstract String getVarPrefix();
+
   protected final Map<String, String> properties;
 
   public EncryptedJoseBase(Map properties) {
     this.properties = CalloutUtil.genericizeMap(properties);
   }
 
-  protected static String varName(String s) {
-    return varprefix + s;
+  protected String varName(String s) {
+    return getVarPrefix() + s;
   }
 
   protected String resolveVariableReferences(String spec, MessageContext msgCtxt) {

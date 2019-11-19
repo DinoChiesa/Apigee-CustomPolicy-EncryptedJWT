@@ -50,6 +50,8 @@ public class GenerateJwe extends GenerateBase implements Execution {
     super(properties);
   }
 
+  String getVarPrefix() { return "jwe_"; };
+
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");

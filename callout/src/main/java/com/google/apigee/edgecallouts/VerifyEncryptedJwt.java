@@ -41,6 +41,8 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
     super(properties);
   }
 
+  String getVarPrefix() { return "ejwt_"; };
+
   void decrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     Object v = msgCtxt.getVariable(policyConfig.source);
     if (v == null) throw new IllegalStateException("Cannot find JWT within source.");

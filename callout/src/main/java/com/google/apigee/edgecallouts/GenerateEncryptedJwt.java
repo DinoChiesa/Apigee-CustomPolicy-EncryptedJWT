@@ -48,6 +48,8 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     super(properties);
   }
 
+  String getVarPrefix() { return "ejwt_"; };
+
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");

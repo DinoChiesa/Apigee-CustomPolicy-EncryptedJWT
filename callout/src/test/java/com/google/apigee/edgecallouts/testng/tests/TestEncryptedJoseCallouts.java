@@ -516,11 +516,11 @@ public class TestEncryptedJoseCallouts {
     reportThings(properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariable("jwe_error");
     Assert.assertNull(error);
-    String cty = msgCtxt.getVariable("ejwt_header_cty");
+    String cty = msgCtxt.getVariable("jwe_header_cty");
     Assert.assertEquals(cty, "JWT");
-    String payload = msgCtxt.getVariable("ejwt_payload");
+    String payload = msgCtxt.getVariable("jwe_payload");
     Assert.assertNotNull(payload);
     Assert.assertTrue(payload.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
   }
@@ -543,7 +543,7 @@ public class TestEncryptedJoseCallouts {
     reportThings(properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariable("jwe_error");
     Assert.assertEquals(error, "Decryption error");
   }
 
@@ -568,9 +568,9 @@ public class TestEncryptedJoseCallouts {
     reportThings(properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariable("jwe_error");
     Assert.assertNull(error);
-    String output = msgCtxt.getVariable("ejwt_output");
+    String output = msgCtxt.getVariable("jwe_output");
     Assert.assertNotNull(output);
   }
 
