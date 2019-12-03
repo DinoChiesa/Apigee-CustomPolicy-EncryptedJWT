@@ -1,10 +1,9 @@
 # Encrypted JWT callout
 
-This directory contains the Java source code for
-Java callouts for Apigee that performs Generates or Verifies encrypted JWT
-that use RSA encryption (RSA-OAEP or RSA-OAEP-256).
-Also callouts that generate or verify JWE (JWE with non-JSON encrypted
-payloads). 
+This directory contains the Java source code for Java callouts for Apigee that
+performs Generates or Verifies encrypted JWT that use RSA encryption (RSA-OAEP
+or RSA-OAEP-256).  Also callouts that generate or verify JWE (JWE with non-JSON
+encrypted payloads).
 
 ## License
 
@@ -131,9 +130,10 @@ These are the properties available on the policy:
 
 ### Verifying JWE
 
-You can verify JWE as well. While encrypted JWT are JWE with JSON payloads,
-generic JWE are JWE with JSON payloads. The options are the same. The callout
-class is different: 
+You can verify generic JWE as well. While encrypted JWT are JWE with JSON
+payloads, generic JWE are JWE with arbitrary bytestream payloads (typically they
+are not JSON). The options for the callout are the same. The callout `ClassName`
+is different:
 
   ```xml
   <JavaCallout name="Java-JWEVerification1">
@@ -142,6 +142,7 @@ class is different:
       <Property name='content-encryption'>A256GCM</Property>
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
+    <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
     <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
   </JavaCallout>
@@ -149,9 +150,8 @@ class is different:
 
 ### Generating JWE
 
-You can generate JWE. While encrypted JWT are JWE with JSON payloads,
-generic JWE are JWE with JSON payloads. The options are the same. The callout
-class is different: 
+You can generate generic JWE, too. The options for the callout are the
+same. The callout `ClassName` is different:
 
   ```xml
   <JavaCallout name="Java-JWEGenerate">
@@ -161,6 +161,7 @@ class is different:
       <Property name='payload'>anything-you-like-here</Property>
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
+    <!-- Generate a JWE for non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
     <ResourceURL>java://edge-callout-encrypted-jwt-20191119.jar</ResourceURL>
   </JavaCallout>
@@ -287,4 +288,6 @@ godino@google.com
   header parameters
 * the VerifyEncryptedJwt does not provide a way to explicitly enforce values of `crit`
   header parameters
+* there is no "allowable clock skew" parameter for VerifyEncryptedJwt. 
+
 
