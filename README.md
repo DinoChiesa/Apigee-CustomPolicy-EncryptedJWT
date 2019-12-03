@@ -1,7 +1,7 @@
 # Encrypted JWT callout
 
 This directory contains the Java source code for Java callouts for Apigee that
-performs Generates or Verifies encrypted JWT that use RSA encryption (RSA-OAEP
+Generates or Verifies encrypted JWT that use RSA encryption (RSA-OAEP
 or RSA-OAEP-256).  Also callouts that generate or verify JWE (JWE with non-JSON
 encrypted payloads).
 
@@ -17,10 +17,21 @@ This example is not an official Google product, nor is it part of an official Go
 
 You do not need to build the Jar in order to use the custom policy.
 
+There are four different classes:
+
+| class                                               | purpose                                |
+|-----------------------------------------------------|----------------------------------------|
+| com.google.apigee.edgecallouts.GenerateEncryptedJwt | generate an encrypted JWT.             |
+| com.google.apigee.edgecallouts.VerifyEncryptedJwt   | verify an encrypted JWT.               |
+| com.google.apigee.edgecallouts.GenerateJwe          | generate a JWE with arbitrary payload. |
+| com.google.apigee.edgecallouts.VerifyJwe            | verify a JWE with arbitrary payload.   |
+
 When you use the policy to generate an encrypted JWT, the resulting JWT can be
 decrypted by other systems that have access to the matching private key. Likewise, when you use
 the policy to verify an encrypted JWT, the policy will work with any compliant
 encrypted JWT that uses alg = RSA-OAEP-256 or alg = RSA-OAEP.
+
+Likewise with the JWE variants.
 
 ## Policy Configuration
 
@@ -170,7 +181,7 @@ same. The callout `ClassName` is different:
 
 ## About PEM-encoded Keys
 
-Private keys should look like:
+Private keys should look like this:
 ```
 -----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDXk9k01JrhGQf1
@@ -181,7 +192,9 @@ OtpRWoF2/LERvp6RNeXthgs=
 -----END PRIVATE KEY-----
 ```
 
-Public keys should look like:
+
+
+Public keys should look like this:
 ```
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA15PZNNSa4RkH9eAeJ8ph
@@ -288,6 +301,4 @@ godino@google.com
   header parameters
 * the VerifyEncryptedJwt does not provide a way to explicitly enforce values of `crit`
   header parameters
-* there is no "allowable clock skew" parameter for VerifyEncryptedJwt. 
-
-
+* there is no "allowable clock skew" parameter for VerifyEncryptedJwt.
