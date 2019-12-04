@@ -79,6 +79,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
   static class PolicyConfig {
     public boolean debug;
     public boolean generateId;
+    public boolean compress; /* only for generate */
     public String keyEncryptionAlgorithm;
     public String contentEncryptionAlgorithm;
     public PublicKey publicKey;
@@ -100,6 +101,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     config.lifetime = getExpiry(msgCtxt);
     config.notBefore = getNotBefore(msgCtxt);
     config.generateId = _getBooleanProperty(msgCtxt, "generate-id", false);
+    config.compress = _getBooleanProperty(msgCtxt, "compress", false);
     return config;
   }
 

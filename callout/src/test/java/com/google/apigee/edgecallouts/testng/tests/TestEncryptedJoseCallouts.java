@@ -574,5 +574,39 @@ public class TestEncryptedJoseCallouts {
     Assert.assertNotNull(output);
   }
 
+  @Test()
+  public void encrypt7_JWE_compressed() {
+    int[] lengths = new int[2];
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    for (int i=0; i< 2; i++) {
+      Map<String, String> properties = new HashMap<String, String>();
+      properties.put("testname", "encrypt7");
+      properties.put("public-key", publicKey1);
+      properties.put("key-encryption", "RSA-OAEP");
+      properties.put("content-encryption", "A256GCM");
+      properties.put("payload", jwt1);
+      properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+      properties.put("debug", "true");
+      properties.put("compress", (i==1)? "true": "false");
+
+      GenerateJwe callout = new GenerateJwe(properties);
+      ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+      // check result and output
+      reportThings(properties);
+      Assert.assertEquals(result, ExecutionResult.SUCCESS);
+      // retrieve output
+      String error = msgCtxt.getVariable("jwe_error");
+      Assert.assertNull(error);
+      String output = msgCtxt.getVariable("jwe_output");
+      Assert.assertNotNull(output);
+      lengths[i] = output.length();
+    }
+    // with compression the output should be shorter
+    Assert.assertTrue(lengths[0] > lengths[1]);
+  }
+
 
 }

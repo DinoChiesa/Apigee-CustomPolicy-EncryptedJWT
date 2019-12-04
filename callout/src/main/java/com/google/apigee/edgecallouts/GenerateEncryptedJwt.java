@@ -19,22 +19,18 @@
 
 package com.google.apigee.edgecallouts;
 
-import com.apigee.flow.execution.ExecutionContext;
-import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
-import com.google.apigee.util.KeyUtil;
-import com.google.apigee.util.TimeResolver;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -48,7 +44,9 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     super(properties);
   }
 
-  String getVarPrefix() { return "ejwt_"; };
+  String getVarPrefix() {
+    return "ejwt_";
+  };
 
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
@@ -69,7 +67,9 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
       JSONObjectUtils.parse(policyConfig.header)
           .forEach((key, value) -> headerBuilder.customParam(key, value));
     }
-
+    if (policyConfig.compress) {
+      headerBuilder.compressionAlgorithm(CompressionAlgorithm.DEF);
+    }
     JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder();
     if (policyConfig.payload != null) {
       Map<String, Object> map = JSONObjectUtils.parse(policyConfig.payload);

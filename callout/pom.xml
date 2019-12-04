@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>edge-callout-encrypted-jwt</artifactId>
-  <version>20191119</version>
+  <version>20191204</version>
   <name>EdgeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -16,7 +16,8 @@
     <mockito.all.version>1.10.19</mockito.all.version>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.7</jmockit.version>
-    <bouncycastle.version>1.62</bouncycastle.version>
+    <nimbus-jose.version>8.2.1</nimbus-jose.version>
+    <bouncycastle.version>1.64</bouncycastle.version>
     <jdk.target.version>1.8</jdk.target.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -50,7 +51,7 @@
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
-      <version>8.2</version>
+      <version>${nimbus-jose.version}</version>
     </dependency>
 
     <dependency>

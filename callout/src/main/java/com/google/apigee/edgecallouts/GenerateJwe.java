@@ -26,6 +26,7 @@ import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.KeyUtil;
 import com.google.apigee.util.TimeResolver;
+import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -79,6 +80,9 @@ public class GenerateJwe extends GenerateBase implements Execution {
                 break;
             }
           });
+    }
+    if (policyConfig.compress) {
+      headerBuilder.compressionAlgorithm(CompressionAlgorithm.DEF);
     }
 
     JWEHeader header = headerBuilder.build();
