@@ -3,7 +3,19 @@
 This directory contains the Java source code for Java callouts for Apigee that
 Generates or Verifies encrypted JWT that use RSA encryption (RSA-OAEP
 or RSA-OAEP-256).  Also callouts that generate or verify JWE (JWE with non-JSON
-encrypted payloads).
+encrypted payloads) with RSA algorithms.
+
+* Please note: Back in 2017, Google [announced a practical method of producing a
+  "collision" for
+  SHA-1](https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html).
+  And in that announcement, stressed that it is time to retire the SHA-1 hash.
+  RSA-OAEP depends on the SHA-1 hash.  For that reason, I discourage the use of
+  RSA-OAEP in lieu of RSA-OAEP-256, which relies on the more secure SHA-256
+  hash. Security is complicated, and depends on a layering of protocols, hashes,
+  and algorithms. Take care when implementing RSA-OAEP.
+
+
+RSA-OAEP is discouraged deprecated by
 
 ## License
 
