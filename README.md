@@ -1,8 +1,9 @@
 # Encrypted JWT callout
 
 For several years, Apigee has included builtin  policies that generate and
-verify signed JWT. There will be policies "coming soon" to handle Encrypted
-JWT. But in the meantime, you can handle such things with a Java callout.
+verify signed JWT. There will be built-in policies "coming soon" to handle Encrypted
+JWT (As defined in [RFC 7516](https://tools.ietf.org/html/rfc7516)).
+But in the meantime, you can handle encrypted JWT _today_, with a Java callout.
 
 This repo contains the Java source code for Java callouts for Apigee that
 Generate or Verify encrypted JWT that use RSA encryption (RSA-OAEP
@@ -18,8 +19,8 @@ encrypted payloads) with RSA algorithms.
   hash. Security is complicated, and depends on a layering of protocols, hashes,
   and algorithms. Take care when implementing RSA-OAEP.
 
-
-RSA-OAEP is discouraged deprecated by
+* Also: The Encrypted JWT standard allows a variety of encryption
+  algorithms. This callout supports only the RSA-based encryption algorithms.
 
 ## License
 
@@ -28,6 +29,13 @@ This code is Copyright (c) 2017-2019 Google LLC, and is released under the Apach
 ## Disclaimer
 
 This example is not an official Google product, nor is it part of an official Google product.
+
+## Screencast
+
+You can view a [screencast walkthrough of this
+example](https://youtu.be/KreuWmVka1s) on Youtube:
+[![image](./img/screenshot-20191205-171309.png)](https://youtu.be/KreuWmVka1s)
+
 
 ## Using the Custom Policy
 
