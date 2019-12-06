@@ -1,8 +1,12 @@
 # Encrypted JWT callout
 
-This directory contains the Java source code for Java callouts for Apigee that
-Generates or Verifies encrypted JWT that use RSA encryption (RSA-OAEP
-or RSA-OAEP-256).  Also callouts that generate or verify JWE (JWE with non-JSON
+For several years, Apigee has included builtin  policies that generate and
+verify signed JWT. There will be policies "coming soon" to handle Encrypted
+JWT. But in the meantime, you can handle such things with a Java callout.
+
+This repo contains the Java source code for Java callouts for Apigee that
+Generate or Verify encrypted JWT that use RSA encryption (RSA-OAEP
+or RSA-OAEP-256). Also callouts that generate or verify JWE (JWE with non-JSON
 encrypted payloads) with RSA algorithms.
 
 * Please note: Back in 2017, Google [announced a practical method of producing a
