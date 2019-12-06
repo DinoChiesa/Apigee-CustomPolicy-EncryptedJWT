@@ -4,7 +4,8 @@
     <Template>{
     "sub" : "dino@apigee.com",
     "org" : "{organization.name}",
-    "message" : "{messageid}"
+    "proxy" : "{apiproxy.name}",
+    "messageid" : "{messageid}"
     }</Template>
   </AssignVariable>
 

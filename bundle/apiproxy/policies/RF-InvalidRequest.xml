@@ -1,13 +1,13 @@
-<RaiseFault name="RF-UnknownRequest">
+<RaiseFault name="RF-InvalidRequest">
   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
   <FaultResponse>
    <Set>
      <Payload contentType="application/json">{
- "error" : "Unknown request"
+ "error" : "invalid request"
 }
 </Payload>
-     <StatusCode>404</StatusCode>
-     <ReasonPhrase>Not Found</ReasonPhrase>
+     <StatusCode>400</StatusCode>
+     <ReasonPhrase>Bad Request</ReasonPhrase>
    </Set>
  </FaultResponse>
 </RaiseFault>

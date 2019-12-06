@@ -243,10 +243,10 @@ The policy will return ABORT and set the context variable `ejwt_error` if there 
 
 Errors can result at runtime if:
 
-* you specify an invalid configuration, for example an unsupported value for
+* You specify an invalid configuration, for example an unsupported value for
   key-encryption or content-encryption
 * You use VerifyEncryptedJwt and the inbound JWT is expired
-* You use VerifyEncryptedJwt and the inbound JWT uses an alg or enc that is not
+* You use VerifyEncryptedJwt and the inbound JWT uses an `alg` or `enc` that is not
   consistent with the policy configuration.
 
 ## Example Bundle
@@ -262,10 +262,21 @@ ENV=myenv
 curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/generate_jwt -d ''
 ```
 
-Example request to verify an encrypted JWT:
+The result will be a JWT. You can paste it into a JWT decoder like [this
+one](https://dinochiesa.github.io/jwt/) to examine the header. But since it's an
+encrypted JWT you will not be able to see the payload unless you decrypt it.
+
+To verify and decrypt that JWT, first set a shell variable to the returned
+value:
+```
+JWT=eyJ0eXAiOiJKV1QiLCJlbmMi...
+```
+
+Then verify it:
 
 ```
-curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/verify_jwt -d ''
+curl -i -X POST https://$ORG-$ENV.apigee.net/encrypted-jwt/verify_jwt  \
+  -d "JWT=$JWT"
 ```
 
 

@@ -2,8 +2,8 @@
   <Properties>
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='debug'>true</Property>
-    <Property name='source'>inbound.jwt</Property>
-    <Property name='private-key'>{private.rsa_key2}</Property>
+    <Property name='source'>request.formparam.JWT</Property>
+    <Property name='private-key'>{private.my_private_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
   <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
