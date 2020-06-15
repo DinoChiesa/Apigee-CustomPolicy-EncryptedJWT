@@ -6,5 +6,5 @@
     <Property name='private-key'>{private.rsa_key2}</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
-  <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
+  <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
 </JavaCallout>

@@ -11,8 +11,7 @@ or RSA-OAEP-256). Also callouts that generate or verify JWE (JWE with non-JSON
 encrypted payloads) with RSA algorithms.
 
 * Please note: Back in 2017, Google [announced a practical method of producing a
-  "collision" for
-  SHA-1](https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html).
+  "collision" for SHA-1](https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html).
   And in that announcement, stressed that it is time to retire the SHA-1 hash.
   RSA-OAEP depends on the SHA-1 hash.  For that reason, I discourage the use of
   RSA-OAEP in lieu of RSA-OAEP-256, which relies on the more secure SHA-256
@@ -73,7 +72,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -116,7 +115,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -140,7 +139,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -162,6 +161,8 @@ These are the properties available on the policy:
 | content-encryption   | optional. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms.                       |
 | source               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `message.header.authorization`. |
 | crit-headers         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
+| time-allowance       | optional. a string expressing the allowed clock skew in seconds. When the JWT expires (via the exp claim) at time T1, if the time-allowance is N, then the policy treats the JWT as expired only at time T1+N. A similar calculation is performed with the nbf claim.  |
+| max-lifetime         | optional. a string expressing the allowed maximum lifetime of the JWT. This can be a time expression like "120s". If the JWT has a lifetime that exceeds this, then the policy treats the JWT as invalid.  |
 
 
 ### Verifying JWE
@@ -180,7 +181,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -199,7 +200,7 @@ same. The callout `ClassName` is different:
     </Properties>
     <!-- Generate a JWE for non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20191204.jar</ResourceURL>
+    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -310,7 +311,7 @@ To build: `mvn clean package`
 
 The Jar source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20191204.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20200615.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
 
 
 ## Build Dependencies
@@ -319,10 +320,11 @@ If you edit policies offline, copy [the jar file for the custom policy](callout/
 * Apigee Edge message-flow v1.0
 * Bouncy Castle 1.64
 * NimbusDS jose-jwt v8.2.1
+* other dependencies of NimbusDS jose-jwt
 
 These jars are specified in the pom.xml file.
 
-Aside from the first two, you will need to upload these Jars as resources to your Apigee instance, either
+You will need to upload the output jar, as well as  jose-jwt jar and its dependencies as resources to your Apigee instance, either
 with the API Proxy or with the organization or environment.
 
 ## Author
