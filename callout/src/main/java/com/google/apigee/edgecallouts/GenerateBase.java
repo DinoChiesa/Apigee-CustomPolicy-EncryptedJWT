@@ -85,6 +85,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     public PublicKey publicKey;
     public String payload;
     public String header;
+    public String crit;
     public String outputVar;
     public int lifetime;
     public int notBefore;
@@ -97,6 +98,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     config.publicKey = getPublicKey(msgCtxt);
     config.payload = _getOptionalString(msgCtxt, "payload");
     config.header = _getOptionalString(msgCtxt, "header");
+    config.crit = _getOptionalString(msgCtxt, "crit");
     config.outputVar = _getStringProp(msgCtxt, "output", varName("output"));
     config.lifetime = getExpiry(msgCtxt);
     config.notBefore = getNotBefore(msgCtxt);

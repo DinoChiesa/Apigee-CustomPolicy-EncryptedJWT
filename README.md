@@ -72,7 +72,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20200729.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -98,7 +98,8 @@ These are the properties available on the policy:
 | key-encryption     | required. name of the key encryption algorithm. Must be RSA-OAEP-256 or RSA-OAEP.                                   |
 | content-encryption | required. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms. |
 | payload            | optional. a JSON string that includes additional properties for the payload of the JWT.                             |
-| header             | optional. a JSON string that includes additional properties for the header of the JWT.                              |
+| header             | optional. a JSON string that includes additional custom properties for the header of the JWT.                       |
+| crit             | optional. a comma-separated list of header names to be used as the "crit" header of the JWT.                          |
 | expiry             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
 | not-before         | optional. an interval as above, expressing the not-before time of the JWT, measured from now.                       |
 | generate-id        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim.                               |
@@ -115,7 +116,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20200729.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -139,7 +140,7 @@ These are the properties available on the policy:
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20200729.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -181,7 +182,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20200729.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -200,7 +201,7 @@ same. The callout `ClassName` is different:
     </Properties>
     <!-- Generate a JWE for non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
-    <ResourceURL>java://edge-callout-encrypted-jwt-20200615.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20200729.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -312,7 +313,7 @@ To build: `mvn clean package`
 
 The Jar source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/edge-callout-encrypted-jwt-20200615.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20200729.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
 
 
 ## Build Dependencies
@@ -325,7 +326,7 @@ If you edit policies offline, copy [the jar file for the custom policy](callout/
 
 These jars are specified in the pom.xml file.
 
-You will need to upload the output jar, as well as  jose-jwt jar and its dependencies as resources to your Apigee instance, either
+You will need to upload the output jar, as well as jose-jwt jar and its dependencies as resources to your Apigee instance, either
 with the API Proxy or with the organization or environment.
 
 ## Author
@@ -333,7 +334,6 @@ with the API Proxy or with the organization or environment.
 Dino Chiesa
 godino@google.com
 
-## Bugs
+## Bugs & Limitations
 
 * The policies support only RSA-OAEP-256 and RSA-OAEP for Key encryption algorithms.
-* The GenerateEncryptedJwt does not consider `crit` header parameters

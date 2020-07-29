@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.google.apigee</groupId>
-  <artifactId>edge-callout-encrypted-jwt</artifactId>
-  <version>20200615</version>
-  <name>EdgeCustomEncryptedJwt</name>
+  <artifactId>apigee-callout-encrypted-jwt</artifactId>
+  <version>20200729</version>
+  <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
 
@@ -71,7 +71,6 @@
   </dependencies>
 
   <build>
-<!--    <finalName>${groupId}-${project.artifactId}-${project.version}</finalName> -->
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
 
@@ -136,7 +135,7 @@
                   <fileset dir="${project.build.directory}">
                     <include name="${project.build.finalName}.jar"/>
                     <!-- copy any required dependencies tht are not
-                         already included in the Edge runtime: -->
+                         already included in the Apigee runtime: -->
                     <include name="lib/*.jar"/>
                     <exclude name='lib/bcprov-jdk15on-*.*.jar'/>
                     <exclude name='lib/bcpkix-jdk15on-*.*.jar'/>

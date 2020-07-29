@@ -1,6 +1,6 @@
 // TestEncryptedJoseCallouts.java
 //
-// Copyright (c) 2018-2019 Google LLC
+// Copyright (c) 2018-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -482,6 +482,38 @@ public class TestEncryptedJoseCallouts {
     properties.put("expiry", "1h");
 
     msgCtxt.setVariable("random1", StringGen.randomString(28));
+
+    GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("ejwt_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariable("ejwt_output");
+    Assert.assertNotNull(output);
+    String id = msgCtxt.getVariable("ejwt_jti");
+    Assert.assertNotNull(id);
+  }
+
+  @Test()
+  public void encrypt_with_header_and_crit() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt_with_header_and_crit");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A128GCM");
+    properties.put("payload", "{ \"sub\": \"dino\", \"rand\" : \"{random1}\"}");
+    properties.put("header", "{ \"foo\" : \"{greeting}\"}");
+    properties.put("crit", "foo");
+    properties.put("generate-id", "true");
+    properties.put("debug", "true");
+    properties.put("expiry", "1h");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("greeting", "hello");
 
     GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);

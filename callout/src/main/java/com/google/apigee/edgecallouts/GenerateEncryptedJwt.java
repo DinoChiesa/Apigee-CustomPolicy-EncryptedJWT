@@ -1,6 +1,6 @@
 // GenerateEncryptedJwt.java
 //
-// Copyright (c) 2018-2019 Google LLC.
+// Copyright (c) 2018-2020 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ package com.google.apigee.edgecallouts;
 import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
+import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.EncryptedJWT;
@@ -34,7 +34,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -63,6 +65,9 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
 
     JWEHeader.Builder headerBuilder = new JWEHeader.Builder(alg, enc);
     headerBuilder.type(JOSEObjectType.JWT);
+    if (policyConfig.crit != null) {
+      headerBuilder.criticalParams(new HashSet<String>(Arrays.asList(policyConfig.crit.split("[\\s,]+"))));
+    }
     if (policyConfig.header != null) {
       JSONObjectUtils.parse(policyConfig.header)
           .forEach((key, value) -> headerBuilder.customParam(key, value));
