@@ -245,10 +245,11 @@ headers on the `crit` list that it does not understand.
 
 To communicate headers that are understood, configure the policy with the
 `crit-headers` property. When the VerifyEncryptedJwt callout process an inbound
-JWT that contains crit headers, the verification will succeed if and only if
-those headers are in the `crit-headers` list in the policy configuration,
+JWT that contains a `crit` header, the verification will succeed if and only if
+the header names listed in the JWT `crit` claim are also present in the `crit-headers` list in the policy configuration.
 
-If your inbound JWT do not include a `crit` header
+If your inbound JWT do not include a `crit` header, then you do not need to worry about this configuration.
+
 
 ## Detecting Success and Errors
 
@@ -334,9 +335,5 @@ godino@google.com
 
 ## Bugs
 
-* The policies support only RSA-OAEP-256 for a Key encryption algorithm.
-* the GenerateEncryptedJwt does not considers `crit`
-  header parameters
-* the VerifyEncryptedJwt does not provide a way to explicitly enforce values of `crit`
-  header parameters
-* there is no "allowable clock skew" parameter for VerifyEncryptedJwt.
+* The policies support only RSA-OAEP-256 and RSA-OAEP for Key encryption algorithms.
+* The GenerateEncryptedJwt does not consider `crit` header parameters
