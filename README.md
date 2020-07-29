@@ -23,7 +23,7 @@ encrypted payloads) with RSA algorithms.
 
 ## License
 
-This code is Copyright (c) 2017-2019 Google LLC, and is released under the Apache Source License v2.0. For information see the [LICENSE](LICENSE) file.
+This code is Copyright (c) 2017-2020 Google LLC, and is released under the Apache Source License v2.0. For information see the [LICENSE](LICENSE) file.
 
 ## Disclaimer
 
