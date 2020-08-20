@@ -368,4 +368,4 @@ godino@google.com
 ## Bugs & Limitations
 
 * The policies support only RSA-OAEP-256 and RSA-OAEP for Key encryption algorithms.
-* There is no support for specifying a JWKS URI for acquiring public keys
+
