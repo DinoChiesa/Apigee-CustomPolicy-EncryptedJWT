@@ -133,7 +133,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 | crit               | optional. a comma-separated list of header names to be used as the "crit" header of the JWT.                        |
 | expiry             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
 | not-before         | optional. an interval as above, expressing the not-before time of the JWT, measured from now.                       |
-| generate-id        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim.                               |
+| generate-id        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim. (GenerateEncryptedJwt only)   |
 | compress           | optional. boolean, true or false. Defaults to false. Whether to compress the payload before encrypting.             |
 | output             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                             |
 

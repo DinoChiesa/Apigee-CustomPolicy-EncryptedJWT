@@ -1,10 +1,11 @@
-<JavaCallout name="Java-GenerateJWE">
+<JavaCallout name="Java-GenerateJWE-via-JWKS">
   <Properties>
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='content-encryption'>A256GCM</Property>
     <Property name='debug'>true</Property>
-    <Property name='payload'>Arbitrary-string-to-encrypt</Property>
-    <Property name='public-key'>{my_public_key}</Property>
+    <Property name='payload'>{demo_payload}</Property>
+    <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
+    <Property name='key-id'>{my_key_id}</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
   <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
