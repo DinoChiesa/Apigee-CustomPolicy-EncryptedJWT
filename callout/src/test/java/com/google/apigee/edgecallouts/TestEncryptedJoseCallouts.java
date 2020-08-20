@@ -32,21 +32,31 @@
 // In that JDK, there's no restriction on key strength.
 //
 
-package com.google.apigee.edgecalluts.testng.tests;
+package com.google.apigee.edgecalluts;
 
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.edgecallouts.GenerateEncryptedJwt;
+import com.google.apigee.edgecallouts.GenerateJwe;
 import com.google.apigee.edgecallouts.VerifyEncryptedJwt;
 import com.google.apigee.edgecallouts.VerifyJwe;
-import com.google.apigee.edgecallouts.GenerateJwe;
+import com.nimbusds.jose.util.DefaultResourceRetriever;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jose.util.Resource;
+import com.nimbusds.jose.util.RestrictedResourceRetriever;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import mockit.Mock;
 import mockit.MockUp;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -640,5 +650,135 @@ public class TestEncryptedJoseCallouts {
     Assert.assertTrue(lengths[0] > lengths[1]);
   }
 
+
+  @Test()
+  public void encrypt8_JWE_via_JWKS() throws MalformedURLException, IOException, ParseException {
+    Map<String, String> properties = new HashMap<String, String>();
+
+    RestrictedResourceRetriever resourceRetriever = new DefaultResourceRetriever(4000,3000,1024);
+    Resource resource = resourceRetriever.retrieveResource(new URL("https://jwks-service.appspot.com/keyids?type=rsa"));
+    JSONObject json = JSONObjectUtils.parse(resource.getContent());
+    JSONArray ids = JSONObjectUtils.getJSONArray(json, "ids");
+    String selectedKeyId = (String) ids.get(0);
+
+    properties.put("testname", "encrypt8");
+    properties.put("jwks-uri", "https://jwks-service.appspot.com/.well-known/jwks.json");
+    properties.put("key-id", selectedKeyId);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", jwt1);
+    properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("jwe_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariable("jwe_output");
+    Assert.assertNotNull(output);
+  }
+
+  @Test()
+  public void encrypt9_JWE_via_JWKS_fail_no_keyid() {
+    Map<String, String> properties = new HashMap<String, String>();
+
+    properties.put("testname", "encrypt9");
+    properties.put("jwks-uri", "https://jwks-service.appspot.com/.well-known/jwks.json");
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", jwt1);
+    properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariable("jwe_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "key-id resolves to null or empty.");
+    String output = msgCtxt.getVariable("jwe_output");
+    Assert.assertNull(output);
+  }
+
+  @Test()
+  public void encrypt10_JWE_no_JWKS_or_publickey() {
+    Map<String, String> properties = new HashMap<String, String>();
+
+    properties.put("testname", "encrypt10");
+    //properties.put("jwks-uri", "https://jwks-service.appspot.com/.well-known/jwks.json");
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", jwt1);
+    properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariable("jwe_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "specify one of public-key or jwks-uri.");
+    String output = msgCtxt.getVariable("jwe_output");
+    Assert.assertNull(output);
+  }
+
+
+  @Test()
+  public void encrypt11_JWE_bad_JWKS() throws MalformedURLException, IOException, ParseException {
+    Map<String, String> properties = new HashMap<String, String>();
+
+    RestrictedResourceRetriever resourceRetriever = new DefaultResourceRetriever(4000,3000,1024);
+    Resource resource = resourceRetriever.retrieveResource(new URL("https://jwks-service.appspot.com/keyids?type=rsa"));
+    JSONObject json = JSONObjectUtils.parse(resource.getContent());
+    JSONArray ids = JSONObjectUtils.getJSONArray(json, "ids");
+    String selectedKeyId = (String) ids.get(0);
+
+    properties.put("testname", "encrypt8");
+    properties.put("jwks-uri", "https://jwks-service.appspot.com/keyids"); // not a JWKS
+    properties.put("key-id", selectedKeyId);
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", jwt1);
+    properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("random1", StringGen.randomString(28));
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings(properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariable("jwe_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "java.text.ParseException: Missing required \"keys\" member");
+    String output = msgCtxt.getVariable("jwe_output");
+    Assert.assertNull(output);
+  }
 
 }

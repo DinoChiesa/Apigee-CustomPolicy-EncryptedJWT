@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20200729</version>
+  <version>20200820</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -16,6 +16,7 @@
     <mockito.all.version>1.10.19</mockito.all.version>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.7</jmockit.version>
+    <guava.version>26.0-jre</guava.version>
     <nimbus-jose.version>8.2.1</nimbus-jose.version>
     <bouncycastle.version>1.64</bouncycastle.version>
     <jdk.target.version>1.8</jdk.target.version>
@@ -34,6 +35,12 @@
       <groupId>com.apigee.edge</groupId>
       <artifactId>expressions</artifactId>
       <version>${apigee.expressions.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
     </dependency>
 
     <dependency>

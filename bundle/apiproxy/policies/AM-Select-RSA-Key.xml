@@ -1,0 +1,12 @@
+<AssignMessage name='AM-Select-RSA-Key'>
+  <AssignVariable>
+    <Name>json_path_1</Name>
+    <Value>$[0]</Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>my_key_id</Name>
+    <Value>BADDBEEF</Value>
+    <Template>{jsonPath(json_path_1,keyIdsResponse.content)}</Template>
+  </AssignVariable>
+
+</AssignMessage>

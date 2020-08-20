@@ -81,6 +81,9 @@ public class GenerateJwe extends GenerateBase implements Execution {
             }
           });
     }
+    if (policyConfig.keyId != null) {
+      headerBuilder.keyID(policyConfig.keyId);
+    }
     if (policyConfig.compress) {
       headerBuilder.compressionAlgorithm(CompressionAlgorithm.DEF);
     }

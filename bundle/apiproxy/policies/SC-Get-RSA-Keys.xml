@@ -1,0 +1,22 @@
+<ServiceCallout name='SC-Get-RSA-Keys'>
+  <Request variable='simpleGetRequest'>
+    <Set>
+      <Verb>GET</Verb>
+      <QueryParams>
+        <QueryParam name='type'>rsa</QueryParam>
+      </QueryParams>
+      <Path>/keyids</Path>
+    </Set>
+  </Request>
+  <Response>keyIdsResponse</Response>
+  <HTTPTargetConnection>
+    <SSLInfo>
+      <Enabled>true</Enabled>
+      <IgnoreValidationErrors>false</IgnoreValidationErrors>
+    </SSLInfo>
+    <Properties>
+      <Property name='success.codes'>2xx</Property>
+    </Properties>
+    <URL>https://jwks-service.appspot.com</URL>
+  </HTTPTargetConnection>
+</ServiceCallout>

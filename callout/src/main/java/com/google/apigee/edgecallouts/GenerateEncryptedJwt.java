@@ -72,6 +72,9 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
       JSONObjectUtils.parse(policyConfig.header)
           .forEach((key, value) -> headerBuilder.customParam(key, value));
     }
+    if (policyConfig.keyId != null) {
+      headerBuilder.keyID(policyConfig.keyId);
+    }
     if (policyConfig.compress) {
       headerBuilder.compressionAlgorithm(CompressionAlgorithm.DEF);
     }

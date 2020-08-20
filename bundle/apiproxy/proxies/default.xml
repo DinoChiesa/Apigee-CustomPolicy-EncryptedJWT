@@ -54,6 +54,27 @@
       <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe") and (request.verb = "POST")</Condition>
     </Flow>
 
+    <Flow name="generate 3">
+      <Description>generate an encrypted JWT using a JWKS</Description>
+      <Request>
+        <Step>
+          <Name>SC-Get-RSA-Keys</Name>
+        </Step>
+        <Step>
+          <Name>AM-Select-RSA-Key</Name>
+        </Step>
+        <Step>
+          <Name>Java-GenerateJWT-via-JWKS</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-SuccessGenerateResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_via_jwks") and (request.verb = "POST")</Condition>
+    </Flow>
+
     <Flow name="verify 1">
       <Description>verify an encrypted JWT</Description>
       <Request>
