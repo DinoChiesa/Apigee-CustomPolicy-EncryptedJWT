@@ -1,6 +1,11 @@
 <AssignMessage name='AM-JWT-Operation-Error'>
   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
   <Set>
+
+    <Headers>
+      <Header name='APIProxy'>{apiproxy.name} v{apiproxy.revision}</Header>
+    </Headers>
+
     <Payload contentType='text/plain'>
 JWT Operation Error: {ejwt_error}
 
