@@ -6,7 +6,7 @@
   </AssignVariable>
   <AssignVariable>
     <Name>regex</Name>
-    <Value>\n\s+</Value>
+    <Value>(?m)^\s+</Value>
   </AssignVariable>
   <AssignVariable>
     <Name>payload</Name>

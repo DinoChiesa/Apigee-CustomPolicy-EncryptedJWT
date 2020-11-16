@@ -116,7 +116,7 @@
       </Request>
       <Response>
         <Step>
-          <Name>AM-SuccessVerifyResponse</Name>
+          <Name>AM-SuccessVerifyJwtResponse</Name>
         </Step>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/verify_jwt") and (request.verb = "POST")</Condition>
@@ -135,7 +135,7 @@
       </Request>
       <Response>
         <Step>
-          <Name>AM-SuccessVerifyResponse</Name>
+          <Name>AM-SuccessVerifyJweResponse</Name>
         </Step>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe") and (request.verb = "POST")</Condition>
