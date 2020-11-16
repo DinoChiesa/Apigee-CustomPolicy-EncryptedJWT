@@ -1,0 +1,24 @@
+<AssignMessage name='AM-PrivateKeyResponse'>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignVariable>
+    <Name>nothing</Name>
+    <Value></Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>regex</Name>
+    <Value>(?m)^\s+</Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>payload</Name>
+    <Template>{replaceAll(private.my_private_key,regex,nothing)}</Template>
+  </AssignVariable>
+
+  <Set>
+    <Payload contentType='text/plain'>{payload}
+
+</Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+
+</AssignMessage>

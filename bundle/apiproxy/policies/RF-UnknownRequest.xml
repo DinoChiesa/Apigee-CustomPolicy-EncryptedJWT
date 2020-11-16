@@ -3,7 +3,7 @@
   <FaultResponse>
    <Set>
      <Payload contentType="application/json">{
- "error" : "Unknown request"
+ "error" : "Unknown request. Wrong URL or verb, probably."
 }
 </Payload>
      <StatusCode>404</StatusCode>

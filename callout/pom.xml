@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20200820</version>
+  <version>20201116</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -149,7 +149,6 @@
                     <exclude name='lib/bcpkix-jdk15on-*.*.jar'/>
                     <exclude name='lib/jcip-annotations-*.*.jar'/>
                     <exclude name='lib/animal-sniffer-annotations-*.*.jar'/>
-                    <exclude name='lib/error_prone_annotations-*.*.jar'/>
                     <exclude name='lib/error_prone_annotations-*.*.jar'/>
                     <exclude name='lib/checker-qual-*.*.jar'/>
                     <exclude name="lib/message-flow-1.0.0.jar"/>

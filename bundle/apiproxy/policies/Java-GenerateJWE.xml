@@ -3,9 +3,9 @@
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='content-encryption'>A256GCM</Property>
     <Property name='debug'>true</Property>
-    <Property name='payload'>Arbitrary-string-to-encrypt</Property>
+    <Property name='payload'>Arbitrary-string-to-encrypt,messageid={messageid},time={system.timestamp},org={organization.name},proxy={apiproxy.name}</Property>
     <Property name='public-key'>{my_public_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20201116.jar</ResourceURL>
 </JavaCallout>

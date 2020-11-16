@@ -19,31 +19,19 @@
 
 package com.google.apigee.edgecallouts;
 
-import com.apigee.flow.execution.ExecutionContext;
-import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
-import com.google.apigee.util.KeyUtil;
-import com.google.apigee.util.TimeResolver;
 import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.jwt.EncryptedJWT;
-import com.nimbusds.jwt.JWTClaimsSet;
-import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 
 @IOIntensive
 public class GenerateJwe extends GenerateBase implements Execution {
@@ -51,7 +39,9 @@ public class GenerateJwe extends GenerateBase implements Execution {
     super(properties);
   }
 
-  String getVarPrefix() { return "jwe_"; };
+  String getVarPrefix() {
+    return "jwe_";
+  };
 
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
@@ -67,19 +57,20 @@ public class GenerateJwe extends GenerateBase implements Execution {
     msgCtxt.setVariable(varName("enc"), enc.toString());
 
     JWEHeader.Builder headerBuilder = new JWEHeader.Builder(alg, enc);
-    //headerBuilder.type(JOSEObjectType.JWT);
+    // headerBuilder.type(JOSEObjectType.JWT);
     if (policyConfig.header != null) {
       JSONObjectUtils.parse(policyConfig.header)
-          .forEach((key, value) -> {
-            switch(key) {
-              case "cty":
-                headerBuilder.contentType(value.toString());
-                break;
-              default:
-                headerBuilder.customParam(key, value);
-                break;
-            }
-          });
+          .forEach(
+              (key, value) -> {
+                switch (key) {
+                  case "cty":
+                    headerBuilder.contentType(value.toString());
+                    break;
+                  default:
+                    headerBuilder.customParam(key, value);
+                    break;
+                }
+              });
     }
     if (policyConfig.keyId != null) {
       headerBuilder.keyID(policyConfig.keyId);

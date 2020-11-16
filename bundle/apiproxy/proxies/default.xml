@@ -2,12 +2,19 @@
   <Description>Default Proxy</Description>
 
   <HTTPProxyConnection>
-    <BasePath>/encrypted-jwt</BasePath>
+    <BasePath>/encrypted-jwt-java</BasePath>
     <Properties/>
     <VirtualHost>secure</VirtualHost>
   </HTTPProxyConnection>
 
-  <FaultRules/>
+  <FaultRules>
+    <FaultRule name='jwt_operation_error'>
+      <Step>
+        <Name>AM-JWT-Operation-Error</Name>
+      </Step>
+      <Condition>ejwt_error != null</Condition>
+    </FaultRule>
+  </FaultRules>
 
   <PreFlow>
     <Request>
@@ -119,6 +126,10 @@
       <Description>verify a JWE</Description>
       <Request>
         <Step>
+          <Condition>request.formparam.JWE = null</Condition>
+          <Name>RF-InvalidRequest</Name>
+        </Step>
+        <Step>
           <Name>Java-VerifyJWE</Name>
         </Step>
       </Request>
@@ -130,6 +141,29 @@
       <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe") and (request.verb = "POST")</Condition>
     </Flow>
 
+    <Flow name="private_key">
+      <Description>retrieve the private key (for demo purposes only)</Description>
+      <Request>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-PrivateKeyResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/private_key") and (request.verb = "GET")</Condition>
+    </Flow>
+
+    <Flow name="public_key">
+      <Description>retrieve the public key</Description>
+      <Request>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-PublicKeyResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/public_key") and (request.verb = "GET")</Condition>
+    </Flow>
 
     <Flow name='unknown'>
       <Description>unknown request</Description>

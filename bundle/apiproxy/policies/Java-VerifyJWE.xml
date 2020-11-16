@@ -2,9 +2,9 @@
   <Properties>
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='debug'>true</Property>
-    <Property name='source'>inbound.jwe</Property>
-    <Property name='private-key'>{private.rsa_key2}</Property>
+    <Property name='source'>request.formparam.JWE</Property>
+    <Property name='private-key'>{private.my_private_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20201116.jar</ResourceURL>
 </JavaCallout>

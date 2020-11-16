@@ -64,7 +64,7 @@ public abstract class EncryptedJoseBase {
       String[] parts = ref.split(":", 2);
       Object v = msgCtxt.getVariable(parts[0]);
       if (v != null) {
-        sb.append((String) v);
+        sb.append(v.toString());
       } else if (parts.length > 1) {
         sb.append(parts[1]);
       }

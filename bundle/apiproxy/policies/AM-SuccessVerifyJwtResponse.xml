@@ -1,0 +1,12 @@
+<AssignMessage name='AM-SuccessVerifyJwtResponse'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <Set>
+    <Payload contentType='application/json'>{
+  "header": {ejwt_header},
+  "payload": {ejwt_payload}
+}
+</Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+</AssignMessage>

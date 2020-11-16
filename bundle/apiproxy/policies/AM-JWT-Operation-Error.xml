@@ -1,0 +1,11 @@
+<AssignMessage name='AM-JWT-Operation-Error'>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <Set>
+    <Payload contentType='text/plain'>
+JWT Operation Error: {ejwt_error}
+
+</Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+</AssignMessage>
