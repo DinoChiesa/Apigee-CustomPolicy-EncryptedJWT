@@ -6,10 +6,9 @@ use the `RSA-OAEP-256` key encryption algorithm.
 
 ## Pre-requisites
 
-1. Deploy the API Proxy to an Apigee organization
+1. Deploy the API Proxy into an Apigee organization + environment.
 
 ## Invoke it
-
 
 1. generate an example encrypted JWT
    ```
@@ -111,8 +110,10 @@ use the `RSA-OAEP-256` key encryption algorithm.
 
 ## Interoperating with other systems
 
-You can use the `/generate_jwt` endpoint to encrypt a JWT, and then use an external system to decrypt it. Likewise with `/generate_jwe`.
-To decrypt, you will need to provide the private key to the external system.  Get it with this request:
+You can use the `/generate_jwt` endpoint to encrypt a JWT, and then use an
+external system to decrypt it (For example, https://dinochiesa.github.io/jwt).
+Likewise with `/generate_jwe`.  To decrypt, you will need to provide the private
+key to the external system.  Get it with this request:
 
 ```
 curl -i https://${my_endpoint}/encrypted-jwt-java/private_key
@@ -120,9 +121,10 @@ curl -i https://${my_endpoint}/encrypted-jwt-java/private_key
 
 The response will show you a PEM-encoded private key.
 
-You can also get the public key.  This is useful if you want to use an external system to GENERATE the encrypted JWT or JWE, that you will then verify with `/verify_jwt` or `/verify_jwe`. Retrieve the public key with this request:
+You can also get the public key.  This is useful if you want to use an external
+system to GENERATE the encrypted JWT or JWE, that you will then verify with
+`/verify_jwt` or `/verify_jwe`. Retrieve the public key with this request:
 
 ```
 curl -i https://${my_endpoint}/encrypted-jwt-java/public_key
 ```
-
