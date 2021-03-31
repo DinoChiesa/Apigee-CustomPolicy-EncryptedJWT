@@ -2,9 +2,4 @@
   <Remove>
     <Headers/>
   </Remove>
-  <Set>
-    <Headers>
-      <Header name='APIProxy'>{apiproxy.name} v{apiproxy.revision}</Header>
-    </Headers>
-  </Set>
 </AssignMessage>

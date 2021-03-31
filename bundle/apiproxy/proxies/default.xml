@@ -16,6 +16,13 @@
     </FaultRule>
   </FaultRules>
 
+  <DefaultFaultRule name="default-fault-rule">
+    <Step>
+      <Name>AM-InjectProxyVersionHeader</Name>
+    </Step>
+    <AlwaysEnforce>true</AlwaysEnforce>
+  </DefaultFaultRule>
+
   <PreFlow>
     <Request>
         <Step>
@@ -25,6 +32,9 @@
     <Response>
         <Step>
           <Name>AM-CleanHeaders</Name>
+        </Step>
+        <Step>
+          <Name>AM-InjectProxyRevisionHeader</Name>
         </Step>
     </Response>
   </PreFlow>
