@@ -27,10 +27,9 @@ import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.KeyUtil;
 import com.google.apigee.util.TimeResolver;
-import com.google.common.base.Predicate;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -68,8 +67,8 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
   public GenerateBase(Map properties) {
     super(properties);
 
-    jwksCache = CacheBuilder.newBuilder()
-      .concurrencyLevel(4)
+    jwksCache = Caffeine.newBuilder()
+      //.concurrencyLevel(4)
       .maximumSize(MAX_CACHE_ENTRIES)
       .expireAfterAccess(60, TimeUnit.MINUTES)
       .build(new CacheLoader<String, JWKSet>() {

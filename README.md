@@ -1,9 +1,10 @@
 # JWE and Encrypted JWT callout
 
 For several years, Apigee has included builtin  policies that generate and
-verify signed JWT. There will be built-in policies "coming soon" to handle Encrypted
+verify signed JWT. There are also recently (as of November 2020) built-in policies to handle Encrypted
 JWT (As defined in [RFC 7516](https://tools.ietf.org/html/rfc7516)).
-But in the meantime, you can handle encrypted JWT _today_, with a Java callout.
+But there are not yet built-in policies to handle general JWE. It's in the Apigee roadmap, but 
+in the meantime, you can handle JWE (and encrypted JWT) _today_, with a Java callout.
 
 This repo contains the Java source code for:
 
@@ -15,20 +16,19 @@ This repo contains the Java source code for:
 
 ## Notes:
 
-* Please note: Back in 2017, Google [announced a practical method of producing a
+* Please note: in 2017, Google [announced a practical method of producing a
   "collision" for SHA-1](https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html).
   And in that announcement, stressed that it is time to retire the SHA-1 hash.
   RSA-OAEP depends on the SHA-1 hash.  For that reason, I discourage the use of
-  RSA-OAEP in lieu of RSA-OAEP-256, which relies on the more secure SHA-256
-  hash. Security is complicated, and depends on a layering of protocols, hashes,
-  and algorithms. Take care when implementing RSA-OAEP.
+  RSA-OAEP and encourage the use of RSA-OAEP-256, which relies on the more secure SHA-256
+  hash.
 
-* Also: The Encrypted JWT standard allows a variety of encryption
+* Also: The Encrypted JWT and JWE standards allow a variety of encryption
   algorithms. This callout supports only the RSA-based encryption algorithms.
 
 ## License
 
-This code is Copyright (c) 2017-2020 Google LLC, and is released under the Apache Source License v2.0. For information see the [LICENSE](LICENSE) file.
+This code is Copyright (c) 2017-2021 Google LLC, and is released under the Apache Source License v2.0. For information see the [LICENSE](LICENSE) file.
 
 ## Disclaimer
 
@@ -77,7 +77,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -106,7 +106,7 @@ key.
       <Property name='key-id'>{my_key_id}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -147,7 +147,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -171,7 +171,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.edgecallouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -213,7 +213,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.VerifyJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -232,7 +232,7 @@ same. The callout `ClassName` is different:
     </Properties>
     <!-- Generate a JWE for non-JSON payloads -->
     <ClassName>com.google.apigee.edgecallouts.GenerateJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20200820.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -335,34 +335,34 @@ all the configuration options - the policy may be usable for you without modific
 
 If you do wish to build the jar, you can use
 [maven](https://maven.apache.org/download.cgi) to do so. The build requires
-JDK8. Before you run the build the first time, you need to download the Apigee
-Edge dependencies into your local maven repo.
+JDK8. Before you run the build the first time, you need to download the Apigee dependencies into your local maven repo.
 
 Preparation, first time only: `./buildsetup.sh`
 
 To build: `mvn clean package`
 
-The Jar source code includes tests.
+The source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20200820.jar)  to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Edge API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20210331.jar)  and all the dependencies to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Apigee API Proxy Editor .
 
 
 ## Build Dependencies
 
-* Apigee Edge expressions v1.0
-* Apigee Edge message-flow v1.0
-* Bouncy Castle 1.64
-* NimbusDS jose-jwt v8.2.1
+* Apigee expressions v1.0 (provided)
+* Apigee message-flow v1.0 (provided)
+* Bouncy Castle 1.64 (provided)
+* NimbusDS jose-jwt v8.21 
 * other dependencies of NimbusDS jose-jwt
+* Ben Manes' caffeine v2.9.0
 
-These jars are specified in the pom.xml file.
+These dependencies are specified in the pom.xml file.
 
 You will need to upload the output jar, as well as jose-jwt jar and its dependencies as resources to your Apigee instance, either
 with the API Proxy or with the organization or environment.
 
 ## Author
 
-Dino Chiesa
+Dino Chiesa  
 godino@google.com
 
 ## Bugs & Limitations

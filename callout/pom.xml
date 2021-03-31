@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20201116</version>
+  <version>20210331</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -16,8 +16,10 @@
     <mockito.all.version>1.10.19</mockito.all.version>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.7</jmockit.version>
+
     <guava.version>26.0-jre</guava.version>
-    <nimbus-jose.version>8.2.1</nimbus-jose.version>
+    <caffeine.version>2.9.0</caffeine.version>
+    <nimbus-jose.version>8.21</nimbus-jose.version>
     <bouncycastle.version>1.64</bouncycastle.version>
     <jdk.target.version>1.8</jdk.target.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,12 +39,24 @@
       <version>${apigee.expressions.version}</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
-      <scope>provided</scope>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>${caffeine.version}</version>
+      <!--
+          <scope>provided</scope>
+      -->
     </dependency>
+
+    <!--
+        <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+        <scope>provided</scope>
+        </dependency>
+    -->
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -106,7 +120,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.8.1</version>
         <configuration>
           <showDeprecation>true</showDeprecation>
           <source>${jdk.target.version}</source>
@@ -121,7 +135,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.2.0</version>
         <configuration>
           <archive>
             <!-- do not include the pom.xml file in the generated jar -->
@@ -168,7 +182,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M2</version>
+        <version>3.0.0-M3</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -178,7 +192,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.0.5</version>
+                  <version>3.2.0</version>
                 </requireMavenVersion>
               </rules>
             </configuration>
@@ -189,7 +203,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.8.1</version>
         <executions>
           <execution>
             <phase>compile</phase>
