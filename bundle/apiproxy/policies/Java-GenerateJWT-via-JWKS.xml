@@ -9,6 +9,6 @@
     <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
     <Property name='key-id'>{my_key_id}</Property>
   </Properties>
-  <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
+  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
 </JavaCallout>

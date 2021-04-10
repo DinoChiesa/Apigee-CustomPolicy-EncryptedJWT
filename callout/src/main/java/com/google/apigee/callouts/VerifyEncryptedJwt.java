@@ -20,7 +20,7 @@
 // @author: Dino Chiesa
 //
 
-package com.google.apigee.edgecallouts;
+package com.google.apigee.callouts;
 
 import com.google.apigee.util.TimeResolver;
 import com.apigee.flow.execution.IOIntensive;

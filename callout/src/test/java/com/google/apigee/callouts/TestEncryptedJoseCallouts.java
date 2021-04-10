@@ -1,6 +1,6 @@
 // TestEncryptedJoseCallouts.java
 //
-// Copyright (c) 2018-2020 Google LLC
+// Copyright (c) 2018-2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,15 +32,11 @@
 // In that JDK, there's no restriction on key strength.
 //
 
-package com.google.apigee.edgecalluts;
+package com.google.apigee.callouts;
 
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.message.MessageContext;
-import com.google.apigee.edgecallouts.GenerateEncryptedJwt;
-import com.google.apigee.edgecallouts.GenerateJwe;
-import com.google.apigee.edgecallouts.VerifyEncryptedJwt;
-import com.google.apigee.edgecallouts.VerifyJwe;
 import com.nimbusds.jose.util.DefaultResourceRetriever;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.Resource;

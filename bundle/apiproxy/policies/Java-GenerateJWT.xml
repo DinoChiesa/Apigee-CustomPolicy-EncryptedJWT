@@ -8,6 +8,6 @@
     <Property name='expiry'>5m</Property>
     <Property name='public-key'>{my_public_key}</Property>
   </Properties>
-  <ClassName>com.google.apigee.edgecallouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20210331.jar</ResourceURL>
+  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
 </JavaCallout>

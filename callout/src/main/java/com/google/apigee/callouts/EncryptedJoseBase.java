@@ -17,7 +17,7 @@
 // @author: Dino Chiesa
 //
 
-package com.google.apigee.edgecallouts;
+package com.google.apigee.callouts;
 
 import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.message.MessageContext;
