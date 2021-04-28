@@ -12,7 +12,8 @@ use the `RSA-OAEP-256` key encryption algorithm.
 
 1. generate an example encrypted JWT
    ```
-   curl -i https://${my_endpoint}/encrypted-jwt-java/generate_jwt -d ''
+   $endpoint=https://foo.bar.com
+   curl -i ${endpoint}/encrypted-jwt-java/generate_jwt -d ''
    ```
 
    You should see something like this as output:
@@ -32,7 +33,7 @@ use the `RSA-OAEP-256` key encryption algorithm.
 
    ```
    JWT=eyJ0eXAiOiJKV1Q....eXX258QmzYdBA (from above)
-   curl -i https://${my_endpoint}/encrypted-jwt-java/verify_jwt -d "JWT=${JWT}"
+   curl -i ${endpoint}/encrypted-jwt-java/verify_jwt -d "JWT=${JWT}"
 
    ```
 
@@ -54,7 +55,7 @@ use the `RSA-OAEP-256` key encryption algorithm.
 
 3. generate an example JWE (not a JSON payload)
    ```
-   curl -i https://${my_endpoint}/encrypted-jwt-java/generate_jwe -d ''
+   curl -i ${endpoint}/encrypted-jwt-java/generate_jwe -d ''
    ```
 
    You should see something like this as output:
@@ -75,7 +76,7 @@ use the `RSA-OAEP-256` key encryption algorithm.
 
    ```
    JWE=eyJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.PelZ...ZYBiXy85u.ZkjuSBvcW7iU4vj6oOo9KA
-   curl -i https://${my_endpoint}/encrypted-jwt-java/verify_jwe -d "JWE=${JWE}"
+   curl -i ${endpoint}/encrypted-jwt-java/verify_jwe -d "JWE=${JWE}"
    ```
    You should see output that looks something like this:
    ```
@@ -116,7 +117,7 @@ Likewise with `/generate_jwe`.  To decrypt, you will need to provide the private
 key to the external system.  Get it with this request:
 
 ```
-curl -i https://${my_endpoint}/encrypted-jwt-java/private_key
+curl -i ${endpoint}/encrypted-jwt-java/private_key
 ```
 
 The response will show you a PEM-encoded private key.
@@ -126,5 +127,5 @@ system to GENERATE the encrypted JWT or JWE, that you will then verify with
 `/verify_jwt` or `/verify_jwe`. Retrieve the public key with this request:
 
 ```
-curl -i https://${my_endpoint}/encrypted-jwt-java/public_key
+curl -i ${endpoint}/encrypted-jwt-java/public_key
 ```

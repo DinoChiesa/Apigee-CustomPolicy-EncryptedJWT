@@ -3,7 +3,7 @@
 For several years, Apigee has included builtin  policies that generate and
 verify signed JWT. There are also recently (as of November 2020) built-in policies to handle Encrypted
 JWT (As defined in [RFC 7516](https://tools.ietf.org/html/rfc7516)).
-But there are not yet built-in policies to handle general JWE. It's in the Apigee roadmap, but 
+But there are not yet built-in policies to handle general JWE. It's in the Apigee roadmap, but
 in the meantime, you can handle JWE (and encrypted JWT) _today_, with a Java callout.
 
 This repo contains the Java source code for:
@@ -77,7 +77,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -106,7 +106,7 @@ key.
       <Property name='key-id'>{my_key_id}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -147,7 +147,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -171,7 +171,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -213,7 +213,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -232,7 +232,7 @@ same. The callout `ClassName` is different:
     </Properties>
     <!-- Generate a JWE for non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210409.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -343,7 +343,7 @@ To build: `mvn clean package`
 
 The source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20210409.jar)  and all the dependencies to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Apigee API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20210428.jar)  and all the dependencies to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Apigee API Proxy Editor .
 
 
 ## Build Dependencies
