@@ -10,6 +10,11 @@
   </AssignVariable>
 
   <AssignVariable>
+    <Name>apigee-issuer</Name>
+    <Template>apigee:{organization.name}:{environment.name}:{apiproxy.name}</Template>
+  </AssignVariable>
+
+  <AssignVariable>
     <Name>my_public_key</Name>
     <Value>
       -----BEGIN PUBLIC KEY-----

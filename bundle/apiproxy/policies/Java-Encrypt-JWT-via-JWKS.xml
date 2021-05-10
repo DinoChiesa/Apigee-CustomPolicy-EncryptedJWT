@@ -1,9 +1,9 @@
-<JavaCallout name="Java-GenerateJWE-via-JWKS">
+<JavaCallout name="Java-Encrypt-JWT-via-JWKS">
   <Properties>
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='content-encryption'>A256GCM</Property>
     <Property name='debug'>true</Property>
-    <Property name='payload'>Arbitrary-string-to-encrypt,messageid={messageid},time={system.timestamp},org={organization.name},proxy={apiproxy.name}</Property>
+    <Property name='payload'>{signed-jwt}</Property>
     <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
     <Property name='key-id'>{my_key_id}</Property>
   </Properties>

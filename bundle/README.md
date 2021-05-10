@@ -108,6 +108,13 @@ use the `RSA-OAEP-256` key encryption algorithm.
    ```
 
 
+7. Generate a signed JWT, then encrypt it:
+   ```
+   curl -i https://5g-dev.dinochiesa.net/encrypted-jwt-java/signed_jwt_wrapped_in_jwe -d ''
+   ```
+
+
+
 
 ## Interoperating with other systems
 

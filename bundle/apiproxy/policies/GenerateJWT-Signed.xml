@@ -1,0 +1,21 @@
+<GenerateJWT name='GenerateJWT-Signed'>
+  <Algorithm>RS256</Algorithm>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <PrivateKey>
+    <Value ref="private.my_private_key"/>
+    <!-- the keyid is optional, and typically it will not be hard-coded -->
+    <Id>cb24a396-4414-4793-b4ce-90333b694bff</Id>
+  </PrivateKey>
+  <!-- typically the subject claim will not be hard-coded -->
+  <Subject>example@apigee.com</Subject>
+
+  <Issuer ref='apigee-issuer'/>
+
+  <!-- often the audience claim will not be hard-coded -->
+  <Audience>all</Audience>
+  <ExpiresIn>30m</ExpiresIn>
+  <AdditionalClaims>
+    <Claim name='messageid' ref='messageid}'/>
+  </AdditionalClaims>
+  <OutputVariable>signed-jwt</OutputVariable>
+</GenerateJWT>

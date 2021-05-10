@@ -18,7 +18,7 @@
 
   <DefaultFaultRule name="default-fault-rule">
     <Step>
-      <Name>AM-InjectProxyVersionHeader</Name>
+      <Name>AM-InjectProxyRevisionHeader</Name>
     </Step>
     <AlwaysEnforce>true</AlwaysEnforce>
   </DefaultFaultRule>
@@ -111,6 +111,30 @@
         </Step>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_via_jwks") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 5">
+      <Description>generate a JWE that wraps a signed JWT</Description>
+      <Request>
+        <Step>
+          <Name>GenerateJWT-Signed</Name>
+        </Step>
+        <Step>
+          <Name>SC-Get-RSA-Keys</Name>
+        </Step>
+        <Step>
+          <Name>AM-Select-RSA-Key</Name>
+        </Step>
+        <Step>
+          <Name>Java-Encrypt-JWT-via-JWKS</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-SuccessGenerateResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/signed_jwt_wrapped_in_jwe") and (request.verb = "POST")</Condition>
     </Flow>
 
     <Flow name="verify 1">

@@ -1,6 +1,7 @@
 <AssignMessage name='AM-SuccessGenerateResponse'>
   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
   <Set>
+    <!-- only one of the following variables will resolve. that's ok, desired. -->
     <Payload contentType='text/plain'>{ejwt_output}{jwe_output}
 
 </Payload>
