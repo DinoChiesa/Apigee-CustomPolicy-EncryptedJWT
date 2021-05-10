@@ -15,7 +15,7 @@
   <Audience>all</Audience>
   <ExpiresIn>30m</ExpiresIn>
   <AdditionalClaims>
-    <Claim name='messageid' ref='messageid}'/>
+    <Claim name='messageid' ref='messageid'/>
   </AdditionalClaims>
   <OutputVariable>signed-jwt</OutputVariable>
 </GenerateJWT>
