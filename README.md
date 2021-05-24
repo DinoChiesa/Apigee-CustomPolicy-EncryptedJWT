@@ -40,6 +40,8 @@ You can view a [screencast walkthrough of this
 example](https://youtu.be/KreuWmVka1s) on Youtube:
 [![image](./img/screenshot-20191205-171309.png)](https://youtu.be/KreuWmVka1s)
 
+And also there is [a second screencast](https://youtu.be/9w4iBu5ImHI) showing how to use this callout to sign-then-encrypt.
+[![image](./img/screenshot-20210524-140009.png)](https://youtu.be/9w4iBu5ImHI)
 
 ## Using the Custom Policy
 
