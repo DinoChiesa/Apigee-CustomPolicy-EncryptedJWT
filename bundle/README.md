@@ -99,12 +99,12 @@ use the `RSA-OAEP-256` key encryption algorithm.
    This logic randomly chooses an RS256 key from the JWKS and uses that. It embeds the
    keyid into the JWT header.
    ```
-   curl -i https://5g-dev.dinochiesa.net/encrypted-jwt-java/generate_jwt_via_jwks -d ''
+   curl -i $endpoint/encrypted-jwt-java/generate_jwt_via_jwks -d ''
    ```
 
 6. Likewise, you can generate a JWE using JWKS as the source for the public key.
    ```
-   curl -i https://5g-dev.dinochiesa.net/encrypted-jwt-java/generate_jwe_via_jwks -d ''
+   curl -i $endpoint/encrypted-jwt-java/generate_jwe_via_jwks -d ''
    ```
 
 
