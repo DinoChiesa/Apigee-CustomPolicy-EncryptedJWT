@@ -444,7 +444,6 @@ public class TestEncryptedJoseCallouts extends CalloutTestBase {
     Assert.assertTrue(lengths[0] > lengths[1]);
   }
 
-
   @Test()
   public void encrypt8_JWE_via_JWKS() throws MalformedURLException, IOException, ParseException {
     Map<String, String> properties = new HashMap<String, String>();
@@ -481,7 +480,7 @@ public class TestEncryptedJoseCallouts extends CalloutTestBase {
   }
 
   @Test()
-  public void encrypt9_JWE_via_JWKS_fail_no_keyid() {
+  public void encrypt9_JWE_via_JWKS_no_keyid() {
     Map<String, String> properties = new HashMap<String, String>();
 
     properties.put("testname", "encrypt9");
@@ -500,17 +499,21 @@ public class TestEncryptedJoseCallouts extends CalloutTestBase {
 
     // check result and output
     reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.ABORT);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
-    Assert.assertNotNull(error);
-    Assert.assertEquals(error, "key-id resolves to null or empty.");
+    Assert.assertNull(error);
+    String selectedKeyId = msgCtxt.getVariable("jwe_selected_key_id");
+    Assert.assertNotNull(selectedKeyId);
     String output = msgCtxt.getVariable("jwe_output");
-    Assert.assertNull(output);
+
+    String jweHeader = msgCtxt.getVariable("jwe_header");
+    Assert.assertNotNull(jweHeader);
+    Assert.assertTrue(jweHeader.indexOf("\"kid\"") > 0);
   }
 
   @Test()
-  public void encrypt10_JWE_no_JWKS_or_publickey() {
+  public void encrypt10_JWE_neither_JWKS_nor_publickey() {
     Map<String, String> properties = new HashMap<String, String>();
 
     properties.put("testname", "encrypt10");
@@ -537,7 +540,6 @@ public class TestEncryptedJoseCallouts extends CalloutTestBase {
     String output = msgCtxt.getVariable("jwe_output");
     Assert.assertNull(output);
   }
-
 
   @Test()
   public void encrypt11_JWE_bad_JWKS() throws MalformedURLException, IOException, ParseException {

@@ -9,5 +9,5 @@
     <Property name='public-key'>{my_public_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
 </JavaCallout>

@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20210428</version>
+  <version>20210629</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -17,9 +17,8 @@
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.7</jmockit.version>
 
-    <guava.version>26.0-jre</guava.version>
     <caffeine.version>2.9.0</caffeine.version>
-    <nimbus-jose.version>8.21</nimbus-jose.version>
+    <nimbus-jose.version>8.21.1</nimbus-jose.version>
     <bouncycastle.version>1.64</bouncycastle.version>
     <jdk.target.version>1.8</jdk.target.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,19 +43,7 @@
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
       <version>${caffeine.version}</version>
-      <!--
-          <scope>provided</scope>
-      -->
     </dependency>
-
-    <!--
-        <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
-        <scope>provided</scope>
-        </dependency>
-    -->
 
     <dependency>
       <groupId>org.bouncycastle</groupId>

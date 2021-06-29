@@ -7,8 +7,9 @@
     <Property name='generate-id'>true</Property>
     <Property name='expiry'>5m</Property>
     <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
+    <!-- key-id is optional.  -->
     <Property name='key-id'>{my_key_id}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
 </JavaCallout>

@@ -79,7 +79,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -94,8 +94,7 @@ To decrypt the resulting ciphertext, either within Apigee with this policy, or
 using some other system, the decryptor needs to use the corresponding private
 key.
 
-
-## Example: Generation of an Encrypted JWT using a JWKS and key-id
+## Example: Generation of an Encrypted JWT using a JWKS and a randomly-selected key
 
   ```xml
   <JavaCallout name="Java-JWTGeneration-via-JWKS">
@@ -103,20 +102,42 @@ key.
       <Property name='key-encryption'>RSA-OAEP-256</Property>
       <Property name='content-encryption'>A256GCM</Property>
       <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
-      <Property name='expiry'>1h</Property>
+      <Property name='expiry'>5m</Property>
       <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
-      <Property name='key-id'>{my_key_id}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
 
-This is similar to the above, but now the public key is retrieved from a JWKS, using a key-id.
+This is similar to the above, but now the callout randomly selects the public
+key from the RSA keys in a JWKS.
 
 To decrypt the resulting ciphertext, either within Apigee with this policy, or
 using some other system, the decryptor needs to use the corresponding private
 key.
+
+
+## Example: Generation of an Encrypted JWT using a JWKS and key-id
+
+  ```xml
+  <JavaCallout name="Java-JWTGeneration-via-JWKS-and-KeyId">
+    <Properties>
+      <Property name='key-encryption'>RSA-OAEP-256</Property>
+      <Property name='content-encryption'>A256GCM</Property>
+      <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
+      <Property name='expiry'>20m</Property>
+      <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
+      <Property name='key-id'>{my_key_id}</Property>
+    </Properties>
+    <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+  </JavaCallout>
+  ```
+
+In this case, the callout selects an RSA key from the JWKS, using a specific key-id.
+
+Again, the decryptor needs to use the corresponding private key.
 
 
 ### Properties for Generation
@@ -127,7 +148,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 |--------------------|---------------------------------------------------------------------------------------------------------------------|
 | public-key         | optional. a PEM string representing the public key. Either a public-key or a jwks-uri and key-id must be specified. |
 | jwks-uri           | optional. a PEM string representing the public key.                                                                 |
-| key-id             | optional. the key-id for the header. This is required when selecting a public key from JWKS URI.                    |
+| key-id             | optional. the key-id for the header. If you do not specify this when selecting a public key from JWKS URI, the callout selects a suitable key at random. The callout does not examine the "use" property of a JWK to determine suitability. |
 | key-encryption     | required. name of the key encryption algorithm. Must be RSA-OAEP-256 or RSA-OAEP.                                   |
 | content-encryption | required. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms. |
 | payload            | optional. a JSON string that includes additional properties for the payload of the JWT. (GenerateEncryptedJwt only) |
@@ -149,7 +170,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -173,7 +194,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -215,7 +236,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -234,7 +255,7 @@ same. The callout `ClassName` is different:
     </Properties>
     <!-- Generate a JWE for non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210428.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -345,7 +366,7 @@ To build: `mvn clean package`
 
 The source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20210428.jar)  and all the dependencies to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Apigee API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20210629.jar)  and all the dependencies to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Apigee API Proxy Editor .
 
 
 ## Build Dependencies
@@ -353,7 +374,7 @@ If you edit policies offline, copy [the jar file for the custom policy](callout/
 * Apigee expressions v1.0 (provided)
 * Apigee message-flow v1.0 (provided)
 * Bouncy Castle 1.64 (provided)
-* NimbusDS jose-jwt v8.21 
+* NimbusDS jose-jwt v8.21.1
 * other dependencies of NimbusDS jose-jwt
 * Ben Manes' caffeine v2.9.0
 
@@ -364,10 +385,9 @@ with the API Proxy or with the organization or environment.
 
 ## Author
 
-Dino Chiesa  
+Dino Chiesa
 godino@google.com
 
 ## Bugs & Limitations
 
 * The policies support only RSA-OAEP-256 and RSA-OAEP for Key encryption algorithms.
-

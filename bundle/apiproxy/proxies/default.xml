@@ -120,12 +120,6 @@
           <Name>GenerateJWT-Signed</Name>
         </Step>
         <Step>
-          <Name>SC-Get-RSA-Keys</Name>
-        </Step>
-        <Step>
-          <Name>AM-Select-RSA-Key</Name>
-        </Step>
-        <Step>
           <Name>Java-Encrypt-JWT-via-JWKS</Name>
         </Step>
       </Request>
