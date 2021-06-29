@@ -1,4 +1,4 @@
-// TestEncryptedJoseCallouts.java
+// TestEncrypt.java
 //
 // Copyright (c) 2018-2021 Google LLC
 //
@@ -57,97 +57,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class TestEncryptedJoseCallouts extends CalloutTestBase {
-
-  @Test()
-  public void decrypt1() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "decrypt1");
-    properties.put("private-key", privateKey2);
-    properties.put("key-encryption", "RSA-OAEP-256");
-    properties.put("debug", "true");
-    properties.put("source", "message.content");
-
-    msgCtxt.setVariable("message.content", jwt1);
-
-    VerifyEncryptedJwt callout = new VerifyEncryptedJwt(properties);
-    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
-
-    // check result and output
-    reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.SUCCESS);
-    // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
-    Assert.assertNull(error);
-  }
-
-  @Test()
-  public void decrypt2_with_CEK() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "decrypt2");
-    properties.put("private-key", privateKey2);
-    properties.put("key-encryption", "RSA-OAEP-256");
-    properties.put("content-encryption", "A256GCM");
-    properties.put("source", "message.content");
-    properties.put("debug", "true");
-
-    msgCtxt.setVariable("message.content", jwt1);
-
-    VerifyEncryptedJwt callout = new VerifyEncryptedJwt(properties);
-    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
-
-    // check result and output
-    reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.ABORT);
-    // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
-    Assert.assertEquals(error, "JWT uses unacceptable Content Encryption Algorithm.");
-  }
-
-  @Test()
-  public void decrypt3_with_KEK() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "decrypt3");
-    properties.put("private-key", privateKey2);
-    properties.put("key-encryption", "dir"); // not supported
-    properties.put("content-encryption", "A256GCM");
-    properties.put("source", "message.content");
-    properties.put("debug", "true");
-
-    msgCtxt.setVariable("message.content", jwt1);
-
-    VerifyEncryptedJwt callout = new VerifyEncryptedJwt(properties);
-    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
-
-    // check result and output
-    reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.ABORT);
-    // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
-    Assert.assertEquals(error, "that key-encryption algorithm name is unsupported.");
-  }
-
-  @Test()
-  public void decrypt4_with_expiry() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "decrypt4");
-    properties.put("private-key", privateKey1);
-    properties.put("key-encryption", "RSA-OAEP-256");
-    properties.put("source", "message.content");
-    properties.put("debug", "true");
-
-    msgCtxt.setVariable("message.content", jwt2);
-
-    VerifyEncryptedJwt callout = new VerifyEncryptedJwt(properties);
-    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
-
-    // check result and output
-    reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.ABORT);
-    // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
-    Assert.assertEquals(error, "JWT is expired.");
-  }
+public class TestEncrypt extends CalloutTestBase {
 
   @Test()
   public void encrypt1() {
@@ -332,55 +242,6 @@ public class TestEncryptedJoseCallouts extends CalloutTestBase {
     Assert.assertNotNull(output);
     String id = msgCtxt.getVariable("ejwt_jti");
     Assert.assertNotNull(id);
-  }
-
-  @Test()
-  public void decrypt5_jwe() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "decrypt5");
-    properties.put("private-key", privateKey3);
-    properties.put("key-encryption", "RSA-OAEP");
-    properties.put("source", "message.content");
-    properties.put("debug", "true");
-
-    msgCtxt.setVariable("message.content", jwe1);
-
-    VerifyJwe callout = new VerifyJwe(properties);
-    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
-
-    // check result and output
-    reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.SUCCESS);
-    // retrieve output
-    String error = msgCtxt.getVariable("jwe_error");
-    Assert.assertNull(error);
-    String cty = msgCtxt.getVariable("jwe_header_cty");
-    Assert.assertEquals(cty, "JWT");
-    String payload = msgCtxt.getVariable("jwe_payload");
-    Assert.assertNotNull(payload);
-    Assert.assertTrue(payload.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
-  }
-
-  @Test()
-  public void decrypt6_jwe_wrongkey() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("testname", "decrypt6");
-    properties.put("private-key", privateKey1);
-    properties.put("key-encryption", "RSA-OAEP");
-    properties.put("source", "message.content");
-    properties.put("debug", "true");
-
-    msgCtxt.setVariable("message.content", jwe1);
-
-    VerifyJwe callout = new VerifyJwe(properties);
-    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
-
-    // check result and output
-    reportThings(properties);
-    Assert.assertEquals(result, ExecutionResult.ABORT);
-    // retrieve output
-    String error = msgCtxt.getVariable("jwe_error");
-    Assert.assertEquals(error, "Decryption error");
   }
 
   @Test()

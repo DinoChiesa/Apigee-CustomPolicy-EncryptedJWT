@@ -143,8 +143,14 @@ public abstract class EncryptedJoseBase {
 
   protected void clearVariables(MessageContext msgCtxt) {
     msgCtxt.removeVariable(varName("error"));
+    msgCtxt.removeVariable(varName("output"));
     msgCtxt.removeVariable(varName("exception"));
     msgCtxt.removeVariable(varName("stacktrace"));
+    msgCtxt.removeVariable(varName("alg"));
+    msgCtxt.removeVariable(varName("enc"));
+    msgCtxt.removeVariable(varName("header"));
+    msgCtxt.removeVariable(varName("payload"));
+    msgCtxt.removeVariable(varName("age"));
   }
 
   protected static String getStackTraceAsString(Throwable t) {

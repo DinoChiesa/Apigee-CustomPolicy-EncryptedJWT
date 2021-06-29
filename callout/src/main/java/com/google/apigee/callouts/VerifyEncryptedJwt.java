@@ -22,10 +22,10 @@
 
 package com.google.apigee.callouts;
 
-import com.google.apigee.util.TimeResolver;
 import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
+import com.google.apigee.util.TimeResolver;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jwt.EncryptedJWT;
@@ -38,39 +38,53 @@ import java.util.Map;
 
 @IOIntensive
 public class VerifyEncryptedJwt extends VerifyBase implements Execution {
-  private final static long defaultTimeAllowance = 0L;
-  private final static long maxTimeAllowance = 60L;
-  private final static long minTimeAllowance = 0L;
-  private final static long defaultMaxLifetime = -1L;
+  private static final long defaultTimeAllowance = 0L;
+  private static final long maxTimeAllowance = 60L;
+  private static final long minTimeAllowance = 0L;
+  private static final long defaultMaxLifetime = -1L;
 
   public VerifyEncryptedJwt(Map properties) {
     super(properties);
   }
 
-  String getVarPrefix() { return "ejwt_"; };
+  String getVarPrefix() {
+    return "ejwt_";
+  };
 
   private long getTimeAllowance(MessageContext msgCtxt) throws Exception {
-        String timeAllowance = (String) this.properties.get("time-allowance");
-        if (timeAllowance == null) { return defaultTimeAllowance; }
-        timeAllowance = timeAllowance.trim();
-        if (timeAllowance.equals("")) { return defaultTimeAllowance; }
-        timeAllowance = resolveVariableReferences(timeAllowance, msgCtxt);
-        if (timeAllowance == null || timeAllowance.equals("")) { return defaultTimeAllowance; }
-        long resolvedTimeAllowance = Long.parseLong(timeAllowance, 10);
-        return Math.max(Math.min(resolvedTimeAllowance,maxTimeAllowance),minTimeAllowance);
+    String timeAllowance = (String) this.properties.get("time-allowance");
+    if (timeAllowance == null) {
+      return defaultTimeAllowance;
     }
+    timeAllowance = timeAllowance.trim();
+    if (timeAllowance.equals("")) {
+      return defaultTimeAllowance;
+    }
+    timeAllowance = resolveVariableReferences(timeAllowance, msgCtxt);
+    if (timeAllowance == null || timeAllowance.equals("")) {
+      return defaultTimeAllowance;
+    }
+    long resolvedTimeAllowance = Long.parseLong(timeAllowance, 10);
+    return Math.max(Math.min(resolvedTimeAllowance, maxTimeAllowance), minTimeAllowance);
+  }
 
   private long getMaxAllowableLifetime(MessageContext msgCtxt) throws Exception {
-        String maxLifetime = (String) this.properties.get("max-lifetime");
-        if (maxLifetime == null) { return defaultMaxLifetime; }
-        maxLifetime = maxLifetime.trim();
-        if (maxLifetime.equals("")) { return defaultMaxLifetime; }
-        maxLifetime = resolveVariableReferences(maxLifetime, msgCtxt);
-        if (maxLifetime == null || maxLifetime.equals("")) { return defaultMaxLifetime; }
+    String maxLifetime = (String) this.properties.get("max-lifetime");
+    if (maxLifetime == null) {
+      return defaultMaxLifetime;
+    }
+    maxLifetime = maxLifetime.trim();
+    if (maxLifetime.equals("")) {
+      return defaultMaxLifetime;
+    }
+    maxLifetime = resolveVariableReferences(maxLifetime, msgCtxt);
+    if (maxLifetime == null || maxLifetime.equals("")) {
+      return defaultMaxLifetime;
+    }
 
-        Long maxLifetimeInMilliseconds = TimeResolver.resolveExpression(maxLifetime);
-        if (maxLifetimeInMilliseconds < 0L) return -1L;
-        return (maxLifetimeInMilliseconds / 1000L);
+    Long maxLifetimeInMilliseconds = TimeResolver.resolveExpression(maxLifetime);
+    if (maxLifetimeInMilliseconds < 0L) return -1L;
+    return (maxLifetimeInMilliseconds / 1000L);
   }
 
   void decrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
@@ -102,7 +116,6 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
       throw new IllegalStateException("JWT uses unacceptable Key Encryption Algorithm.");
 
     msgCtxt.setVariable(varName("alg"), header.getAlgorithm().toString());
-
     msgCtxt.setVariable(varName("enc"), header.getEncryptionMethod().toString());
 
     if (policyConfig.contentEncryptionAlgorithm != null
@@ -115,18 +128,41 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
     long maxLifetime = getMaxAllowableLifetime(msgCtxt);
 
     Date expDate = claims.getExpirationTime();
+    Long secondsRemaining = null;
+    /*
+     * Comments regarding lifetime and expiry.
+     *
+     * Token lifetime is subtly different than expiry.
+     *
+     * The expiry is optional in a token, and if present is expressed as an
+     * absolute number of seconds since epoch.  The lifetime is a computed
+     * property: the difference between the optional expiry and (notbefore or iat or now), in
+     * that order of precedence.
+     *
+     * If the token carries an expiry claim, this policy will
+     * enforce it.
+     *
+     * If the policy configuration directs the callout to enforce a maximum
+     * lifetime of the token, this code wll enforce it.
+     *
+     ***/
+    Long lifetime = null;
+    Instant now = Instant.now();
+
     if (expDate != null) {
       Instant expiry = expDate.toInstant();
       msgCtxt.setVariable(varName("expires"), DateTimeFormatter.ISO_INSTANT.format(expiry));
       msgCtxt.setVariable(varName("expires_seconds"), Long.toString(expiry.getEpochSecond()));
-      Instant now = Instant.now();
-      long secondsRemaining = now.until(expiry, ChronoUnit.SECONDS);
+      secondsRemaining = now.until(expiry, ChronoUnit.SECONDS);
       msgCtxt.setVariable(varName("seconds_remaining"), Long.toString(secondsRemaining));
-      if (secondsRemaining + timeAllowance <= 0L) throw new IllegalStateException("JWT is expired.");
+      if (secondsRemaining + timeAllowance <= 0L)
+        throw new IllegalStateException("JWT is expired.");
+    }
 
-      if (maxLifetime > 0L && secondsRemaining > maxLifetime)  {
-          throw new IllegalStateException("the JWT has a lifetime that exceeds the configured limit.");
-      }
+    Date iatDate = claims.getIssueTime();
+    if (iatDate != null) {
+      Instant issuedAt = iatDate.toInstant();
+      msgCtxt.setVariable(varName("issued_at"), DateTimeFormatter.ISO_INSTANT.format(issuedAt));
     }
 
     Date nbfDate = claims.getNotBeforeTime();
@@ -134,23 +170,26 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
       Instant notBefore = nbfDate.toInstant();
       msgCtxt.setVariable(varName("notbefore"), DateTimeFormatter.ISO_INSTANT.format(notBefore));
       msgCtxt.setVariable(varName("notbefore_seconds"), Long.toString(notBefore.getEpochSecond()));
-      Instant now = Instant.now();
       long age = notBefore.until(now, ChronoUnit.SECONDS);
       msgCtxt.setVariable(varName("age"), Long.toString(age));
       if (age + timeAllowance <= 0L) throw new IllegalStateException("JWT is not yet valid.");
     }
 
-    if (nbfDate != null && expDate != null) {
-      Instant notBefore = nbfDate.toInstant();
-      Instant expiry = expDate.toInstant();
-      long lifetime = notBefore.until(expiry, ChronoUnit.SECONDS);
+    if (expDate != null) {
+      Instant anchor =
+          (nbfDate != null) ? nbfDate.toInstant() : (iatDate != null) ? iatDate.toInstant() : now;
+      lifetime = anchor.until(expDate.toInstant(), ChronoUnit.SECONDS);
       msgCtxt.setVariable(varName("lifetime"), Long.toString(lifetime));
-      if (maxLifetime > 0L) {
-        if (lifetime > maxLifetime) {
-          throw new IllegalStateException("the JWT has a lifetime that exceeds the configured limit.");
-        }
-      }
     }
 
+    if (maxLifetime > 0L) {
+      if (lifetime == null)
+        throw new IllegalStateException(
+            "the JWT has an unlimited lifetime which exceeds the configured limit.");
+
+      if (lifetime > maxLifetime)
+        throw new IllegalStateException(
+            "the JWT has a lifetime that exceeds the configured limit.");
+    }
   }
 }

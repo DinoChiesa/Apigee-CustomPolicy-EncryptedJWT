@@ -92,13 +92,14 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     Instant now = Instant.now();
     claimsBuilder.issueTime(Date.from(now));
 
-    if (policyConfig.lifetime > 0) {
-      Instant exp = now.plus(policyConfig.lifetime, ChronoUnit.SECONDS);
-      claimsBuilder.expirationTime(Date.from(exp));
-    }
-    if (policyConfig.notBefore > 0) {
+    if (policyConfig.notBefore != 0) {
       Instant nbf = now.plus(policyConfig.notBefore, ChronoUnit.SECONDS);
-      claimsBuilder.notBeforeTime(Date.from(nbf));
+      claimsBuilder.notBeforeTime(Date.from(nbf)); // possibly in the past
+    }
+
+    if (policyConfig.expiry != 0) {
+      Instant exp = now.plus(policyConfig.expiry, ChronoUnit.SECONDS);
+      claimsBuilder.expirationTime(Date.from(exp)); // possibly in the past
     }
 
     JWEHeader header = headerBuilder.build();

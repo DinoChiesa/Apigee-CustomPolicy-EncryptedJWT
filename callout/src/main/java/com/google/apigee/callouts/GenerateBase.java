@@ -118,22 +118,20 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     return _getStringProp(msgCtxt, "output", varName("output"));
   }
 
-  private int getExpiry(MessageContext msgCtxt) throws Exception {
-    String lifetimeString = _getOptionalString(msgCtxt, "expiry");
-    if (lifetimeString == null) return -1;
-    lifetimeString = lifetimeString.trim();
-    Long durationInMilliseconds = TimeResolver.resolveExpression(lifetimeString);
-    if (durationInMilliseconds < 0L) return -1;
+  private int getTimeIntervalString(MessageContext msgCtxt, String propertyName) throws Exception {
+    String timeDurationString = _getOptionalString(msgCtxt, propertyName);
+    if (timeDurationString == null) return 0;
+    timeDurationString = timeDurationString.trim();
+    Long durationInMilliseconds = TimeResolver.resolveExpression(timeDurationString);
     return ((Long) (durationInMilliseconds / 1000L)).intValue();
   }
 
+  private int getExpiry(MessageContext msgCtxt) throws Exception {
+    return getTimeIntervalString(msgCtxt, "expiry");
+  }
+
   private int getNotBefore(MessageContext msgCtxt) throws Exception {
-    String notBeforeString = _getOptionalString(msgCtxt, "not-before");
-    if (notBeforeString == null) return -1;
-    notBeforeString = notBeforeString.trim();
-    Long durationInMilliseconds = TimeResolver.resolveExpression(notBeforeString);
-    if (durationInMilliseconds < 0L) return -1;
-    return ((Long) (durationInMilliseconds / 1000L)).intValue();
+    return getTimeIntervalString(msgCtxt, "not-before");
   }
 
   abstract void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception;
@@ -150,7 +148,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     public String keyId;
     public String crit;
     public String outputVar;
-    public int lifetime;
+    public int expiry;
     public int notBefore;
   }
 
@@ -165,13 +163,12 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
               msgCtxt.setVariable(varName("selected_key_id"), kid);
               config.keyId = kid;
             });
-    if (config.keyId==null)
-      config.keyId = _getOptionalString(msgCtxt, "key-id");
+    if (config.keyId == null) config.keyId = _getOptionalString(msgCtxt, "key-id");
     config.payload = _getOptionalString(msgCtxt, "payload");
     config.header = _getOptionalString(msgCtxt, "header");
     config.crit = _getOptionalString(msgCtxt, "crit");
     config.outputVar = _getStringProp(msgCtxt, "output", varName("output"));
-    config.lifetime = getExpiry(msgCtxt);
+    config.expiry = getExpiry(msgCtxt);
     config.notBefore = getNotBefore(msgCtxt);
     config.generateId = _getBooleanProperty(msgCtxt, "generate-id", false);
     config.compress = _getBooleanProperty(msgCtxt, "compress", false);
