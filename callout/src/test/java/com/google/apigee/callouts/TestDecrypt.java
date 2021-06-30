@@ -57,7 +57,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -80,7 +80,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -103,7 +103,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -125,7 +125,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -147,7 +147,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
@@ -174,7 +174,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
@@ -200,7 +200,7 @@ public class TestDecrypt extends CalloutTestBase {
     msgCtxt.setVariable("aud-value", "146B30DD-5338-472D-9357-EF6545C146AF");
     GenerateEncryptedJwt callout1 = new GenerateEncryptedJwt(properties1);
     ExecutionResult result1 = callout1.execute(msgCtxt, exeCtxt);
-    reportThings(properties1);
+    reportThings("ejwt", properties1);
     Assert.assertEquals(result1, ExecutionResult.SUCCESS);
     String encryptedJwt = msgCtxt.getVariable("ejwt_output");
     Assert.assertNotNull(encryptedJwt);
@@ -215,7 +215,7 @@ public class TestDecrypt extends CalloutTestBase {
     msgCtxt.setVariable("message.content", encryptedJwt);
     VerifyEncryptedJwt callout2 = new VerifyEncryptedJwt(properties2);
     ExecutionResult result2 = callout2.execute(msgCtxt, exeCtxt);
-    reportThings(properties2);
+    reportThings("ejwt", properties2);
     Assert.assertEquals(result2, ExecutionResult.SUCCESS);
     String error2 = msgCtxt.getVariable("ejwt_error");
     Assert.assertNull(error2);
@@ -231,7 +231,7 @@ public class TestDecrypt extends CalloutTestBase {
     msgCtxt.setVariable("message.content", encryptedJwt);
     VerifyEncryptedJwt callout3 = new VerifyEncryptedJwt(properties3);
     ExecutionResult result3 = callout3.execute(msgCtxt, exeCtxt);
-    reportThings(properties3);
+    reportThings("ejwt", properties3);
     Assert.assertEquals(result3, ExecutionResult.ABORT);
     String error3 = msgCtxt.getVariable("ejwt_error");
     Assert.assertNotNull(error3);
@@ -248,7 +248,7 @@ public class TestDecrypt extends CalloutTestBase {
     msgCtxt.setVariable("message.content", encryptedJwt);
     VerifyEncryptedJwt callout4 = new VerifyEncryptedJwt(properties4);
     ExecutionResult result4 = callout4.execute(msgCtxt, exeCtxt);
-    reportThings(properties4);
+    reportThings("ejwt", properties4);
     Assert.assertEquals(result4, ExecutionResult.SUCCESS);
     String error4 = msgCtxt.getVariable("ejwt_error");
     Assert.assertNull(error4);
@@ -272,7 +272,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result1 = callout1.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties1);
+    reportThings("ejwt", properties1);
     Assert.assertEquals(result1, ExecutionResult.SUCCESS);
     String encryptedJwt = msgCtxt.getVariable("ejwt_output");
     Assert.assertNotNull(encryptedJwt);
@@ -292,7 +292,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result2 = callout2.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties2);
+    reportThings("ejwt", properties2);
     Assert.assertEquals(result2, ExecutionResult.ABORT);
     // retrieve output
     String error2 = msgCtxt.getVariable("ejwt_error");

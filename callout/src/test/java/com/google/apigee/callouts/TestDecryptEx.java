@@ -1,4 +1,4 @@
-// TestEnc.java
+// TestDecryptEx.java
 //
 // Copyright (c) 2018-2021 Google LLC
 //
@@ -58,7 +58,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class TestEncrypted2 extends CalloutTestBase {
+public class TestDecryptEx extends CalloutTestBase {
 
   private static final String ejwt1 =
       "eyJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.Wf77ZGSTukkVSQHRAivihrx3nMcmG74a58glykZ2jxkvfPk7NqptIOwbxU3JRocwEIS9dpX1eB_w8J2J0j6NXR4Q8gsoEqSu5tHaoP5vh9-gjfR4PtvsH0gttbloDxvivxhJOlLUGw6q1VwpVc_rzmvW6eczxXZCcInW04hDX84s8e1XfUBTCUduwYvlprwt5mBKt9FE-P4a8a1PdBXy3lLJvIiJCfmB_LQAlCM5bE0t5dc-bAvL--D-UL8-REbUXWjUly4Ro0KfPcJ1yODF5z8Mc2-BSHssB7lc9_S08VtjqaAIkqoAXkacohLfza6tsD1u0G7MtzOyu0Ww_30nSQ.FiIYOmXZr1UN0zAH.7s67r_9mjcmlSFZiMNwIePT9a4b8UEdFLwpSNtGv7gvly-JYcnf0RnwusX19RENRx7lKjLdl5SJC2pP9sMEaWUjMvg.oTT4c10mabqe2N4rM7MUgQ";
@@ -113,7 +113,7 @@ public class TestEncrypted2 extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -137,7 +137,7 @@ public class TestEncrypted2 extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -162,7 +162,7 @@ public class TestEncrypted2 extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -192,7 +192,7 @@ public class TestEncrypted2 extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");

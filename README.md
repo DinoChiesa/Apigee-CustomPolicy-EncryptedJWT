@@ -51,10 +51,10 @@ There are four different classes:
 
 | class                                               | purpose                                |
 |-----------------------------------------------------|----------------------------------------|
-| com.google.apigee.callouts.GenerateEncryptedJwt | generate an encrypted JWT.             |
-| com.google.apigee.callouts.VerifyEncryptedJwt   | verify an encrypted JWT.               |
-| com.google.apigee.callouts.GenerateJwe          | generate a JWE with arbitrary payload. |
-| com.google.apigee.callouts.VerifyJwe            | verify a JWE with arbitrary payload.   |
+| com.google.apigee.callouts.GenerateEncryptedJwt     | generate an encrypted JWT.             |
+| com.google.apigee.callouts.VerifyEncryptedJwt       | verify an encrypted JWT.               |
+| com.google.apigee.callouts.GenerateJwe              | generate a JWE with arbitrary payload. |
+| com.google.apigee.callouts.VerifyJwe                | verify a JWE with arbitrary payload.   |
 
 When you use the policy to generate an encrypted JWT, the resulting JWT can be
 decrypted by other systems that have access to the matching private key. Likewise, when you use
@@ -94,10 +94,10 @@ To decrypt the resulting ciphertext, either within Apigee with this policy, or
 using some other system, the decryptor needs to use the corresponding private
 key.
 
-## Example: Generation of an Encrypted JWT using a JWKS and a randomly-selected key
+## Example: Generation of an Encrypted JWT using a JWKS URI and a randomly-selected key
 
   ```xml
-  <JavaCallout name="Java-JWTGeneration-via-JWKS">
+  <JavaCallout name="Java-JWTGeneration-via-JWKS-URI">
     <Properties>
       <Property name='key-encryption'>RSA-OAEP-256</Property>
       <Property name='content-encryption'>A256GCM</Property>
@@ -111,14 +111,54 @@ key.
   ```
 
 This is similar to the above, but now the callout randomly selects the public
-key from the RSA keys in a JWKS.
+key from one of the RSA keys available in a JWKS retrieved from a particular
+URI. The JWK must be `"kty"="RSA"` and, either `"use" = "enc"`, or it should
+have no `"use"` property.
 
 To decrypt the resulting ciphertext, either within Apigee with this policy, or
 using some other system, the decryptor needs to use the corresponding private
 key.
 
+## Example: Generation of a JWE using a JWKS URI and a randomly-selected key
 
-## Example: Generation of an Encrypted JWT using a JWKS and key-id
+  ```xml
+  <JavaCallout name="Java-JWTGeneration-via-JWKS-URI">
+    <Properties>
+      <Property name='key-encryption'>RSA-OAEP-256</Property>
+      <Property name='content-encryption'>A256GCM</Property>
+      <Property name='payload'>Arbitrary-string-to-encrypt,{variable-name-here}</Property>
+      <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
+    </Properties>
+    <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+  </JavaCallout>
+  ```
+
+This is similar to the above, except the payload is any arbitrary string.
+
+
+## Example: Generation of an Encrypted JWT using a provided JWKS
+
+  ```xml
+  <JavaCallout name="Java-JWTGeneration-via-JWKS-JSON">
+    <Properties>
+      <Property name='key-encryption'>RSA-OAEP-256</Property>
+      <Property name='content-encryption'>A256GCM</Property>
+      <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
+      <Property name='expiry'>20m</Property>
+      <Property name='jwks'>{variable-containing-jwks-json-string}</Property>
+    </Properties>
+    <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+  </JavaCallout>
+  ```
+
+In this case, the callout selects an RSA key suitable for use with encryption from the JWKS provided in the context variable. You should have obtained the JWKS from a prior `ServiceCalllout` policy, or similar.
+
+Again, the decryptor needs to use the corresponding private key.
+
+
+## Example: Generation of an Encrypted JWT using a JWKS URI and key-id
 
   ```xml
   <JavaCallout name="Java-JWTGeneration-via-JWKS-and-KeyId">
@@ -135,7 +175,7 @@ key.
   </JavaCallout>
   ```
 
-In this case, the callout selects an RSA key from the JWKS, using a specific key-id.
+In this case, the callout selects an RSA key from the JWKS retrieved from a URI, using a specific key-id. This approach ignores the `"use"` property if any, on the JWK.
 
 Again, the decryptor needs to use the corresponding private key.
 
@@ -144,21 +184,22 @@ Again, the decryptor needs to use the corresponding private key.
 
 These are the properties available on the GenerateJwe and GenerateEncryptedJwt policies:
 
-| Property           | Description                                                                                                         |
-|--------------------|---------------------------------------------------------------------------------------------------------------------|
-| public-key         | optional. a PEM string representing the public key. Either a public-key or a jwks-uri and key-id must be specified. |
-| jwks-uri           | optional. a PEM string representing the public key.                                                                 |
-| key-id             | optional. the key-id for the header. If you do not specify this when selecting a public key from JWKS URI, the callout selects a suitable key at random. The callout does not examine the "use" property of a JWK to determine suitability. |
-| key-encryption     | required. name of the key encryption algorithm. Must be RSA-OAEP-256 or RSA-OAEP.                                   |
-| content-encryption | required. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms. |
-| payload            | optional. a JSON string that includes additional properties for the payload of the JWT. (GenerateEncryptedJwt only) |
-| header             | optional. a JSON string that includes additional custom properties for the header of the JWT or JWE.                |
-| crit               | optional. a comma-separated list of header names to be used as the "crit" header of the JWT.                        |
-| expiry             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now.        |
-| not-before         | optional. an interval as above, expressing the not-before time of the JWT, measured from now.                       |
-| generate-id        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim. (GenerateEncryptedJwt only)   |
-| compress           | optional. boolean, true or false. Defaults to false. Whether to compress the payload before encrypting.             |
-| output             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                             |
+| Property             | Description                                                                                                                           |
+| -------------------- |-------------------------------------------------------------------------------------------------------------------------------------- |
+| `public-key`         | optional. a PEM string representing the public key. You must specify one of {`public-key`, `jwks`, `jwks-uri`}.                       |
+| `jwks-uri`           | optional. a URI that returns a JWKS payload. You must specify one of {`public-key`, `jwks`, `jwks-uri`}.                              |
+| `jwks`               | optional. a JWKS payload. You must specify one of {`public-key`, `jwks`, `jwks-uri`}.                                                 |
+| `key-id`             | optional. the key-id for the header. If you specify this, the callout will select the specific key and will ignore the "use" property of the JWK.  If you do not specify `key-id`, the callout selects a suitable key at random, selecting only from keys that are kty="RSA" and either "use"="enc", or without the "use" property.                                                 |
+| `key-encryption`     | required. name of the key encryption algorithm. Must be `RSA-OAEP-256` or `RSA-OAEP`.                                                 |
+| `content-encryption` | required. name of the content encryption algorithm. One of `A256GCM`, `A128GCM`, `A265GCM`, or one of the CBC algorithms.             |
+| `payload`            | optional. For GenerateEncryptedJwt, a JSON string that includes additional properties to be included in the payload of the JWT. For GenerateJwe, this is any arbitrary string. |
+| `header`             | optional. a JSON string that includes additional custom properties for the header of the JWT or JWE.                                  |
+| `crit`               | optional. a comma-separated list of header names to be used as the "crit" header of the JWT.                                          |
+| `expiry`             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now. Applies to GenerateEncryptedJwt only.  |
+| `not-before`         | optional. an interval as above, expressing the not-before time of the JWT, measured from now. Can be negative (eg -1m = one minute ago). Applies to GenerateEncryptedJwt only.   |
+| `generate-id`        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim. Applies to GenerateEncryptedJwt only.           |
+| `compress`           | optional. boolean, true or false. Defaults to false. Whether to compress the payload before encrypting.                               |
+| `output`             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                                               |
 
 
 ### Example: Basic Verification of an Encrypted JWT
@@ -208,16 +249,16 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 
 These are the properties available on the policy:
 
-| Property             | Description                                                                                                                               |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| private-key          | required when action = "decrypt". a PEM string representing the private key.                                                              |
-| private-key-password | optional. a password to use with an encrypted private key.                                                                                |
-| key-encryption       | required. name of the key encryption algorithm. Must be RSA-OAEP-256 or RSA-OAEP.                                                         |
-| content-encryption   | optional. name of the content encryption algorithm. One of A256GCM, A128GCM, A265GCM, or one of the CBC algorithms.                       |
-| source               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `message.header.authorization`. |
-| crit-headers         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
-| time-allowance       | optional. a string expressing the allowed clock skew in seconds. When the JWT expires (via the exp claim) at time T1, if the time-allowance is N, then the policy treats the JWT as expired only at time T1+N. A similar calculation is performed with the nbf claim.  |
-| max-lifetime         | optional. a string expressing the allowed maximum lifetime of the JWT. This can be a time expression like "120s". If the JWT has a lifetime that exceeds this, then the policy treats the JWT as invalid.  |
+| Property               | Description                                                                                                                               |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `private-key`          | required when action = "decrypt". a PEM string representing the private key.                                                              |
+| `private-key-password` | optional. a password to use with an encrypted private key.                                                                                |
+| `key-encryption`       | required. name of the key encryption algorithm. Must be `RSA-OAEP-256` or `RSA-OAEP`.                                                     |
+| `content-encryption`   | optional. name of the content encryption algorithm. One of `A256GCM`, `A128GCM`, `A265GCM`, or one of the CBC algorithms.                 |
+| `source`               | optional. name of the context variable containing the data to encrypt or decrypt. Do not surround in curly braces. Defaults to `message.header.authorization`. |
+| `crit-headers`         | optional. comma-separated list of header names that are critical; to be handled by the proxy later.  |
+| `time-allowance`       | optional. a string expressing the allowed clock skew in seconds. When the JWT expires (via the `exp` claim) at time T1, if the time-allowance is N, then the policy treats the JWT as expired only at time T1+N. A similar calculation is performed with the `nbf` claim.  |
+| `max-lifetime`         | optional. Applies to VerifyEncryptedJwt only. A string indicating the allowed maximum lifetime of the JWT. This can be a time expression like "120s". If the JWT has a lifetime that exceeds this, then the policy treats the JWT as invalid.  To compute lifetime, the `exp` claim must be present. The callout uses one of `nbf`, `iat` or "now", in that order, to determine the beginnig of the lifetime of the token. |
 
 
 ### Verifying JWE
@@ -236,25 +277,6 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
-  </JavaCallout>
-  ```
-
-### Generating JWE
-
-You can generate generic JWE, too. The options for the callout are the
-same. The callout `ClassName` is different:
-
-  ```xml
-  <JavaCallout name="Java-JWEGenerate">
-    <Properties>
-      <Property name='key-encryption'>RSA-OAEP</Property>
-      <Property name='content-encryption'>A256GCM</Property>
-      <Property name='payload'>anything-you-like-here</Property>
-      <Property name='public-key'>{my_public_key}</Property>
-    </Properties>
-    <!-- Generate a JWE for non-JSON payloads -->
-    <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
     <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
   </JavaCallout>
   ```
@@ -374,7 +396,7 @@ If you edit policies offline, copy [the jar file for the custom policy](callout/
 * Apigee expressions v1.0 (provided)
 * Apigee message-flow v1.0 (provided)
 * Bouncy Castle 1.64 (provided)
-* NimbusDS jose-jwt v8.21.1
+* NimbusDS jose-jwt v8.22
 * other dependencies of NimbusDS jose-jwt
 * Ben Manes' caffeine v2.9.0
 

@@ -7,5 +7,5 @@
     <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
 </JavaCallout>

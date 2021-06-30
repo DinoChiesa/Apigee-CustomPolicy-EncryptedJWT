@@ -273,21 +273,21 @@ public abstract class CalloutTestBase {
           + "AUSfkBBboTdFvB4itkJOCxuRxO5is06M47F7aYL2XT6ESY+C+fZO3NLhCs+7XkWC\n"
           + "-----END CERTIFICATE-----\n";
 
-  protected void reportThings(Map<String, String> props) {
+  protected void reportThings(String prefix, Map<String, String> props) {
     String test = props.get("testname");
     System.out.println("test  : " + test);
-    String header = msgCtxt.getVariable("ejwt_header");
+    String header = msgCtxt.getVariable(prefix + "_header");
     System.out.println("header: " + header);
-    String payload = msgCtxt.getVariable("ejwt_payload");
+    String payload = msgCtxt.getVariable(prefix + "_payload");
     System.out.println("payload: " + payload);
 
-    String alg = msgCtxt.getVariable("ejwt_alg");
+    String alg = msgCtxt.getVariable(prefix +"_alg");
     System.out.println("alg: " + alg);
 
-    String enc = msgCtxt.getVariable("ejwt_enc");
+    String enc = msgCtxt.getVariable(prefix + "_enc");
     System.out.println("enc: " + enc);
 
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariable(prefix + "_error");
     System.out.println("error : " + error);
   }
 }

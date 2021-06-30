@@ -34,6 +34,7 @@ import com.nimbusds.jose.jwk.JWKMatcher;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -44,29 +45,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @IOIntensive
 public abstract class GenerateBase extends EncryptedJoseBase implements Execution {
-  private static LoadingCache<String, JWKSet> jwksCache;
+  private static LoadingCache<String, JWKSet> jwksRemoteCache;
+  private static LoadingCache<String, JWKSet> jwksLocalCache;
   private static final int MAX_CACHE_ENTRIES = 128;
+  private static final int CACHE_EXPIRY_IN_MINUTES = 5;
 
-  public GenerateBase(Map properties) {
-    super(properties);
-
-    jwksCache =
+  static {
+    jwksRemoteCache =
         Caffeine.newBuilder()
             // .concurrencyLevel(4)
             .maximumSize(MAX_CACHE_ENTRIES)
-            .expireAfterAccess(60, TimeUnit.MINUTES)
+            .expireAfterAccess(CACHE_EXPIRY_IN_MINUTES, TimeUnit.MINUTES)
             .build(
                 new CacheLoader<String, JWKSet>() {
                   public JWKSet load(String uri)
                       throws MalformedURLException, IOException, ParseException {
                     // NB: this will throw an IOException on HTTP error.
-                    JWKSet jwks = JWKSet.load(new URL(uri));
-                    return jwks;
+                    return JWKSet.load(new URL(uri));
                   }
                 });
+
+    jwksLocalCache =
+        Caffeine.newBuilder()
+            // .concurrencyLevel(4)
+            .maximumSize(MAX_CACHE_ENTRIES)
+            .expireAfterAccess(CACHE_EXPIRY_IN_MINUTES, TimeUnit.MINUTES)
+            .build(
+                new CacheLoader<String, JWKSet>() {
+                  public JWKSet load(String jwksJson) throws ParseException {
+                    // NB: this can throw an Exception on parse error.
+                   return JWKSet.parse(jwksJson);
+                  }
+                });
+  }
+
+  public GenerateBase(Map properties) {
+    super(properties);
   }
 
   private PublicKey getPublicKey(MessageContext msgCtxt, Consumer<String> onKeySelected)
@@ -79,6 +97,12 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
 
   private static JWKMatcher.Builder matcherBuilder() {
     return new JWKMatcher.Builder().keyType(KeyType.RSA);
+    /*
+     * Do not match on .keyUse(KeyUse.ENCRYPTION)
+     *
+     * It's possible that some keys miss the "use" flag.
+     * So we will filter later.
+     **/
   }
 
   private PublicKey selectKey(List<JWK> list, Consumer<String> onKeySelected) throws Exception {
@@ -89,12 +113,20 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
 
   private PublicKey getPublicKeyFromJwks(MessageContext msgCtxt, Consumer<String> onKeySelected)
       throws Exception {
-    String jwksUri = _getOptionalString(msgCtxt, "jwks-uri");
-    if (jwksUri == null) throw new IllegalStateException("specify one of public-key or jwks-uri.");
+    JWKSet jwks = null;
+    String jwksJson = _getOptionalString(msgCtxt, "jwks");
+    if (jwksJson != null) {
+      jwks = jwksLocalCache.get(jwksJson);
+    } else {
+      String jwksUri = _getOptionalString(msgCtxt, "jwks-uri");
+      if (jwksUri == null)
+        throw new IllegalStateException("specify one of {public-key, jwks, jwks-uri}.");
+      jwks = jwksRemoteCache.get(jwksUri);
+    }
 
     String keyId = _getOptionalString(msgCtxt, "key-id");
-    JWKSet jwks = jwksCache.get(jwksUri);
     if (keyId != null) {
+      // find key with specific kid. Ignore use.
       List<JWK> filtered = new JWKSelector(matcherBuilder().keyID(keyId).build()).select(jwks);
 
       if (filtered.size() == 0) {
@@ -106,10 +138,14 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
       throw new IllegalStateException(
           String.format("more than one key with kid '%s' found.", keyId));
     }
-    List<JWK> filtered = new JWKSelector(matcherBuilder().build()).select(jwks);
+
+    List<JWK> filtered = new JWKSelector(matcherBuilder().build()).select(jwks)
+      .stream()
+      .filter(k -> k.getKeyUse() == null || k.getKeyUse().equals(KeyUse.ENCRYPTION))
+      .collect(Collectors.toList());
 
     if (filtered.size() == 0) {
-      throw new IllegalStateException("could not find any RSA keys.");
+      throw new IllegalStateException("could not find any appropriate RSA keys.");
     }
     return selectKey(filtered, onKeySelected);
   }

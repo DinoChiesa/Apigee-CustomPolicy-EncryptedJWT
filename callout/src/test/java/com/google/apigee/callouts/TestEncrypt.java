@@ -59,6 +59,10 @@ import org.testng.annotations.Test;
 
 public class TestEncrypt extends CalloutTestBase {
 
+  protected void reportThings(Map<String, String> props) {
+        super.reportThings("jwe", props);
+    }
+
   @Test()
   public void encrypt1() {
     Map<String, String> properties = new HashMap<String, String>();
@@ -75,7 +79,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -122,7 +126,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -148,7 +152,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -174,7 +178,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -201,7 +205,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -233,7 +237,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("ejwt_error");
@@ -262,7 +266,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
@@ -292,7 +296,7 @@ public class TestEncrypt extends CalloutTestBase {
       ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
       // check result and output
-      reportThings(properties);
+      reportThings("jwe", properties);
       Assert.assertEquals(result, ExecutionResult.SUCCESS);
       // retrieve output
       String error = msgCtxt.getVariable("jwe_error");
@@ -331,7 +335,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
@@ -359,7 +363,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
@@ -392,12 +396,12 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
     Assert.assertNotNull(error);
-    Assert.assertEquals(error, "specify one of public-key or jwks-uri.");
+    Assert.assertEquals(error, "specify one of {public-key, jwks, jwks-uri}.");
     String output = msgCtxt.getVariable("jwe_output");
     Assert.assertNull(output);
   }
@@ -412,7 +416,7 @@ public class TestEncrypt extends CalloutTestBase {
     JSONArray ids = JSONObjectUtils.getJSONArray(json, "ids");
     String selectedKeyId = (String) ids.get(0);
 
-    properties.put("testname", "encrypt8");
+    properties.put("testname", "encrypt12");
     properties.put("jwks-uri", "https://jwks-service.appspot.com/keyids"); // not a JWKS
     properties.put("key-id", selectedKeyId);
     properties.put("key-encryption", "RSA-OAEP");
@@ -428,7 +432,7 @@ public class TestEncrypt extends CalloutTestBase {
     ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
 
     // check result and output
-    reportThings(properties);
+    reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
     String error = msgCtxt.getVariable("jwe_error");
@@ -436,6 +440,41 @@ public class TestEncrypt extends CalloutTestBase {
     Assert.assertEquals(error, "java.text.ParseException: Missing required \"keys\" member");
     String output = msgCtxt.getVariable("jwe_output");
     Assert.assertNull(output);
+  }
+
+  @Test()
+  public void encrypt12_JWE_static_JWKS() throws MalformedURLException, IOException, ParseException {
+    RestrictedResourceRetriever resourceRetriever = new DefaultResourceRetriever(4000,3000,10240);
+    Resource resource = resourceRetriever.retrieveResource(new URL("https://jwks-service.appspot.com/.well-known/jwks.json"));
+    String jwksContent = resource.getContent();
+
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt12");
+    properties.put("jwks", "{jwksContent}");
+    properties.put("key-encryption", "RSA-OAEP");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", jwt1);
+    properties.put("header", "{ \"p1.org\": \"{random2}\", \"cty\": \"JWT\"}");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("jwksContent", jwksContent);
+    msgCtxt.setVariable("random2", StringGen.randomString(7));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariable("jwe_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariable("jwe_output");
+    Assert.assertNotNull(output);
+    String jweHeader = msgCtxt.getVariable("jwe_header");
+    Assert.assertNotNull(jweHeader);
+    Assert.assertTrue(jweHeader.indexOf("\"kid\"") > 0);
+
   }
 
 }
