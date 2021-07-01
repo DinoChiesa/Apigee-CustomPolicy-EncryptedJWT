@@ -18,7 +18,7 @@ This repo contains the Java source code for:
 
 * The Encrypted JWT and JWE standards allow a variety of encryption
   algorithms. This callout supports only the RSA-based encryption algorithms.
-  
+
 * I discourage the use of RSA-OAEP and encourage the use of RSA-OAEP-256, which
   relies on the SHA-256 hash.  In 2017, Google [announced a
   practical method of producing a "collision" for
@@ -139,7 +139,7 @@ key.
   ```
 
 This is similar to the above, except the payload is any arbitrary string. The result is a JWE, not an encrypted JWT.
-Properties relevant to JWT, like `expiry`, `not-before`, and `generate-id` are ignored when using `GenerateJwe`. 
+Properties relevant to JWT, like `expiry`, `not-before`, and `generate-id` are ignored when using `GenerateJwe`.
 
 ### Generation of an Encrypted JWT using a provided JWKS
 
@@ -206,7 +206,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 | `not-before`         | optional. an interval as above, expressing the not-before time of the JWT, measured from now. Can be negative (eg -1m = one minute ago). Applies to GenerateEncryptedJwt only.   |
 | `generate-id`        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim. Applies to GenerateEncryptedJwt only.           |
 | `compress`           | optional. boolean, true or false. Defaults to false. Whether to compress the payload before encrypting.                               |
-| `output`             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                                               |
+| `output`             | optional. name of the variable in which to store the output. Defaults to `ejwt_output` or `jwe_output`.                               |
 
 
 ### Basic Verification of an Encrypted JWT
@@ -340,9 +340,12 @@ worry about this configuration option.
 
 ## Detecting Success and Errors
 
-The policy will return `ABORT` and set the context variable `ejwt_error` or `jwe_error` if there
-has been any error at runtime. Your proxy bundles can check this variable in Conditions wrapped around
-`FaultRules`.
+If there has been any error at runtime:
+
+* The callout will return `ABORT`, which causes the proxy to enter a fault state.
+
+* The callout will set the context variable `ejwt_error` or `jwe_error` Your
+  proxy bundles can check this variable in Conditions wrapped around `FaultRules`.
 
 Errors can result at runtime if:
 
@@ -351,6 +354,27 @@ Errors can result at runtime if:
 * You use `VerifyEncryptedJwt` and the inbound JWT is expired
 * You use `VerifyEncryptedJwt` and the inbound JWT uses an `alg` or `enc` that is not
   consistent with the policy configuration.
+
+If there is no error, the callout simply sets the appropriate context variables.
+
+For `GenerateEncryptedJwt` and `GenerateJwe`, the callout sets `ejwt_output` and `jwe_output`, respectively.
+
+For `VerifyEncryptedJwt`, on success, the callout sets:
+* `ejwt_header` and `ejwt_payload` to the JSON representations of those parts of the JWT.
+* `ejwt_alg` to the `alg` value found in the header.
+* `ejwt_enc` to the `enc` value found in the header.
+* `ejwt_payload_XXX` for each claim in the payload.
+* `ejwt_header_XXX` for each claim in the header.
+* various other variables pertaining to expiry, lifetime, and age of the JWT.
+
+For `VerifyJwe`, on success, the callout sets:
+* `ejwt_header` to the JSON representation of the JWE header.
+* `ejwt_alg` to the `alg` value found in the header.
+* `ejwt_enc` to the `enc` value found in the header.
+* `ejwt_header_XXX` for each claim in the header.
+
+
+
 
 ## Example Bundle
 
