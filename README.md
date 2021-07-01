@@ -68,7 +68,7 @@ Likewise with the JWE variants.
 
 There is a variety of options. Some examples follow.
 
-## Example: Generation of an Encrypted JWT using a public key
+### Generation of an Encrypted JWT using a public key
 
   ```xml
   <JavaCallout name="Java-JWTGeneration">
@@ -77,10 +77,11 @@ There is a variety of options. Some examples follow.
       <Property name='content-encryption'>A256GCM</Property>
       <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
       <Property name='expiry'>1h</Property>
+      <!-- the context variable "my_public_key" must hold a PEM-encoded RSA public key -->
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -95,7 +96,7 @@ To decrypt the resulting ciphertext, either within Apigee with this policy, or
 using some other system, the decryptor needs to use the corresponding private
 key.
 
-## Example: Generation of an Encrypted JWT using a JWKS URI and a randomly-selected key
+### Generation of an Encrypted JWT using a JWKS URI and a randomly-selected key
 
   ```xml
   <JavaCallout name="Java-JWTGeneration-via-JWKS-URI">
@@ -107,20 +108,22 @@ key.
       <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
 This is similar to the above, but now the callout randomly selects the public
 key from one of the RSA keys available in a JWKS retrieved from a particular
-URI. The JWK must be `"kty"="RSA"` and, either `"use" = "enc"`, or it should
-have no `"use"` property.
+URI. The URI must return a JWKS as in [this
+example](https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.1).  The
+callout will select from JWK in that set that have `"kty"="RSA"` and, either
+`"use"="enc"`, or with no `use` property.
 
 To decrypt the resulting ciphertext, either within Apigee with this policy, or
 using some other system, the decryptor needs to use the corresponding private
 key.
 
-## Example: Generation of a JWE using a JWKS URI and a randomly-selected key
+### Generation of a JWE using a JWKS URI and a randomly-selected key
 
   ```xml
   <JavaCallout name="Java-JWTGeneration-via-JWKS-URI">
@@ -131,14 +134,14 @@ key.
       <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
-This is similar to the above, except the payload is any arbitrary string.
+This is similar to the above, except the payload is any arbitrary string. The result is a JWE, not an encrypted JWT.
+Properties relevant to JWT, like `expiry`, `not-before`, and `generate-id` are ignored when using `GenerateJwe`. 
 
-
-## Example: Generation of an Encrypted JWT using a provided JWKS
+### Generation of an Encrypted JWT using a provided JWKS
 
   ```xml
   <JavaCallout name="Java-JWTGeneration-via-JWKS-JSON">
@@ -150,16 +153,19 @@ This is similar to the above, except the payload is any arbitrary string.
       <Property name='jwks'>{variable-containing-jwks-json-string}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
-In this case, the callout selects an RSA key suitable for use with encryption from the JWKS provided in the context variable. You should have obtained the JWKS from a prior `ServiceCalllout` policy, or similar.
+In this case, the callout selects an RSA key suitable for use with encryption
+from the JWKS provided in the context variable. The JWKS should look like [this
+example](https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.1). You should
+have obtained the JWKS from a prior `ServiceCalllout` policy, or similar.
 
 Again, the decryptor needs to use the corresponding private key.
 
 
-## Example: Generation of an Encrypted JWT using a JWKS URI and key-id
+### Generation of an Encrypted JWT using a JWKS URI and key-id
 
   ```xml
   <JavaCallout name="Java-JWTGeneration-via-JWKS-and-KeyId">
@@ -172,11 +178,11 @@ Again, the decryptor needs to use the corresponding private key.
       <Property name='key-id'>{my_key_id}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
-In this case, the callout selects an RSA key from the JWKS retrieved from a URI, using a specific key-id. This approach ignores the `"use"` property if any, on the JWK.
+In this case, the callout selects an RSA key from the JWKS retrieved from a URI, using a specific key-id. This approach ignores the `use` property if any, on the JWK.
 
 Again, the decryptor needs to use the corresponding private key.
 
@@ -191,7 +197,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 | `jwks-uri`           | optional. a URI that returns a JWKS payload. You must specify one of {`public-key`, `jwks`, `jwks-uri`}.                              |
 | `jwks`               | optional. a JWKS payload. You must specify one of {`public-key`, `jwks`, `jwks-uri`}.                                                 |
 | `key-id`             | optional. the key-id for the header. If you specify this, the callout will select the specific key and will ignore the "use" property of the JWK.  If you do not specify `key-id`, the callout selects a suitable key at random, selecting only from keys that are kty="RSA" and either "use"="enc", or without the "use" property.                                                 |
-| `key-encryption`     | required. name of the key encryption algorithm. Must be `RSA-OAEP-256` or `RSA-OAEP`.                                                 |
+| `key-encryption`     | required. name of the key encryption algorithm. Must be `RSA-OAEP-256` or `RSA-OAEP`. You probably want the former. See the note above. |
 | `content-encryption` | required. name of the content encryption algorithm. One of `A256GCM`, `A128GCM`, `A265GCM`, or one of the CBC algorithms.             |
 | `payload`            | optional. For GenerateEncryptedJwt, a JSON string that includes additional properties to be included in the payload of the JWT. For GenerateJwe, this is any arbitrary string. |
 | `header`             | optional. a JSON string that includes additional custom properties for the header of the JWT or JWE.                                  |
@@ -203,7 +209,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 | `output`             | optional. name of the variable in which to store the output. Defaults to `ejwt_output`.                                               |
 
 
-### Example: Basic Verification of an Encrypted JWT
+### Basic Verification of an Encrypted JWT
 
   ```xml
   <JavaCallout name="Java-JWTVerification1">
@@ -212,7 +218,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -226,7 +232,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 * If decryption succeeds, the policy will verify the effective times on the JWT
   (exp and nbf), if they exist.
 
-### Example: Verification of an Encrypted JWT with a specific content encryption
+### Verification of an Encrypted JWT with a specific content encryption
 
   ```xml
   <JavaCallout name="Java-JWTVerification1">
@@ -236,7 +242,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -278,7 +284,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210629.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -322,23 +328,28 @@ understood by any consumer or reader. The reader MUST reject any JWT containing
 headers on the `crit` list that it does not understand.
 
 To communicate headers that are understood, configure the policy with the
-`crit-headers` property. When the VerifyEncryptedJwt callout process an inbound
-JWT that contains a `crit` header, the verification will succeed if and only if
-the header names listed in the JWT `crit` claim are also present in the `crit-headers` list in the policy configuration.
+`crit-headers` property. When either the `VerifyEncryptedJwt` or the `VerifyJwe`
+callout processes an inbound JWT or JWE respectively that contains a `crit`
+header, the verification will succeed if and only if the header names listed in
+the JWT `crit` claim are also present in the `crit-headers` list in the policy
+configuration.
 
-If your inbound JWT do not include a `crit` header, then you do not need to worry about this configuration.
+If your inbound JWT or JWE do not include a `crit` header, then you do not need to
+worry about this configuration option.
 
 
 ## Detecting Success and Errors
 
-The policy will return ABORT and set the context variable `ejwt_error` if there has been any error at runtime. Your proxy bundles can check this variable in `FaultRules`.
+The policy will return `ABORT` and set the context variable `ejwt_error` or `jwe_error` if there
+has been any error at runtime. Your proxy bundles can check this variable in Conditions wrapped around
+`FaultRules`.
 
 Errors can result at runtime if:
 
 * You specify an invalid configuration, for example an unsupported value for
   key-encryption or content-encryption
-* You use VerifyEncryptedJwt and the inbound JWT is expired
-* You use VerifyEncryptedJwt and the inbound JWT uses an `alg` or `enc` that is not
+* You use `VerifyEncryptedJwt` and the inbound JWT is expired
+* You use `VerifyEncryptedJwt` and the inbound JWT uses an `alg` or `enc` that is not
   consistent with the policy configuration.
 
 ## Example Bundle
@@ -381,7 +392,8 @@ all the configuration options - the policy may be usable for you without modific
 
 If you do wish to build the jar, you can use
 [maven](https://maven.apache.org/download.cgi) to do so. The build requires
-JDK8. Before you run the build the first time, you need to download the Apigee dependencies into your local maven repo.
+JDK8. Before you run the build the first time, you need to download the Apigee
+dependencies into your local maven repo.
 
 Preparation, first time only: `./buildsetup.sh`
 
@@ -389,7 +401,11 @@ To build: `mvn clean package`
 
 The source code includes tests.
 
-If you edit policies offline, copy [the jar file for the custom policy](callout/target/apigee-callout-encrypted-jwt-20210629.jar)  and all the dependencies to your apiproxy/resources/java directory.  If you don't edit proxy bundles offline, upload that jar file into the API Proxy via the Apigee API Proxy Editor .
+If you edit policies offline, copy [the jar file for the custom
+policy](callout/target/apigee-callout-encrypted-jwt-20210630.jar) and all the
+dependencies to your apiproxy/resources/java directory.  If you don't edit proxy
+bundles offline, upload that jar file into the API Proxy via the Apigee API
+Proxy Editor .
 
 
 ## Build Dependencies
@@ -397,7 +413,7 @@ If you edit policies offline, copy [the jar file for the custom policy](callout/
 * Apigee expressions v1.0 (provided)
 * Apigee message-flow v1.0 (provided)
 * Bouncy Castle 1.64 (provided)
-* NimbusDS jose-jwt v8.22
+p* NimbusDS jose-jwt v8.22
 * other dependencies of NimbusDS jose-jwt
 * Ben Manes' caffeine v2.9.0
 
