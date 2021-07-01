@@ -16,19 +16,20 @@ This repo contains the Java source code for:
 
 ## Notes:
 
-* Please note: in 2017, Google [announced a practical method of producing a
-  "collision" for SHA-1](https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html).
-  And in that announcement, stressed that it is time to retire the SHA-1 hash.
-  RSA-OAEP depends on the SHA-1 hash.  For that reason, I discourage the use of
-  RSA-OAEP and encourage the use of RSA-OAEP-256, which relies on the more secure SHA-256
-  hash.
-
-* Also: The Encrypted JWT and JWE standards allow a variety of encryption
+* The Encrypted JWT and JWE standards allow a variety of encryption
   algorithms. This callout supports only the RSA-based encryption algorithms.
+  
+* I discourage the use of RSA-OAEP and encourage the use of RSA-OAEP-256, which
+  relies on the SHA-256 hash.  In 2017, Google [announced a
+  practical method of producing a "collision" for
+  SHA-1](https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html).
+  And in that announcement, stressed that it is time to retire the SHA-1 hash.
+  RSA-OAEP depends on the SHA-1 hash. Better to avoid using it, if possible.
 
 ## License
 
-This code is Copyright (c) 2017-2021 Google LLC, and is released under the Apache Source License v2.0. For information see the [LICENSE](LICENSE) file.
+This code is Copyright (c) 2017-2021 Google LLC, and is released under the
+Apache Source License v2.0. For information see the [LICENSE](LICENSE) file.
 
 ## Disclaimer
 
