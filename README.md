@@ -1,4 +1,4 @@
-# JWE and Encrypted JWT callout
+ # JWE and Encrypted JWT callout
 
 For several years, Apigee has included builtin  policies that generate and
 verify signed JWT. There are also recently (as of November 2020) built-in policies to handle Encrypted
@@ -81,7 +81,7 @@ There is a variety of options. Some examples follow.
       <Property name='public-key'>{my_public_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -108,7 +108,7 @@ key.
       <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -134,7 +134,7 @@ key.
       <Property name='jwks-uri'>https://jwks-service.appspot.com/.well-known/jwks.json</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -153,7 +153,7 @@ Properties relevant to JWT, like `expiry`, `not-before`, and `generate-id` are i
       <Property name='jwks'>{variable-containing-jwks-json-string}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -178,7 +178,7 @@ Again, the decryptor needs to use the corresponding private key.
       <Property name='key-id'>{my_key_id}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -218,7 +218,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -242,7 +242,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
       <Property name='private-key'>{private.my_private_key}</Property>
     </Properties>
     <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -284,7 +284,7 @@ is different:
     </Properties>
     <!-- Verify a JWE containing a non-JSON payloads -->
     <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-    <ResourceURL>java://apigee-callout-encrypted-jwt-20210630.jar</ResourceURL>
+    <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
   </JavaCallout>
   ```
 
@@ -426,7 +426,7 @@ To build: `mvn clean package`
 The source code includes tests.
 
 If you edit policies offline, copy [the jar file for the custom
-policy](callout/target/apigee-callout-encrypted-jwt-20210630.jar) and all the
+policy](callout/target/apigee-callout-encrypted-jwt-20211021.jar) and all the
 dependencies to your apiproxy/resources/java directory.  If you don't edit proxy
 bundles offline, upload that jar file into the API Proxy via the Apigee API
 Proxy Editor .
@@ -436,19 +436,20 @@ Proxy Editor .
 
 * Apigee expressions v1.0 (provided)
 * Apigee message-flow v1.0 (provided)
-* Bouncy Castle 1.64 (provided)
-p* NimbusDS jose-jwt v8.22
+* Bouncy Castle 1.67 (provided)
+* NimbusDS jose-jwt v8.22
 * other dependencies of NimbusDS jose-jwt
 * Ben Manes' caffeine v2.9.0
 
 These dependencies are specified in the pom.xml file.
 
-You will need to upload the output jar, as well as jose-jwt jar and its dependencies as resources to your Apigee instance, either
-with the API Proxy or with the organization or environment.
+You will need to upload the output jar, as well as jose-jwt jar and its
+dependencies as resources to your Apigee instance, either with the API Proxy or
+with the organization or environment.
 
 ## Author
 
-Dino Chiesa
+Dino Chiesa    
 godino@google.com
 
 ## Bugs & Limitations
