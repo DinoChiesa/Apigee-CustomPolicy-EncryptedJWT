@@ -221,9 +221,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
       encrypt(policyConfig, msgCtxt);
     } catch (Exception e) {
       if (debug) {
-        // e.printStackTrace();
-        String stacktrace = getStackTraceAsString(e);
-        msgCtxt.setVariable(varName("stacktrace"), stacktrace);
+        msgCtxt.setVariable(varName("stacktrace"), getStackTraceAsString(e));
       }
       setExceptionVariables(e, msgCtxt);
       return ExecutionResult.ABORT;

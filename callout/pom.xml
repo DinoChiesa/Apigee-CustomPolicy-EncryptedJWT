@@ -39,6 +39,7 @@
       <version>${apigee.expressions.version}</version>
     </dependency>
 
+    <!-- Caffeine for LoadingCache -->
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
@@ -146,20 +147,26 @@
           <execution>
             <id>ant1</id>
             <phase>clean</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
             <configuration>
-              <tasks>
+              <target>
                 <delete>
                   <fileset dir="${apiproxy.java.rsrc.dir}"
                            includes="*.jar" />
                 </delete>
-              </tasks>
+              </target>
             </configuration>
           </execution>
           <execution>
             <id>ant2</id>
             <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
             <configuration>
-              <tasks>
+              <target>
                 <copy todir="${apiproxy.java.rsrc.dir}">
                   <fileset dir="${project.build.directory}">
                     <include name="${project.build.finalName}.jar"/>
@@ -177,11 +184,8 @@
                   </fileset>
                   <mapper type="flatten"/>
                 </copy>
-              </tasks>
+              </target>
             </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
