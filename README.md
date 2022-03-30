@@ -1,7 +1,7 @@
  # JWE and Encrypted JWT callout
 
 For several years, Apigee has included builtin  policies that generate and
-verify signed JWT. There are also recently (as of November 2020) built-in policies to handle Encrypted
+verify signed JWT. As of November 2020, the built-in policies also can handle Encrypted
 JWT (As defined in [RFC 7516](https://tools.ietf.org/html/rfc7516)).
 But there are not yet built-in policies to handle general JWE. It's in the Apigee roadmap, but
 in the meantime, you can handle JWE (and encrypted JWT) _today_, with a Java callout.
