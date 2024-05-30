@@ -1,4 +1,4 @@
-<AssignMessage name='AM-InjectProxyRevisionHeader'>
+<AssignMessage name='AM-Inject-Proxy-Revision-Header'>
   <Set>
     <Headers>
       <Header name='APIProxy'>{apiproxy.name} r{apiproxy.revision}</Header>

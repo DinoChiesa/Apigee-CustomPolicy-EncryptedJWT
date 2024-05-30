@@ -1,6 +1,6 @@
 // TestDecrypt.java
 //
-// Copyright (c) 2018-2021 Google LLC
+// Copyright (c) 2018-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@
 package com.google.apigee.callouts;
 
 import com.apigee.flow.execution.ExecutionResult;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import org.testng.Assert;
@@ -60,7 +63,7 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNull(error);
   }
 
@@ -83,8 +86,8 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
-    Assert.assertEquals(error, "JWT uses unacceptable Content Encryption Algorithm.");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
+    Assert.assertEquals(error, "the JWT uses an unacceptable Content Encryption Algorithm.");
   }
 
   @Test()
@@ -106,7 +109,7 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertEquals(error, "that key-encryption algorithm name is unsupported.");
   }
 
@@ -128,7 +131,7 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertEquals(error, "JWT is expired.");
   }
 
@@ -150,11 +153,11 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
-    String error = msgCtxt.getVariable("jwe_error");
+    String error = msgCtxt.getVariableAsString("jwe_error");
     Assert.assertNull(error);
-    String cty = msgCtxt.getVariable("jwe_header_cty");
+    String cty = msgCtxt.getVariableAsString("jwe_header_cty");
     Assert.assertEquals(cty, "JWT");
-    String payload = msgCtxt.getVariable("jwe_payload");
+    String payload = msgCtxt.getVariableAsString("jwe_payload");
     Assert.assertNotNull(payload);
     Assert.assertTrue(payload.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
   }
@@ -177,8 +180,8 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("jwe_error");
-    Assert.assertEquals(error, "Decryption error");
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertEquals(error, "Padding error in decryption");
   }
 
   @Test()
@@ -202,7 +205,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result1 = callout1.execute(msgCtxt, exeCtxt);
     reportThings("ejwt", properties1);
     Assert.assertEquals(result1, ExecutionResult.SUCCESS);
-    String encryptedJwt = msgCtxt.getVariable("ejwt_output");
+    String encryptedJwt = msgCtxt.getVariableAsString("ejwt_output");
     Assert.assertNotNull(encryptedJwt);
 
     /* ----- Verify, without enforcing a max lifetime ----- */
@@ -217,7 +220,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result2 = callout2.execute(msgCtxt, exeCtxt);
     reportThings("ejwt", properties2);
     Assert.assertEquals(result2, ExecutionResult.SUCCESS);
-    String error2 = msgCtxt.getVariable("ejwt_error");
+    String error2 = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNull(error2);
 
     /* ----- Verify, enforcing a max lifetime, which is exceeded ----- */
@@ -233,7 +236,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result3 = callout3.execute(msgCtxt, exeCtxt);
     reportThings("ejwt", properties3);
     Assert.assertEquals(result3, ExecutionResult.ABORT);
-    String error3 = msgCtxt.getVariable("ejwt_error");
+    String error3 = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNotNull(error3);
     Assert.assertEquals(error3, "the JWT has a lifetime that exceeds the configured limit.");
 
@@ -250,7 +253,7 @@ public class TestDecrypt extends CalloutTestBase {
     ExecutionResult result4 = callout4.execute(msgCtxt, exeCtxt);
     reportThings("ejwt", properties4);
     Assert.assertEquals(result4, ExecutionResult.SUCCESS);
-    String error4 = msgCtxt.getVariable("ejwt_error");
+    String error4 = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNull(error4);
   }
 
@@ -274,12 +277,11 @@ public class TestDecrypt extends CalloutTestBase {
     // check result and output
     reportThings("ejwt", properties1);
     Assert.assertEquals(result1, ExecutionResult.SUCCESS);
-    String encryptedJwt = msgCtxt.getVariable("ejwt_output");
+    String encryptedJwt = msgCtxt.getVariableAsString("ejwt_output");
     Assert.assertNotNull(encryptedJwt);
 
-    // not enforce max lifetime
     Map<String, String> properties2 = new HashMap<String, String>();
-    properties2.put("testname", "decrypt7");
+    properties2.put("testname", "decrypt8");
     properties2.put("private-key", privateKey1);
     properties2.put("key-encryption", "RSA-OAEP-256");
     properties2.put("source", "message.content");
@@ -295,9 +297,125 @@ public class TestDecrypt extends CalloutTestBase {
     reportThings("ejwt", properties2);
     Assert.assertEquals(result2, ExecutionResult.ABORT);
     // retrieve output
-    String error2 = msgCtxt.getVariable("ejwt_error");
+    String error2 = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNotNull(error2);
     Assert.assertEquals(
-        error2, "the JWT has an unlimited lifetime which exceeds the configured limit.");
+        error2, "the JWT has no expiry; this violates the maximum lifetime constraint.");
+  }
+
+  @Test()
+  public void decrypt9_ECDH_jwe() {
+
+    final String staticJwe =
+        "eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiIwR2JpNHJET0pSQVREU0NSclQ5b2wxcDFkbExWS0EyQVVxcWg0aEVpcnJrIiwieSI6ImEtLUhlN2k1X25zY2VVYlRwS1dqcGVRLVBTcmRobjQ4akFkRVV1R0dfTTQifSwiZW5jIjoiQTI1NkdDTSIsImFsZyI6IkVDREgtRVMrQTEyOEtXIn0.0r6967aiuZSX0K4sm2lgkuxJYN-YPq-7CT8WeasIjqcU0UwUAYf9vg.koMsTnUA8EyfdQy7.5YzHLNCjNAQ2YXTr-4Y2Kts8uUHeLU3sCtIwvffy_scmKZSH2Qoatk4JIoQY.Z3qcRA6yRRe8QiJe6t5RFw";
+
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "decrypt9");
+    properties.put("private-key", ecPrivateKey1);
+    properties.put("key-encryption", "ECDH-ES+A128KW");
+    properties.put("source", "message.content");
+    // properties.put("max-lifetime", "8m");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("message.content", staticJwe);
+
+    VerifyJwe callout = new VerifyJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNull(error);
+    String payload = msgCtxt.getVariableAsString("jwe_payload");
+    Assert.assertEquals(payload, "The quick brown fox jumped over the lazy dog.");
+  }
+
+  @Test()
+  public void decrypt10_ECDH_jwe_unacceptable() {
+
+    final String staticJwe =
+        "eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiIwR2JpNHJET0pSQVREU0NSclQ5b2wxcDFkbExWS0EyQVVxcWg0aEVpcnJrIiwieSI6ImEtLUhlN2k1X25zY2VVYlRwS1dqcGVRLVBTcmRobjQ4akFkRVV1R0dfTTQifSwiZW5jIjoiQTI1NkdDTSIsImFsZyI6IkVDREgtRVMrQTEyOEtXIn0.0r6967aiuZSX0K4sm2lgkuxJYN-YPq-7CT8WeasIjqcU0UwUAYf9vg.koMsTnUA8EyfdQy7.5YzHLNCjNAQ2YXTr-4Y2Kts8uUHeLU3sCtIwvffy_scmKZSH2Qoatk4JIoQY.Z3qcRA6yRRe8QiJe6t5RFw";
+
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "decrypt9");
+    properties.put("private-key", ecPrivateKey1);
+    properties.put("key-encryption", "ECDH-ES+A256KW");
+    properties.put("source", "message.content");
+    properties.put("max-lifetime", "8m");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("message.content", staticJwe);
+
+    VerifyJwe callout = new VerifyJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "the JWT uses an unacceptable Key Encryption Algorithm.");
+  }
+
+  @Test()
+  public void decrypt11_ECDH_jwt_alg_mismatch() {
+
+    final String staticJwt =
+        "eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiI1a3M0TUNSb0NNRGRMdVVoSUx2SEdTeFFyYUxmVHlfTWg5bzFNcjlUR2ZrIiwieSI6InhyNmJYVUo2Y0tsbk11ZXVqa2JsTUkzbDV4ZFFlZDVVTTdnMmthUzBJWm8ifSwidHlwIjoiSldUIiwiZW5jIjoiQTI1NkdDTSIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0.F94FqpWKZzg85V70aJ7FESL_sxZiKF4EdGsYk0MFKZ0gP9-oqMhq_g.rzEAPWo28nhJGI19.kKc0-inKi4NGobU40NgfScCBZEOmaqa8eE6ItEYVUo7lyaxzjTwfqf0y5uqdiX0GSQJfQ4qD7dhe3J2TuJzt4kK6mmNyaxhGCNAibQ.demEL5RiVVQmcdJDCluI8A";
+
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "decrypt11");
+    properties.put("private-key", ecPrivateKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("source", "message.content");
+    properties.put("max-lifetime", "8m");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("message.content", staticJwt);
+
+    VerifyEncryptedJwt callout = new VerifyEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("ejwt", properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("ejwt_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "the JWT uses an unacceptable Key Encryption Algorithm.");
+  }
+
+  @Test()
+  public void decrypt12_ECDH_jwt_success() {
+
+    final String staticJwt =
+        "eyJlcGsiOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiI1a3M0TUNSb0NNRGRMdVVoSUx2SEdTeFFyYUxmVHlfTWg5bzFNcjlUR2ZrIiwieSI6InhyNmJYVUo2Y0tsbk11ZXVqa2JsTUkzbDV4ZFFlZDVVTTdnMmthUzBJWm8ifSwidHlwIjoiSldUIiwiZW5jIjoiQTI1NkdDTSIsImFsZyI6IkVDREgtRVMrQTI1NktXIn0.F94FqpWKZzg85V70aJ7FESL_sxZiKF4EdGsYk0MFKZ0gP9-oqMhq_g.rzEAPWo28nhJGI19.kKc0-inKi4NGobU40NgfScCBZEOmaqa8eE6ItEYVUo7lyaxzjTwfqf0y5uqdiX0GSQJfQ4qD7dhe3J2TuJzt4kK6mmNyaxhGCNAibQ.demEL5RiVVQmcdJDCluI8A";
+
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "decrypt12");
+    properties.put("private-key", ecPrivateKey1);
+    properties.put("key-encryption", "ECDH-ES+A256KW");
+    properties.put("source", "message.content");
+    // properties.put("max-lifetime", "8m");
+    properties.put("debug", "true");
+
+    msgCtxt.setVariable("message.content", staticJwt);
+
+    VerifyEncryptedJwt callout = new VerifyEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("ejwt", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("ejwt_error");
+    Assert.assertNull(error);
+    String payload = msgCtxt.getVariableAsString("ejwt_payload");
+    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+    Map<String, Object> map = new Gson().fromJson(payload, type);
+    Assert.assertEquals(map.get("uid"), "D6B455B4-D252-4F4B-82B3-DA908FDB5BD3");
   }
 }

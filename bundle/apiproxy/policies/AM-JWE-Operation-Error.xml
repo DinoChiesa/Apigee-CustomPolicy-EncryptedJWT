@@ -1,4 +1,4 @@
-<AssignMessage name='AM-JWT-Operation-Error'>
+<AssignMessage name='AM-JWE-Operation-Error'>
   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
   <Set>
 
@@ -7,7 +7,7 @@
     </Headers>
 
     <Payload contentType='text/plain'>
-JWT Operation Error: {ejwt_error}
+JWE Operation Error: {jwe_error}
 
 </Payload>
     <StatusCode>200</StatusCode>

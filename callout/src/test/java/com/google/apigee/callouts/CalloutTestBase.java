@@ -1,6 +1,6 @@
 // CalloutTestBase.java
 //
-// Copyright (c) 2018-2021 Google LLC
+// Copyright (c) 2018-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,28 +34,10 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.ExecutionContext;
-import com.apigee.flow.execution.ExecutionResult;
-import com.apigee.flow.message.MessageContext;
-import com.nimbusds.jose.util.DefaultResourceRetriever;
-import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.jose.util.Resource;
-import com.nimbusds.jose.util.RestrictedResourceRetriever;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.SecureRandom;
-import java.text.ParseException;
-import java.util.HashMap;
+import com.google.apigee.fakes.FakeExecutionContext;
+import com.google.apigee.fakes.FakeMessageContext;
 import java.util.Map;
-import java.util.Random;
-import mockit.Mock;
-import mockit.MockUp;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public abstract class CalloutTestBase {
 
@@ -63,53 +45,62 @@ public abstract class CalloutTestBase {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
   }
 
-  MessageContext msgCtxt;
-  ExecutionContext exeCtxt;
+  FakeMessageContext msgCtxt;
+  FakeExecutionContext exeCtxt;
 
   @BeforeMethod()
   public void testSetup1() {
 
-    msgCtxt =
-        new MockUp<MessageContext>() {
-          private Map<String, Object> variables;
+    msgCtxt = new FakeMessageContext();
+    exeCtxt = new FakeExecutionContext();
 
-          public void $init() {
-            getVariables();
-          }
+    // msgCtxt = (MessageContext) new FakeMessageContext();
+    // exeCtxt = (ExecutionContext) new FakeExecutionContext();
 
-          private Map<String, Object> getVariables() {
-            if (variables == null) {
-              variables = new HashMap<String, Object>();
-            }
-            return variables;
-          }
+    // new MockUp<MessageContext>() {
+    //   private Map<String, Object> variables;
+    //
+    //   @Mock
+    //   public void $init() {
+    //     getVariables();
+    //   }
+    //
+    //   private Map<String, Object> getVariables() {
+    //     if (variables == null) {
+    //       variables = new HashMap<String, Object>();
+    //     }
+    //     return variables;
+    //   }
+    //
+    //   @Mock()
+    //   public Object getVariable(final String name) {
+    //     return getVariables().get(name);
+    //   }
+    //
+    //   @Mock()
+    //   public boolean setVariable(final String name, final Object value) {
+    //     System.out.printf("set(%s) = %s\n", name, value.toString());
+    //     getVariables().put(name, value);
+    //     return true;
+    //   }
+    //
+    //   @Mock()
+    //   public boolean removeVariable(final String name) {
+    //     if (getVariables().containsKey(name)) {
+    //       variables.remove(name);
+    //     }
+    //     return true;
+    //   }
+    // };
+    // // .getMockInstance();
+    // // exeCtxt = new MockUp<ExecutionContext>() {}.getMockInstance();
+    // // exeCtxt = new FakeExecutionContext();
+    // new MockUp<ExecutionContext>() {};
 
-          @Mock()
-          public Object getVariable(final String name) {
-            return getVariables().get(name);
-          }
-
-          @Mock()
-          public boolean setVariable(final String name, final Object value) {
-            System.out.printf("set(%s) = %s\n", name, value.toString());
-            getVariables().put(name, value);
-            return true;
-          }
-
-          @Mock()
-          public boolean removeVariable(final String name) {
-            if (getVariables().containsKey(name)) {
-              variables.remove(name);
-            }
-            return true;
-          }
-        }.getMockInstance();
-
-    exeCtxt = new MockUp<ExecutionContext>() {}.getMockInstance();
     System.out.printf("=============================================\n");
   }
 
-  protected final static String privateKey1 =
+  protected static final String privateKey1 =
       "-----BEGIN PRIVATE KEY-----\n"
           + "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDXk9k01JrhGQf1\n"
           + "4B4nymHntaG9SYA2kEQOo/RK4fM2XcebFsSJQ8GgE1AC1GlWU5YzS34WW0w5GMZe\n"
@@ -168,7 +159,7 @@ public abstract class CalloutTestBase {
           + "BhkCjT+pD2dW1X9S9C6IgcTF8f6Ta27omyw3aqpxefpiVVSbV/I9\n"
           + "-----END RSA PRIVATE KEY-----\n";
 
-  protected final static String privateKey3 =
+  protected static final String privateKey3 =
       "-----BEGIN PRIVATE KEY-----\n"
           + "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDRAfA4ZxT2b2Hr\n"
           + "kbcKXrcMuWJTjfyq50BL+C+VcXGHKmzqw/TAq+3XwATEC+7D9Cf0CssJ93sp/vu+\n"
@@ -228,7 +219,20 @@ public abstract class CalloutTestBase {
           + "oBnc5zrx3gR1tTtj8rqkK/E=\n"
           + "-----END PRIVATE KEY-----\n";
 
-  protected final static String publicKey1 =
+  protected static final String ecPrivateKey1 =
+      "-----BEGIN PRIVATE KEY-----\n"
+          + "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVA7GiMpmiyDgxESR\n"
+          + "B7bDPrKp7Fa3UQZ7Zlnox/oa6dahRANCAARgVnYkM38ondUD34Zw5PcJ5lsBV+ji\n"
+          + "Fk+BBhvDxhCFQvFmDG8WXN1LaZVivkfAMptbIgruT3MtzaSxqHeta/65\n"
+          + "-----END PRIVATE KEY-----\n";
+
+  protected static final String ecPublicKey1 =
+      "-----BEGIN PUBLIC KEY-----\n"
+          + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYFZ2JDN/KJ3VA9+GcOT3CeZbAVfo\n"
+          + "4hZPgQYbw8YQhULxZgxvFlzdS2mVYr5HwDKbWyIK7k9zLc2ksah3rWv+uQ==\n"
+          + "-----END PUBLIC KEY-----\n";
+
+  protected static final String publicKey1 =
       "-----BEGIN PUBLIC KEY-----\n"
           + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA15PZNNSa4RkH9eAeJ8ph\n"
           + "57WhvUmANpBEDqP0SuHzNl3HmxbEiUPBoBNQAtRpVlOWM0t+FltMORjGXtntjSBs\n"
@@ -246,7 +250,7 @@ public abstract class CalloutTestBase {
       "eyJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.vqVKvZcGr7b7MWzSCmYUVXolSTXW-eCzN_ly03gzix47HBYkk7-nQ_kocdeLOr_qV3pTusJedfq6RyeSsccCu0aJionCureBxtn9udM2MZ1OCNmGIBJhWxDqAKIYOmB_IwTK6ATGRRiqOssw1y1x4PWH13QT_Jxf0VuWDZXm74Cz_ttL_dmtZp7zIM47imjUxRhOCdLdBtYkT2Q-9r__WHq1XOVuYiuLaMBnJ3YPtONhwHbyAJ1TshDgkffllivRs9qs7ONy6fvc9OlYkEoUs2zYGAupMUX1YHSnS62ASnEUMcq9lJsxK32Rvh-DmchgtTMvOH1hBoFnuzzi6p3crg.BRTKgJtcL3mLplCd.8lu-rdSOiH_Qvt0KOM6MxuYkf096ldFGuOiCJigzJxQWMyY4UTNkkkl_FFK4bO76w46c5Ub66l3AXWxT9OwwX4A3KwaDI9USEfRUBuXW3S7fSmVrjEu88NM-8shlyLpPXrEmcWBoPPMaDg_De_w.qS3YdrTaHLnpW9evdKTKCw";
 
   protected static final String jwt3 =
-    "eyJhbGciOiJSUzI1NiIsImtpZCI6IkFQUF9XUElfQVBJR0VFXzAxIiwicGkuYXRtIjoiMm9pZyJ9.eyJzY29wZSI6IiIsImNsaWVudF9pZCI6IndwaV9lMDA0MDBfYXBpZ2VlXzAxIiwiaXNzIjoidXJuOi8vYXBpZ2VlLWVkZ2UtSldULXBvbGljeS10ZXN0IiwiYXVkIjoidXJuOi8vYzYwNTExYzAtMTJhMi00NzNjLTgwZmQtNDI1MjhlYjY1YTZhIiwic3ViIjoiYXBpZ2VlLXNlYXR0bGUtaGF0cmFjay1tb250YWdlIiwiZXhwIjoxNTczNTc5MzYxfQ.A-GoVl4h0nys-5lI_p2_71iEfu2YUYPvJVeoZfWDwoDITAvJV0ejyQ0J9w2rgsA-t0cfTlY1t-dAPg3hfuExVBeg2QibNqwaJSy5YlxCadaSxIBF7jYCnYJbVAI300uygm3J4rYnjaeaS1wKpSHRYKCBMEbQonqk5L_xhR7q9oWcBewqiEWA0f4fqGVrTBhfb1bqb8Fynzf2ohtxScec1aJ2dHaGRy5rcmIgV_ezY6A6tT_aawgUEAylTs90hliaG5EJ5_FaMHG9phEgUjwXw695X8qkcmAu_PP2yjjVEAhIUCLNJvqD1tcHip71roLwHNZSBIJVuGk_xL6oFnA_oQ";
+      "eyJhbGciOiJSUzI1NiIsImtpZCI6IkFQUF9XUElfQVBJR0VFXzAxIiwicGkuYXRtIjoiMm9pZyJ9.eyJzY29wZSI6IiIsImNsaWVudF9pZCI6IndwaV9lMDA0MDBfYXBpZ2VlXzAxIiwiaXNzIjoidXJuOi8vYXBpZ2VlLWVkZ2UtSldULXBvbGljeS10ZXN0IiwiYXVkIjoidXJuOi8vYzYwNTExYzAtMTJhMi00NzNjLTgwZmQtNDI1MjhlYjY1YTZhIiwic3ViIjoiYXBpZ2VlLXNlYXR0bGUtaGF0cmFjay1tb250YWdlIiwiZXhwIjoxNTczNTc5MzYxfQ.A-GoVl4h0nys-5lI_p2_71iEfu2YUYPvJVeoZfWDwoDITAvJV0ejyQ0J9w2rgsA-t0cfTlY1t-dAPg3hfuExVBeg2QibNqwaJSy5YlxCadaSxIBF7jYCnYJbVAI300uygm3J4rYnjaeaS1wKpSHRYKCBMEbQonqk5L_xhR7q9oWcBewqiEWA0f4fqGVrTBhfb1bqb8Fynzf2ohtxScec1aJ2dHaGRy5rcmIgV_ezY6A6tT_aawgUEAylTs90hliaG5EJ5_FaMHG9phEgUjwXw695X8qkcmAu_PP2yjjVEAhIUCLNJvqD1tcHip71roLwHNZSBIJVuGk_xL6oFnA_oQ";
 
   protected static final String jwe1 =
       "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00iLCJjdHkiOiJKV1QiLCJwaS5hdG0iOiIyb2lnIn0.ZJD2tK-HTL9NDxCY6_aL9WS7OrwxvnHpQ73wLQ9bZs4JXSb4Xr3LtKlDAQ-9FajhnKFB8K-wj_bpF4Ir3548ipVlihh8gNtC_LVIi2S3iSP3bBZ6ozmEu29Mow1wT6fHn7Qwok0n8misUzZnV0a81RmGj5WenQze8OLTkNtZDWaS6Gr1YjQz_M5vqXrIbIzNfSYbFmSL0poVcs966ok78Br3GIhH1RfsMlBdpodRzqh8nQ-LJ7hfciun06Udlb9CgvtT8ODxXULa57m22Y3-3q_ljIWVrTbVvZ9Targ23LSwfj6lXKTdYeiRZqiv9OEgm5TJuetl5WULV_sqrdgZ1w.dedzaIHfMzY7kjGJ.oHzVKnxUxdZrnrsiOCPg49Gi3N6HxW4XSupcMzUG81L9Bw-Ih49Jo_sDqLXkOpwP7RAqvhyF3-3uumd5oSqpknmTaSUE3eOqFQ3Es06vYUVATc2xwwH0ehJh4DJm4hzoXROrKOJzKMrZj0636pCl-Yj0X0sx-1ktC4IdlnJV4Uela7isi1JKqX-WaxCRRTYdwiVvBTNIuRRfGCs9I8B6yt_lNeU4kW-aZ56AyLMl3oETqenEFU7CM7v4UARwiShlh3eWWGHzsuT66ofRrwWgRNM0U7JoRV8yUFEpIaQeTuLkPqWPzrVyAHB62smnYMOy2JQKfXMW7IqzymadwL5hE4Gf2XZNrs8cm4ajqbHo0n0dNsHzjnaqb3dCp6pQnYk3Uy0uPkRw8DikM39IcfhuolaZghVYtQ3kyB6Ub3QoEurAEoNyRefJ3h-VHzF8yilNeI3Ay4aA57fzHI2H11M9Pu9YEBMGgpPa7DJnbFzV5nE1H-GkHzUjvJmj6_-rlmHcTC1_55eCzY-zHOHiUsgKiIwLVcqEBxtPxD2D_xZcwRHtSF_ixvUlreGTxYZC-8n2Hu2Ny8FlpRY1NSM-sJrtSyo2lh-a6mjAFGU0TltLcOdMbsroB8UmE0zSmKSXTn3QR60b44yjxHO_o77MbBFUuIOuXV9L-E1b-CmHFg2BV7_1vshdKcucbjvhEKvKZNZ9OQBdTeqPRiBqJlCbHd9NJPXu96OVamP7Oz5oLBhWBJksG1Z1wEJAwoT6SgbcZNZiIgBIb5jGHa894hz-B79UM6E9bmD5k497XXQNGdCeISssBeP9xXzGQs8ZZPJ2i8LnpJykvQJvrcfPfYrQnR6ozg_EY9p88eAbxvqWHGpIvgyvV6G6moV1yi17BtkGRjQVbfNHsK_L-wBt1A.vnBwrK3690tYkgmmM08wog";
@@ -275,19 +279,19 @@ public abstract class CalloutTestBase {
 
   protected void reportThings(String prefix, Map<String, String> props) {
     String test = props.get("testname");
-    System.out.println("test  : " + test);
-    String header = msgCtxt.getVariable(prefix + "_header");
-    System.out.println("header: " + header);
-    String payload = msgCtxt.getVariable(prefix + "_payload");
+    System.out.println("test   : " + test);
+    String header = (String) msgCtxt.getVariable(prefix + "_header");
+    System.out.println("header : " + header);
+    String payload = (String) msgCtxt.getVariable(prefix + "_payload");
     System.out.println("payload: " + payload);
 
-    String alg = msgCtxt.getVariable(prefix +"_alg");
-    System.out.println("alg: " + alg);
+    String alg = (String) msgCtxt.getVariable(prefix + "_alg");
+    System.out.println("alg    : " + alg);
 
-    String enc = msgCtxt.getVariable(prefix + "_enc");
-    System.out.println("enc: " + enc);
+    String enc = (String) msgCtxt.getVariable(prefix + "_enc");
+    System.out.println("enc    : " + enc);
 
-    String error = msgCtxt.getVariable(prefix + "_error");
-    System.out.println("error : " + error);
+    String error = (String) msgCtxt.getVariable(prefix + "_error");
+    System.out.println("error  : " + error);
   }
 }

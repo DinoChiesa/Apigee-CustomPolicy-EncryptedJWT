@@ -3,7 +3,7 @@
 // handles verifying JWE, which are not treated as JWT.
 // For full details see the Readme accompanying this source file.
 //
-// Copyright (c) 2018-2019 Google LLC.
+// Copyright (c) 2018-2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,18 +24,15 @@ package com.google.apigee.callouts;
 
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
-import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.KeyUtil;
 import java.security.PrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@IOIntensive
 public abstract class VerifyBase extends EncryptedJoseBase implements Execution {
   public VerifyBase(Map properties) {
     super(properties);
@@ -68,7 +65,7 @@ public abstract class VerifyBase extends EncryptedJoseBase implements Execution 
     public boolean debug;
     public String keyEncryptionAlgorithm;
     public String contentEncryptionAlgorithm;
-    public RSAPrivateKey privateKey;
+    public PrivateKey privateKey;
     public Set<String> deferredCritHeaders;
     public String source;
   }
@@ -77,7 +74,7 @@ public abstract class VerifyBase extends EncryptedJoseBase implements Execution 
     PolicyConfig config = new PolicyConfig();
     config.keyEncryptionAlgorithm = getKeyEncryption(msgCtxt);
     config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
-    config.privateKey = (RSAPrivateKey) getPrivateKey(msgCtxt);
+    config.privateKey = getPrivateKey(msgCtxt);
     config.deferredCritHeaders = getDeferredCriticalHeaders(msgCtxt);
     config.source = getSourceVar();
     return config;

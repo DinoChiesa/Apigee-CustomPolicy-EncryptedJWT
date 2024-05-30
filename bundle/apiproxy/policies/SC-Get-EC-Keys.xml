@@ -1,9 +1,9 @@
-<ServiceCallout name='SC-Get-RSA-Keys'>
+<ServiceCallout name='SC-Get-EC-Keys'>
   <Request variable='simpleGetRequest'>
     <Set>
       <Verb>GET</Verb>
       <QueryParams>
-        <QueryParam name='type'>rsa</QueryParam>
+        <QueryParam name='type'>ec</QueryParam>
       </QueryParams>
       <Path>/keyids</Path>
     </Set>

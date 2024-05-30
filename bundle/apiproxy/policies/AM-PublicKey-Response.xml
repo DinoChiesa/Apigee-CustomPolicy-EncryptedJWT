@@ -1,8 +1,8 @@
-<AssignMessage name='AM-PrivateKeyResponse'>
+<AssignMessage name='AM-PublicKey-Response'>
   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
   <AssignVariable>
     <Name>nothing</Name>
-    <Value></Value>
+    <Value/>
   </AssignVariable>
   <AssignVariable>
     <Name>regex</Name>
@@ -10,7 +10,7 @@
   </AssignVariable>
   <AssignVariable>
     <Name>payload</Name>
-    <Template>{replaceAll(private.my_private_key,regex,nothing)}</Template>
+    <Template>{replaceAll(my_public_key,regex,nothing)}</Template>
   </AssignVariable>
 
   <Set>
@@ -20,5 +20,4 @@
     <StatusCode>200</StatusCode>
     <ReasonPhrase>OK</ReasonPhrase>
   </Set>
-
 </AssignMessage>

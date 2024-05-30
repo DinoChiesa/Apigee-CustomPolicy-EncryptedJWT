@@ -1,10 +1,10 @@
-<JavaCallout name="Java-VerifyJWT">
+<JavaCallout name="Java-VerifyJWT-RSA">
   <Properties>
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='debug'>true</Property>
     <Property name='source'>request.formparam.JWT</Property>
-    <Property name='private-key'>{private.my_private_key}</Property>
+    <Property name='private-key'>{private.my_rsa_private_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20211021.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240603.jar</ResourceURL>
 </JavaCallout>

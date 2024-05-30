@@ -1,6 +1,6 @@
 // EncryptedJoseBase.java
 //
-// Copyright (c) 2018-2019 Google LLC.
+// Copyright (c) 2018-2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,22 +19,22 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.CalloutUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@IOIntensive
 public abstract class EncryptedJoseBase {
   private static final Pattern kekNamePattern =
-      Pattern.compile("^(RSA-OAEP-256|RSA-OAEP)$", Pattern.CASE_INSENSITIVE);
+      Pattern.compile(
+          "^(RSA-OAEP(-256)?|ECDH-ES(\\+A(128|192|256)KW)?)$", Pattern.CASE_INSENSITIVE);
   private static final Pattern cekNamePattern =
       Pattern.compile(
-          "^(A128CBC-HS256|A192CBC-HS384|A256CBC-HS512|A128GCM|A192GCM|A256GCM)$",
+          "^(A128CBC-HS256|A192CBC-HS384|A256CBC-HS512|(A(128|192|256)GCM))$",
           Pattern.CASE_INSENSITIVE);
 
   private static final Pattern variableReferencePattern =
@@ -163,12 +163,16 @@ public abstract class EncryptedJoseBase {
   protected void setVariables(
       Map<String, Object> payloadClaims, Map<String, Object> headerClaims, MessageContext msgCtxt)
       throws Exception {
+
+    Function<Object, String> tos =
+        (v) -> (v instanceof Map) ? toString((Map<String, Object>) v) : v.toString();
+
     if (payloadClaims != null) {
       payloadClaims.forEach(
-          (key, value) -> msgCtxt.setVariable(varName("payload_" + key), value.toString()));
+          (key, value) -> msgCtxt.setVariable(varName("payload_" + key), tos.apply(value)));
     }
     headerClaims.forEach(
-        (key, value) -> msgCtxt.setVariable(varName("header_" + key), value.toString()));
+        (key, value) -> msgCtxt.setVariable(varName("header_" + key), tos.apply(value)));
   }
 
   protected void setExceptionVariables(Exception exc1, MessageContext msgCtxt) {
@@ -180,5 +184,38 @@ public abstract class EncryptedJoseBase {
     } else {
       msgCtxt.setVariable(varName("error"), error);
     }
+  }
+
+  /**
+   * Cannot use the builtin JWEHeader.toString() method because it relies on reflection, which is
+   * disallowed in the Apigee runtime.
+   */
+  protected String toString(Map<String, Object> map) {
+    if (map == null || map.isEmpty()) {
+      return "{}"; // Empty map representation
+    }
+
+    StringBuilder sb = new StringBuilder("{"); // Start with opening brace
+    boolean first = true;
+
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+      if (!first) {
+        sb.append(", ");
+      }
+      first = false;
+
+      sb.append("\"").append(entry.getKey()).append("\": ");
+
+      Object value = entry.getValue();
+      if (value instanceof String) {
+        sb.append("\"").append(value).append("\"");
+      } else if (value instanceof Map) {
+        sb.append(toString((Map<String, Object>) value));
+      } else {
+        sb.append(value);
+      }
+    }
+    sb.append("}");
+    return sb.toString();
   }
 }

@@ -1,6 +1,6 @@
 // GenerateEncryptedJwt.java
 //
-// Copyright (c) 2018-2020 Google LLC.
+// Copyright (c) 2018-2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,18 +19,20 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.crypto.ECDHEncrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -40,7 +42,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
-@IOIntensive
 public class GenerateEncryptedJwt extends GenerateBase implements Execution {
   public GenerateEncryptedJwt(Map properties) {
     super(properties);
@@ -48,7 +49,8 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
 
   String getVarPrefix() {
     return "ejwt_";
-  };
+  }
+  ;
 
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
@@ -66,7 +68,8 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     JWEHeader.Builder headerBuilder = new JWEHeader.Builder(alg, enc);
     headerBuilder.type(JOSEObjectType.JWT);
     if (policyConfig.crit != null) {
-      headerBuilder.criticalParams(new HashSet<String>(Arrays.asList(policyConfig.crit.split("[\\s,]+"))));
+      headerBuilder.criticalParams(
+          new HashSet<String>(Arrays.asList(policyConfig.crit.split("[\\s,]+"))));
     }
     if (policyConfig.header != null) {
       JSONObjectUtils.parse(policyConfig.header)
@@ -104,11 +107,14 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
 
     JWEHeader header = headerBuilder.build();
     JWTClaimsSet claims = claimsBuilder.build();
-    msgCtxt.setVariable(varName("header"), header.toString());
-    msgCtxt.setVariable(varName("payload"), claims.toString());
+    msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
+    msgCtxt.setVariable(varName("payload"), toString(claims.toJSONObject()));
 
     EncryptedJWT encryptedJWT = new EncryptedJWT(header, claims);
-    RSAEncrypter encrypter = new RSAEncrypter((RSAPublicKey) policyConfig.publicKey);
+    JWEEncrypter encrypter =
+        (policyConfig.publicKey instanceof RSAPublicKey)
+            ? new RSAEncrypter((RSAPublicKey) policyConfig.publicKey)
+            : new ECDHEncrypter((ECPublicKey) policyConfig.publicKey);
 
     encryptedJWT.encrypt(encrypter);
     String serialized = encryptedJWT.serialize();

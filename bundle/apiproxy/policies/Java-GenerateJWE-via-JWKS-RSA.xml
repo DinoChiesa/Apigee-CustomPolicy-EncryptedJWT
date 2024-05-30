@@ -1,0 +1,12 @@
+<JavaCallout name="Java-GenerateJWE-via-JWKS-RSA">
+  <Properties>
+    <Property name='key-encryption'>RSA-OAEP-256</Property>
+    <Property name='content-encryption'>A256GCM</Property>
+    <Property name='debug'>true</Property>
+    <Property name='payload'>Arbitrary-string-to-encrypt,messageid={messageid},time={system.timestamp},org={organization.name},proxy={apiproxy.name}</Property>
+    <Property name='jwks-uri'>{jwks_uri}</Property>
+    <Property name='key-id'>{my_selected_key_id}</Property>
+  </Properties>
+  <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240603.jar</ResourceURL>
+</JavaCallout>

@@ -1,9 +1,9 @@
-<AssignMessage name='AM-SuccessVerifyJweResponse'>
+<AssignMessage name='AM-Success-VerifyJwt-Response'>
   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
   <Set>
     <Payload contentType='application/json'>{
-  "header": {jwe_header},
-  "payload": "{escapeJSON(jwe_payload)}"
+  "header": {ejwt_header},
+  "payload": {ejwt_payload}
 }
 </Payload>
     <StatusCode>200</StatusCode>

@@ -1,4 +1,4 @@
-<AssignMessage name='AM-CleanHeaders'>
+<AssignMessage name='AM-Clean-Request-Headers'>
   <Remove>
     <Headers/>
   </Remove>

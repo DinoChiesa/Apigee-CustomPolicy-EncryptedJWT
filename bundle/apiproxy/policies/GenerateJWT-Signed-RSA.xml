@@ -1,8 +1,8 @@
-<GenerateJWT name='GenerateJWT-Signed'>
+<GenerateJWT name='GenerateJWT-Signed-RSA'>
   <Algorithm>RS256</Algorithm>
   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
   <PrivateKey>
-    <Value ref="private.my_private_key"/>
+    <Value ref="private.my_rsa_private_key"/>
     <!-- the keyid is optional, and typically it will not be hard-coded -->
     <Id>cb24a396-4414-4793-b4ce-90333b694bff</Id>
   </PrivateKey>
@@ -12,7 +12,8 @@
   <Issuer ref='apigee-issuer'/>
 
   <!-- often the audience claim will not be hard-coded -->
-  <Audience>all</Audience>
+  <Audience>urn:5DE214D2-247A-4EBA-946E-CDB388E4B35C</Audience>
+
   <ExpiresIn>30m</ExpiresIn>
   <AdditionalClaims>
     <Claim name='messageid' ref='messageid'/>

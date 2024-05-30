@@ -1,9 +1,9 @@
 // VerifyEncryptedJwt.java
 //
-// This is the callout class for the VerifyEncryptedJwt custom policy for Apigee Edge.
+// This is the callout class for the VerifyEncryptedJwt custom policy for Apigee.
 // For full details see the Readme accompanying this source file.
 //
-// Copyright (c) 2018-2019 Google LLC.
+// Copyright (c) 2018-2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,21 +22,23 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.TimeResolver;
+import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.crypto.ECDHDecrypter;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
-@IOIntensive
 public class VerifyEncryptedJwt extends VerifyBase implements Execution {
   private static final long defaultTimeAllowance = 0L;
   private static final long maxTimeAllowance = 60L;
@@ -49,7 +51,7 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
 
   String getVarPrefix() {
     return "ejwt_";
-  };
+  }
 
   private long getTimeAllowance(MessageContext msgCtxt) throws Exception {
     String timeAllowance = (String) this.properties.get("time-allowance");
@@ -95,8 +97,12 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
       jweText = jweText.substring(7);
     }
     EncryptedJWT encryptedJWT = EncryptedJWT.parse(jweText);
-    RSADecrypter decrypter =
-        new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders);
+    JWEDecrypter decrypter =
+        (policyConfig.privateKey instanceof RSAPrivateKey)
+            ? new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders)
+            : new ECDHDecrypter(
+                (ECPrivateKey) policyConfig.privateKey, policyConfig.deferredCritHeaders);
+
     encryptedJWT.decrypt(decrypter);
     if (encryptedJWT.getPayload() != null) {
       String payload = encryptedJWT.getPayload().toString();
@@ -106,14 +112,14 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
       throw new IllegalStateException("JWT included no header.");
 
     JWEHeader header = encryptedJWT.getHeader();
-    msgCtxt.setVariable(varName("header"), header.toString());
+    msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
 
     JWTClaimsSet claims = encryptedJWT.getJWTClaimsSet();
     setVariables(claims.getClaims(), header.toJSONObject(), msgCtxt);
 
     // verify configured Key Encryption Alg and maybe Content Encryption Alg
     if (!header.getAlgorithm().toString().equals(policyConfig.keyEncryptionAlgorithm))
-      throw new IllegalStateException("JWT uses unacceptable Key Encryption Algorithm.");
+      throw new IllegalStateException("the JWT uses an unacceptable Key Encryption Algorithm.");
 
     msgCtxt.setVariable(varName("alg"), header.getAlgorithm().toString());
     msgCtxt.setVariable(varName("enc"), header.getEncryptionMethod().toString());
@@ -121,7 +127,8 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
     if (policyConfig.contentEncryptionAlgorithm != null
         && !policyConfig.contentEncryptionAlgorithm.equals("")) {
       if (!header.getEncryptionMethod().toString().equals(policyConfig.contentEncryptionAlgorithm))
-        throw new IllegalStateException("JWT uses unacceptable Content Encryption Algorithm.");
+        throw new IllegalStateException(
+            "the JWT uses an unacceptable Content Encryption Algorithm.");
     }
 
     long timeAllowance = getTimeAllowance(msgCtxt);
@@ -132,18 +139,19 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
     /*
      * Comments regarding lifetime and expiry.
      *
-     * Token lifetime is subtly different than expiry.
+     * Token lifetime is different than expiry.
      *
      * The expiry is optional in a token, and if present is expressed as an
      * absolute number of seconds since epoch.  The lifetime is a computed
-     * property: the difference between the optional expiry and (notbefore or iat or now), in
-     * that order of precedence.
+     * property. It is the difference between the optional expiry and (notbefore
+     * or iat or now), in that order of precedence.
      *
      * If the token carries an expiry claim, this policy will
      * enforce it.
      *
      * If the policy configuration directs the callout to enforce a maximum
-     * lifetime of the token, this code wll enforce it.
+     * lifetime of the token, this code wll enforce it. As one special case
+     * here, if there is no expiry, the callout will reject the token.
      *
      ***/
     Long lifetime = null;
@@ -170,9 +178,11 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
       Instant notBefore = nbfDate.toInstant();
       msgCtxt.setVariable(varName("notbefore"), DateTimeFormatter.ISO_INSTANT.format(notBefore));
       msgCtxt.setVariable(varName("notbefore_seconds"), Long.toString(notBefore.getEpochSecond()));
-      long age = notBefore.until(now, ChronoUnit.SECONDS);
-      msgCtxt.setVariable(varName("age"), Long.toString(age));
-      if (age + timeAllowance <= 0L) throw new IllegalStateException("JWT is not yet valid.");
+      long secondsSinceInitialValidInstant = notBefore.until(now, ChronoUnit.SECONDS);
+      msgCtxt.setVariable(
+          varName("seconds_since_nbf"), Long.toString(secondsSinceInitialValidInstant));
+      if (secondsSinceInitialValidInstant + timeAllowance <= 0L)
+        throw new IllegalStateException("JWT is not yet valid.");
     }
 
     if (expDate != null) {
@@ -185,7 +195,7 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
     if (maxLifetime > 0L) {
       if (lifetime == null)
         throw new IllegalStateException(
-            "the JWT has an unlimited lifetime which exceeds the configured limit.");
+            "the JWT has no expiry; this violates the maximum lifetime constraint.");
 
       if (lifetime > maxLifetime)
         throw new IllegalStateException(

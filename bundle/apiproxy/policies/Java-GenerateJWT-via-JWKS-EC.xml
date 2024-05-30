@@ -1,0 +1,15 @@
+<JavaCallout name="Java-GenerateJWT-via-JWKS-EC">
+  <Properties>
+    <Property name='key-encryption'>ECDH-ES+A256KW</Property>
+    <Property name='content-encryption'>A256GCM</Property>
+    <Property name='debug'>true</Property>
+    <Property name='payload'>{demo_payload}</Property>
+    <Property name='generate-id'>true</Property>
+    <Property name='expiry'>5m</Property>
+    <Property name='jwks-uri'>{jwks_uri}</Property>
+    <!-- key-id is optional.  -->
+    <Property name='key-id'>{my_selected_key_id}</Property>
+  </Properties>
+  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240603.jar</ResourceURL>
+</JavaCallout>

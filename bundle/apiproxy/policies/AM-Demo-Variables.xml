@@ -1,4 +1,4 @@
-<AssignMessage name='AM-DemoVariables'>
+<AssignMessage name='AM-Demo-Variables'>
   <AssignVariable>
     <Name>demo_payload</Name>
     <Template>{
@@ -15,7 +15,12 @@
   </AssignVariable>
 
   <AssignVariable>
-    <Name>my_public_key</Name>
+    <Name>jwks_uri</Name>
+    <Template>https://jwks-service.dinochiesa.net/.well-known/jwks.json</Template>
+  </AssignVariable>
+
+  <AssignVariable>
+    <Name>my_rsa_public_key</Name>
     <Value>
       -----BEGIN PUBLIC KEY-----
       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA15PZNNSa4RkH9eAeJ8ph
@@ -30,7 +35,7 @@
   </AssignVariable>
 
   <AssignVariable>
-    <Name>private.my_private_key</Name>
+    <Name>private.my_rsa_private_key</Name>
     <Value>
       -----BEGIN PRIVATE KEY-----
       MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDXk9k01JrhGQf1
@@ -97,6 +102,27 @@
       GZev6o3c0OtTndUYwFIrxzZaL1gP6Tb8QGuIA49VVMEvWXJl/rPaa5Ip17ee0YnX
       BhkCjT+pD2dW1X9S9C6IgcTF8f6Ta27omyw3aqpxefpiVVSbV/I9
       -----END RSA PRIVATE KEY-----
+    </Value>
+  </AssignVariable>
+
+  <AssignVariable>
+    <Name>private.my_ec_private_key</Name>
+    <Value>
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVA7GiMpmiyDgxESR
+B7bDPrKp7Fa3UQZ7Zlnox/oa6dahRANCAARgVnYkM38ondUD34Zw5PcJ5lsBV+ji
+Fk+BBhvDxhCFQvFmDG8WXN1LaZVivkfAMptbIgruT3MtzaSxqHeta/65
+-----END PRIVATE KEY-----
+    </Value>
+  </AssignVariable>
+
+  <AssignVariable>
+    <Name>my_ec_public_key</Name>
+    <Value>
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYFZ2JDN/KJ3VA9+GcOT3CeZbAVfo
+4hZPgQYbw8YQhULxZgxvFlzdS2mVYr5HwDKbWyIK7k9zLc2ksah3rWv+uQ==
+-----END PUBLIC KEY-----
     </Value>
   </AssignVariable>
 

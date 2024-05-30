@@ -1,6 +1,6 @@
 // GenerateJwe.java
 //
-// Copyright (c) 2018-2019 Google LLC.
+// Copyright (c) 2018-2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,21 +19,22 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.crypto.ECDHEncrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
-@IOIntensive
 public class GenerateJwe extends GenerateBase implements Execution {
   public GenerateJwe(Map properties) {
     super(properties);
@@ -41,7 +42,8 @@ public class GenerateJwe extends GenerateBase implements Execution {
 
   String getVarPrefix() {
     return "jwe_";
-  };
+  }
+  ;
 
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.keyEncryptionAlgorithm == null)
@@ -80,10 +82,13 @@ public class GenerateJwe extends GenerateBase implements Execution {
     }
 
     JWEHeader header = headerBuilder.build();
-    msgCtxt.setVariable(varName("header"), header.toString());
+    msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
 
     JWEObject jwe = new JWEObject(header, new Payload(policyConfig.payload));
-    RSAEncrypter encrypter = new RSAEncrypter((RSAPublicKey) policyConfig.publicKey);
+    JWEEncrypter encrypter =
+        (policyConfig.publicKey instanceof RSAPublicKey)
+            ? new RSAEncrypter((RSAPublicKey) policyConfig.publicKey)
+            : new ECDHEncrypter((ECPublicKey) policyConfig.publicKey);
 
     jwe.encrypt(encrypter);
     String serialized = jwe.serialize();

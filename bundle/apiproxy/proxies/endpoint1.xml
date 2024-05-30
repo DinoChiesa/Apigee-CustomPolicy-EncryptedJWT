@@ -1,0 +1,285 @@
+<ProxyEndpoint name="endpoint1">
+  <Description>conditional flows for generating and verifying JWE and JWT with RSA and EC keys</Description>
+
+  <HTTPProxyConnection>
+    <BasePath>/encrypted-jwt-java</BasePath>
+  </HTTPProxyConnection>
+
+  <FaultRules>
+    <FaultRule name='jwt_operation_error'>
+      <Step>
+        <Name>AM-JWT-Operation-Error</Name>
+      </Step>
+      <Condition>ejwt_error != null</Condition>
+    </FaultRule>
+    <FaultRule name='jwe_operation_error'>
+      <Step>
+        <Name>AM-JWE-Operation-Error</Name>
+      </Step>
+      <Condition>jwe_error != null</Condition>
+    </FaultRule>
+  </FaultRules>
+
+  <DefaultFaultRule name="default-fault-rule">
+    <Step>
+      <Name>AM-Inject-Proxy-Revision-Header</Name>
+    </Step>
+    <AlwaysEnforce>true</AlwaysEnforce>
+  </DefaultFaultRule>
+
+  <PreFlow>
+    <Request>
+      <Step>
+        <Name>AM-Demo-Variables</Name>
+      </Step>
+    </Request>
+    <Response>
+      <Step>
+        <Name>AM-Clean-Request-Headers</Name>
+      </Step>
+      <Step>
+        <Name>AM-Inject-Proxy-Revision-Header</Name>
+      </Step>
+    </Response>
+  </PreFlow>
+
+  <Flows>
+
+    <Flow name="generate 1-rsa">
+      <Description>generate an encrypted JWT with an RSA key</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWT-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 1-ec">
+      <Description>generate an encrypted JWT with an EC key</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWT-EC</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_ec") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 2-rsa">
+      <Description>generate a JWE with an RSA key</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWE-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 2-ec">
+      <Description>generate a JWE with an EC key</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWE-EC</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_ec") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 3-rsa">
+      <Description>generate an encrypted JWT using an RSA key retrieved from JWKS</Description>
+      <Request>
+        <Step>
+          <Name>SC-Get-RSA-Keys</Name>
+        </Step>
+        <Step>
+          <Name>AM-Select-RSA-Key</Name>
+        </Step>
+        <Step>
+          <Name>Java-GenerateJWT-via-JWKS-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_via_jwks_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 3-ec">
+      <Description>generate an encrypted JWT using an EC key retrieved from JWKS</Description>
+      <Request>
+        <Step>
+          <Name>SC-Get-EC-Keys</Name>
+        </Step>
+        <Step>
+          <Name>AM-Select-EC-Key</Name>
+        </Step>
+        <Step>
+          <Name>Java-GenerateJWT-via-JWKS-EC</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_via_jwks_ec") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 4-rsa">
+      <Description>generate a JWE with a RSA key retrieved via a JWKS</Description>
+      <Request>
+        <Step>
+          <Name>SC-Get-RSA-Keys</Name>
+        </Step>
+        <Step>
+          <Name>AM-Select-RSA-Key</Name>
+        </Step>
+        <Step>
+          <Name>Java-GenerateJWE-via-JWKS-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_via_jwks_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 4">
+      <Description>generate a JWE with a EC key retrieved via a JWKS</Description>
+      <Request>
+        <Step>
+          <Name>SC-Get-EC-Keys</Name>
+        </Step>
+        <Step>
+          <Name>AM-Select-EC-Key</Name>
+        </Step>
+        <Step>
+          <Name>Java-GenerateJWE-via-JWKS-EC</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_via_jwks_ec") and (request.verb = "POST")</Condition>
+    </Flow>
+
+
+    <Flow name="generate 5">
+      <Description>generate a JWE that wraps a signed JWT</Description>
+      <Request>
+        <Step>
+          <Name>GenerateJWT-Signed-RSA</Name>
+        </Step>
+        <Step>
+          <Name>Java-Encrypt-JWT-via-JWKS-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_signed_jwt_wrapped_in_jwe_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="verify 1">
+      <Description>verify an encrypted JWT</Description>
+      <Request>
+        <Step>
+          <Condition>request.formparam.JWT = null</Condition>
+          <Name>RF-Invalid-Request</Name>
+        </Step>
+        <Step>
+          <Name>Java-VerifyJWT-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-VerifyJwt-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify_jwt_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="verify 2">
+      <Description>verify a JWE</Description>
+      <Request>
+        <Step>
+          <Condition>request.formparam.JWE = null</Condition>
+          <Name>RF-Invalid-Request</Name>
+        </Step>
+        <Step>
+          <Name>Java-VerifyJWE-RSA</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-VerifyJwe-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="private_key">
+      <Description>retrieve the private key (for demo purposes only)</Description>
+      <Request>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-PrivateKey-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/private_key") and (request.verb = "GET")</Condition>
+    </Flow>
+
+    <Flow name="public_key">
+      <Description>retrieve the public key</Description>
+      <Request>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-PublicKey-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/public_key") and (request.verb = "GET")</Condition>
+    </Flow>
+
+    <Flow name='unknown'>
+      <Description>unknown request</Description>
+      <Request>
+        <Step>
+          <Name>RF-Unknown-Request</Name>
+        </Step>
+      </Request>
+    </Flow>
+  </Flows>
+
+  <RouteRule name="Loopback"/>
+
+</ProxyEndpoint>

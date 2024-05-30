@@ -1,6 +1,6 @@
 // TestDecryptEx.java
 //
-// Copyright (c) 2018-2021 Google LLC
+// Copyright (c) 2018-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,9 +34,7 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
-import com.apigee.flow.message.MessageContext;
 import com.google.gson.Gson;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -52,10 +50,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import mockit.Mock;
-import mockit.MockUp;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class TestDecryptEx extends CalloutTestBase {
@@ -116,7 +111,7 @@ public class TestDecryptEx extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNull(error);
   }
 
@@ -140,7 +135,7 @@ public class TestDecryptEx extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.SUCCESS);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNull(error);
   }
 
@@ -165,7 +160,7 @@ public class TestDecryptEx extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNotNull(error);
     Assert.assertEquals(error, "AES/GCM/NoPadding decryption failed: Tag mismatch!");
   }
@@ -195,8 +190,8 @@ public class TestDecryptEx extends CalloutTestBase {
     reportThings("ejwt", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
     // retrieve output
-    String error = msgCtxt.getVariable("ejwt_error");
+    String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNotNull(error);
-    Assert.assertEquals(error, "Decryption error");
+    Assert.assertEquals(error, "Padding error in decryption");
   }
 }

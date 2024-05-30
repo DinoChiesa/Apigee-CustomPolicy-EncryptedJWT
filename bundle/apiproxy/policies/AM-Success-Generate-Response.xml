@@ -1,4 +1,4 @@
-<AssignMessage name='AM-SuccessGenerateResponse'>
+<AssignMessage name='AM-Success-Generate-Response'>
   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
   <Set>
     <!-- only one of the following variables will resolve. that's ok, desired. -->

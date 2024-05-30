@@ -1,6 +1,6 @@
 // GenerateBase.java
 //
-// Copyright (c) 2018-2021 Google LLC.
+// Copyright (c) 2018-2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package com.google.apigee.callouts;
 
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
-import com.apigee.flow.execution.IOIntensive;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.github.benmanes.caffeine.cache.CacheLoader;
@@ -35,7 +34,6 @@ import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.RSAKey;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,7 +45,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-@IOIntensive
 public abstract class GenerateBase extends EncryptedJoseBase implements Execution {
   private static LoadingCache<String, JWKSet> jwksRemoteCache;
   private static LoadingCache<String, JWKSet> jwksLocalCache;
@@ -65,7 +62,11 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
                   public JWKSet load(String uri)
                       throws MalformedURLException, IOException, ParseException {
                     // NB: this will throw an IOException on HTTP error.
-                    return JWKSet.load(new URL(uri));
+                    try {
+                      return JWKSet.load(new URL(uri));
+                    } catch (Exception e1) {
+                      return null;
+                    }
                   }
                 });
 
@@ -78,7 +79,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
                 new CacheLoader<String, JWKSet>() {
                   public JWKSet load(String jwksJson) throws ParseException {
                     // NB: this can throw an Exception on parse error.
-                   return JWKSet.parse(jwksJson);
+                    return JWKSet.parse(jwksJson);
                   }
                 });
   }
@@ -87,16 +88,23 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     super(properties);
   }
 
-  private PublicKey getPublicKey(MessageContext msgCtxt, Consumer<String> onKeySelected)
+  private PublicKey getPublicKey(
+      MessageContext msgCtxt,
+      final String keyEncryptionAlgorithm,
+      final Consumer<String> onKeySelected)
       throws Exception {
     String publicKeyString = _getOptionalString(msgCtxt, "public-key");
     return (publicKeyString != null)
         ? KeyUtil.decodePublicKey(publicKeyString)
-        : getPublicKeyFromJwks(msgCtxt, onKeySelected);
+        : getPublicKeyFromJwks(msgCtxt, keyEncryptionAlgorithm, onKeySelected);
   }
 
-  private static JWKMatcher.Builder matcherBuilder() {
-    return new JWKMatcher.Builder().keyType(KeyType.RSA);
+  private static JWKMatcher.Builder matcherBuilder(String algorithmName) throws Exception {
+    if (algorithmName.startsWith("RSA")) return new JWKMatcher.Builder().keyType(KeyType.RSA);
+    if (algorithmName.startsWith("ECDH")) return new JWKMatcher.Builder().keyType(KeyType.EC);
+
+    throw new IllegalStateException("unsupported key encryption algorithm.");
+
     /*
      * Do not match on .keyUse(KeyUse.ENCRYPTION)
      *
@@ -108,10 +116,16 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
   private PublicKey selectKey(List<JWK> list, Consumer<String> onKeySelected) throws Exception {
     JWK randomItem = list.get(new java.util.Random().nextInt(list.size()));
     onKeySelected.accept(randomItem.getKeyID());
-    return ((RSAKey) randomItem).toPublicKey();
+    KeyType kt = randomItem.getKeyType();
+    return (kt == KeyType.RSA)
+        ? randomItem.toRSAKey().toPublicKey()
+        : randomItem.toECKey().toPublicKey();
   }
 
-  private PublicKey getPublicKeyFromJwks(MessageContext msgCtxt, Consumer<String> onKeySelected)
+  private PublicKey getPublicKeyFromJwks(
+      final MessageContext msgCtxt,
+      final String algorithmName,
+      final Consumer<String> onKeySelected)
       throws Exception {
     JWKSet jwks = null;
     String jwksJson = _getOptionalString(msgCtxt, "jwks");
@@ -126,11 +140,13 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
 
     String keyId = _getOptionalString(msgCtxt, "key-id");
     if (keyId != null) {
-      // find key with specific kid. Ignore use.
-      List<JWK> filtered = new JWKSelector(matcherBuilder().keyID(keyId).build()).select(jwks);
+      // find key with specific kid, and an appropriate algorithm. Ignore use.
+      List<JWK> filtered =
+          new JWKSelector(matcherBuilder(algorithmName).keyID(keyId).build()).select(jwks);
 
       if (filtered.size() == 0) {
-        throw new IllegalStateException(String.format("a key with kid '%s' was not found.", keyId));
+        throw new IllegalStateException(
+            String.format("a suitable key with kid '%s' was not found.", keyId));
       }
       if (filtered.size() == 1) {
         return selectKey(filtered, onKeySelected);
@@ -139,10 +155,12 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
           String.format("more than one key with kid '%s' found.", keyId));
     }
 
-    List<JWK> filtered = new JWKSelector(matcherBuilder().build()).select(jwks)
-      .stream()
-      .filter(k -> k.getKeyUse() == null || k.getKeyUse().equals(KeyUse.ENCRYPTION))
-      .collect(Collectors.toList());
+    // select any key with the appropriate algorithm
+    List<JWK> filtered =
+        new JWKSelector(matcherBuilder(algorithmName).build())
+            .select(jwks).stream()
+                .filter(k -> k.getKeyUse() == null || k.getKeyUse().equals(KeyUse.ENCRYPTION))
+                .collect(Collectors.toList());
 
     if (filtered.size() == 0) {
       throw new IllegalStateException("could not find any appropriate RSA keys.");
@@ -195,6 +213,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     config.publicKey =
         getPublicKey(
             msgCtxt,
+            config.keyEncryptionAlgorithm,
             kid -> {
               msgCtxt.setVariable(varName("selected_key_id"), kid);
               config.keyId = kid;

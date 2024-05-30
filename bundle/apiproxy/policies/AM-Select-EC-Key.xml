@@ -1,4 +1,4 @@
-<AssignMessage name='AM-Select-RSA-Key'>
+<AssignMessage name='AM-Select-EC-Key'>
   <AssignVariable>
     <Name>json_path_1</Name>
     <Value>$.ids[0]</Value>
