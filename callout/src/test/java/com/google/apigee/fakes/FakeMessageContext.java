@@ -27,7 +27,7 @@ import java.util.Map;
 public class FakeMessageContext implements MessageContext {
   private Map<String, Object> variables;
 
-  public void FakeMessageContext() {
+  public FakeMessageContext() {
     getVariables();
   }
 

@@ -50,53 +50,8 @@ public abstract class CalloutTestBase {
 
   @BeforeMethod()
   public void testSetup1() {
-
     msgCtxt = new FakeMessageContext();
     exeCtxt = new FakeExecutionContext();
-
-    // msgCtxt = (MessageContext) new FakeMessageContext();
-    // exeCtxt = (ExecutionContext) new FakeExecutionContext();
-
-    // new MockUp<MessageContext>() {
-    //   private Map<String, Object> variables;
-    //
-    //   @Mock
-    //   public void $init() {
-    //     getVariables();
-    //   }
-    //
-    //   private Map<String, Object> getVariables() {
-    //     if (variables == null) {
-    //       variables = new HashMap<String, Object>();
-    //     }
-    //     return variables;
-    //   }
-    //
-    //   @Mock()
-    //   public Object getVariable(final String name) {
-    //     return getVariables().get(name);
-    //   }
-    //
-    //   @Mock()
-    //   public boolean setVariable(final String name, final Object value) {
-    //     System.out.printf("set(%s) = %s\n", name, value.toString());
-    //     getVariables().put(name, value);
-    //     return true;
-    //   }
-    //
-    //   @Mock()
-    //   public boolean removeVariable(final String name) {
-    //     if (getVariables().containsKey(name)) {
-    //       variables.remove(name);
-    //     }
-    //     return true;
-    //   }
-    // };
-    // // .getMockInstance();
-    // // exeCtxt = new MockUp<ExecutionContext>() {}.getMockInstance();
-    // // exeCtxt = new FakeExecutionContext();
-    // new MockUp<ExecutionContext>() {};
-
     System.out.printf("=============================================\n");
   }
 
