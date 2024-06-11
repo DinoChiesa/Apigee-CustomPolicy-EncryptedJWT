@@ -1,9 +1,10 @@
-<JavaCallout name="Java-VerifyJWE-RSA">
+<JavaCallout name="Java-VerifyJWE-AES">
   <Properties>
-    <Property name='key-encryption'>RSA-OAEP-256</Property>
+    <Property name='key-encryption'>A128KW</Property>
     <Property name='debug'>true</Property>
     <Property name='source'>request.formparam.JWE</Property>
-    <Property name='private-key'>{private.my_rsa_private_key}</Property>
+    <Property name='secret-key'>{my_128bit_secret_key_encoded_with_base16}</Property>
+    <Property name='secret-key-encoding'>base16</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
   <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>

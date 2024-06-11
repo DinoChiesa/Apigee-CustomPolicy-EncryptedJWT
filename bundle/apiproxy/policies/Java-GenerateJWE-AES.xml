@@ -1,10 +1,11 @@
-<JavaCallout name="Java-GenerateJWE-RSA">
+<JavaCallout name="Java-GenerateJWE-AES">
   <Properties>
-    <Property name='key-encryption'>RSA-OAEP-256</Property>
+    <Property name='key-encryption'>A128KW</Property>
     <Property name='content-encryption'>A256GCM</Property>
     <Property name='debug'>true</Property>
     <Property name='payload'>Arbitrary-string-to-encrypt,messageid={messageid},time={system.timestamp},org={organization.name},proxy={apiproxy.name}</Property>
-    <Property name='public-key'>{my_rsa_public_key}</Property>
+    <Property name='secret-key'>{my_128bit_secret_key_encoded_with_base16}</Property>
+    <Property name='secret-key-encoding'>base16</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
   <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>

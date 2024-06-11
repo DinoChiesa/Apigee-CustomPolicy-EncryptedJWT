@@ -27,12 +27,8 @@ import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.TimeResolver;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.crypto.ECDHDecrypter;
-import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -97,11 +93,7 @@ public class VerifyEncryptedJwt extends VerifyBase implements Execution {
       jweText = jweText.substring(7);
     }
     EncryptedJWT encryptedJWT = EncryptedJWT.parse(jweText);
-    JWEDecrypter decrypter =
-        (policyConfig.privateKey instanceof RSAPrivateKey)
-            ? new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders)
-            : new ECDHDecrypter(
-                (ECPrivateKey) policyConfig.privateKey, policyConfig.deferredCritHeaders);
+    JWEDecrypter decrypter = getDecrypter(policyConfig);
 
     encryptedJWT.decrypt(decrypter);
     if (encryptedJWT.getPayload() != null) {

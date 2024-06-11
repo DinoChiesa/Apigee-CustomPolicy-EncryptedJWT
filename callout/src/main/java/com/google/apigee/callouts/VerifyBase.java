@@ -27,7 +27,13 @@ import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.KeyUtil;
+import com.nimbusds.jose.JWEDecrypter;
+import com.nimbusds.jose.crypto.AESDecrypter;
+import com.nimbusds.jose.crypto.ECDHDecrypter;
+import com.nimbusds.jose.crypto.RSADecrypter;
 import java.security.PrivateKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,20 +67,47 @@ public abstract class VerifyBase extends EncryptedJoseBase implements Execution 
 
   abstract void decrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception;
 
+  protected JWEDecrypter getDecrypter(PolicyConfig policyConfig) throws Exception {
+    if (policyConfig.algorithmFamily == AlgorithmFamily.ASYMMETRIC) {
+      return (policyConfig.privateKey instanceof RSAPrivateKey)
+          ? new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders)
+          : new ECDHDecrypter(
+              (ECPrivateKey) policyConfig.privateKey, policyConfig.deferredCritHeaders);
+    }
+
+    if (policyConfig.algorithmFamily == AlgorithmFamily.SYMMETRIC) {
+      return new AESDecrypter(policyConfig.secretKey);
+    }
+
+    throw new IllegalStateException("unsupported key encryption algorithm family.");
+  }
+
   static class PolicyConfig {
     public boolean debug;
     public String keyEncryptionAlgorithm;
+    public AlgorithmFamily algorithmFamily;
     public String contentEncryptionAlgorithm;
     public PrivateKey privateKey;
+    public byte[] secretKey;
     public Set<String> deferredCritHeaders;
     public String source;
+
+    public PolicyConfig() {
+      algorithmFamily = AlgorithmFamily.NOTSET;
+    }
   }
 
   PolicyConfig getPolicyConfiguration(MessageContext msgCtxt) throws Exception {
     PolicyConfig config = new PolicyConfig();
     config.keyEncryptionAlgorithm = getKeyEncryption(msgCtxt);
     config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
-    config.privateKey = getPrivateKey(msgCtxt);
+    if (isSymmetricKek(config.keyEncryptionAlgorithm)) {
+      config.secretKey = getSecretKey(msgCtxt);
+      config.algorithmFamily = AlgorithmFamily.SYMMETRIC;
+    } else {
+      config.privateKey = getPrivateKey(msgCtxt);
+      config.algorithmFamily = AlgorithmFamily.ASYMMETRIC;
+    }
     config.deferredCritHeaders = getDeferredCriticalHeaders(msgCtxt);
     config.source = getSourceVar();
     return config;

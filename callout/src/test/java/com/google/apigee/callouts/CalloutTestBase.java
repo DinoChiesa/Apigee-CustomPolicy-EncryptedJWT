@@ -36,7 +36,9 @@ package com.google.apigee.callouts;
 
 import com.google.apigee.fakes.FakeExecutionContext;
 import com.google.apigee.fakes.FakeMessageContext;
+import java.security.SecureRandom;
 import java.util.Map;
+import java.util.Random;
 import org.testng.annotations.BeforeMethod;
 
 public abstract class CalloutTestBase {
@@ -232,6 +234,16 @@ public abstract class CalloutTestBase {
           + "AUSfkBBboTdFvB4itkJOCxuRxO5is06M47F7aYL2XT6ESY+C+fZO3NLhCs+7XkWC\n"
           + "-----END CERTIFICATE-----\n";
 
+  protected static final String gettysburg =
+      "Four score and seven years ago our fathers brought forth on this continent, a new nation,"
+          + " conceived in Liberty, and dedicated to the proposition that all men are created"
+          + " equal. Now we are engaged in a great civil war, testing whether that nation, or any"
+          + " nation so conceived and so dedicated, can long endure. We are met on a great"
+          + " battle-field of that war. We have come to dedicate a portion of that field, as a"
+          + " final resting place for those who here gave their lives that that nation might live."
+          + " But, in a larger sense, we can not dedicate — we can not consecrate — we can not"
+          + " hallow — this ground.";
+
   protected void reportThings(String prefix, Map<String, String> props) {
     String test = props.get("testname");
     System.out.println("test   : " + test);
@@ -248,5 +260,25 @@ public abstract class CalloutTestBase {
 
     String error = (String) msgCtxt.getVariable(prefix + "_error");
     System.out.println("error  : " + error);
+  }
+
+  static class StringGen {
+    public static final char[] CHARSET =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
+    private static final Random random = new SecureRandom();
+
+    public static String randomString(char[] characterSet, int length) {
+      char[] result = new char[length];
+      for (int i = 0; i < result.length; i++) {
+        // picks a random index out of character set > random character
+        int randomCharIndex = random.nextInt(characterSet.length);
+        result[i] = characterSet[randomCharIndex];
+      }
+      return new String(result);
+    }
+
+    public static String randomString(int length) {
+      return randomString(CHARSET, length);
+    }
   }
 }

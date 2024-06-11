@@ -27,13 +27,9 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.crypto.ECDHEncrypter;
-import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -111,10 +107,7 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     msgCtxt.setVariable(varName("payload"), toString(claims.toJSONObject()));
 
     EncryptedJWT encryptedJWT = new EncryptedJWT(header, claims);
-    JWEEncrypter encrypter =
-        (policyConfig.publicKey instanceof RSAPublicKey)
-            ? new RSAEncrypter((RSAPublicKey) policyConfig.publicKey)
-            : new ECDHEncrypter((ECPublicKey) policyConfig.publicKey);
+    JWEEncrypter encrypter = getEncrypter(policyConfig);
 
     encryptedJWT.encrypt(encrypter);
     String serialized = encryptedJWT.serialize();

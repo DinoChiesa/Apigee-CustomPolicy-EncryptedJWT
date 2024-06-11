@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20240603</version>
+  <version>20240610</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>

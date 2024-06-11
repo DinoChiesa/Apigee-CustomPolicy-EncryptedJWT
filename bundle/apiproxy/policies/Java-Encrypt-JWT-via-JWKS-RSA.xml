@@ -7,5 +7,5 @@
     <Property name='jwks-uri'>{jwks_uri}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240603.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>
 </JavaCallout>

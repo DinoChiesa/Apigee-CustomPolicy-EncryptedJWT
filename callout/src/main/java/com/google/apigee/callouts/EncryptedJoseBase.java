@@ -21,6 +21,7 @@ package com.google.apigee.callouts;
 
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.CalloutUtil;
+import com.google.apigee.util.KeyUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
@@ -31,7 +32,11 @@ import java.util.regex.Pattern;
 public abstract class EncryptedJoseBase {
   private static final Pattern kekNamePattern =
       Pattern.compile(
-          "^(RSA-OAEP(-256)?|ECDH-ES(\\+A(128|192|256)KW)?)$", Pattern.CASE_INSENSITIVE);
+          "^(RSA-OAEP(-256)?|ECDH-ES(\\+A(128|192|256)KW)?|A(128|192|256)(GCM)?KW)$",
+          Pattern.CASE_INSENSITIVE);
+  private static final Pattern symmetricKekNamePattern =
+      Pattern.compile("^(A(128|192|256)(GCM)?KW)$", Pattern.CASE_INSENSITIVE);
+
   private static final Pattern cekNamePattern =
       Pattern.compile(
           "^(A128CBC-HS256|A192CBC-HS384|A256CBC-HS512|(A(128|192|256)GCM))$",
@@ -108,7 +113,8 @@ public abstract class EncryptedJoseBase {
 
     Matcher m = kekNamePattern.matcher(alg);
     if (!m.matches()) {
-      throw new IllegalStateException("that key-encryption algorithm name is unsupported.");
+      throw new IllegalStateException(
+          String.format("that key-encryption algorithm name (%s) is unsupported.", alg));
     }
     return alg;
   }
@@ -122,7 +128,8 @@ public abstract class EncryptedJoseBase {
     }
     Matcher m = cekNamePattern.matcher(alg);
     if (!m.matches()) {
-      throw new IllegalStateException("that content-encryption algorithm name is unsupported.");
+      throw new IllegalStateException(
+          String.format("that content-encryption algorithm name (%s) is unsupported.", alg));
     }
     return alg;
   }
@@ -139,6 +146,17 @@ public abstract class EncryptedJoseBase {
       return defaultValue;
     }
     return flag.equalsIgnoreCase("true");
+  }
+
+  protected boolean isSymmetricKek(String alg) {
+    Matcher m = symmetricKekNamePattern.matcher(alg);
+    return m.matches();
+  }
+
+  protected byte[] getSecretKey(MessageContext msgCtxt) throws Exception {
+    return KeyUtil.decodeSecretKey(
+        _getRequiredString(msgCtxt, "secret-key"),
+        _getOptionalString(msgCtxt, "secret-key-encoding"));
   }
 
   protected void clearVariables(MessageContext msgCtxt) {

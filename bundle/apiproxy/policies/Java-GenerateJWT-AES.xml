@@ -1,12 +1,13 @@
-<JavaCallout name="Java-GenerateJWT-EC">
+<JavaCallout name="Java-GenerateJWT-AES">
   <Properties>
-    <Property name='key-encryption'>ECDH-ES+A128KW</Property>
+    <Property name='key-encryption'>A256KW</Property>
     <Property name='content-encryption'>A256GCM</Property>
     <Property name='debug'>true</Property>
     <Property name='payload'>{demo_payload}</Property>
     <Property name='generate-id'>true</Property>
     <Property name='expiry'>5m</Property>
-    <Property name='public-key'>{my_ec_public_key}</Property>
+    <Property name='secret-key'>{my_256bit_secret_key_encoded_with_base64url}</Property>
+    <Property name='secret-key-encoding'>base64url</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
   <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>

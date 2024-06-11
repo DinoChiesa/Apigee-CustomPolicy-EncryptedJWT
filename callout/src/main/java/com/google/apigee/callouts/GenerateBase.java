@@ -28,6 +28,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.apigee.util.KeyUtil;
 import com.google.apigee.util.TimeResolver;
+import com.nimbusds.jose.JWEEncrypter;
+import com.nimbusds.jose.crypto.AESEncrypter;
+import com.nimbusds.jose.crypto.ECDHEncrypter;
+import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKMatcher;
 import com.nimbusds.jose.jwk.JWKSelector;
@@ -38,6 +42,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -190,13 +196,28 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
 
   abstract void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception;
 
+  protected JWEEncrypter getEncrypter(PolicyConfig policyConfig) throws Exception {
+    if (policyConfig.algorithmFamily == AlgorithmFamily.SYMMETRIC) {
+      return new AESEncrypter(policyConfig.secretKey);
+    }
+    if (policyConfig.algorithmFamily == AlgorithmFamily.ASYMMETRIC) {
+      return (policyConfig.publicKey instanceof RSAPublicKey)
+          ? new RSAEncrypter((RSAPublicKey) policyConfig.publicKey)
+          : new ECDHEncrypter((ECPublicKey) policyConfig.publicKey);
+    }
+
+    throw new IllegalStateException("unsupported key encryption algorithm family.");
+  }
+
   static class PolicyConfig {
     public boolean debug;
     public boolean generateId;
     public boolean compress; /* only for generate */
     public String keyEncryptionAlgorithm;
+    public AlgorithmFamily algorithmFamily;
     public String contentEncryptionAlgorithm;
     public PublicKey publicKey;
+    public byte[] secretKey;
     public String payload;
     public String header;
     public String keyId;
@@ -204,20 +225,30 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     public String outputVar;
     public int expiry;
     public int notBefore;
+
+    public PolicyConfig() {
+      algorithmFamily = AlgorithmFamily.NOTSET;
+    }
   }
 
   PolicyConfig getPolicyConfig(MessageContext msgCtxt) throws Exception {
     PolicyConfig config = new PolicyConfig();
     config.keyEncryptionAlgorithm = getKeyEncryption(msgCtxt);
+    if (isSymmetricKek(config.keyEncryptionAlgorithm)) {
+      config.secretKey = getSecretKey(msgCtxt);
+      config.algorithmFamily = AlgorithmFamily.SYMMETRIC;
+    } else {
+      config.publicKey =
+          getPublicKey(
+              msgCtxt,
+              config.keyEncryptionAlgorithm,
+              kid -> {
+                msgCtxt.setVariable(varName("selected_key_id"), kid);
+                config.keyId = kid;
+              });
+      config.algorithmFamily = AlgorithmFamily.ASYMMETRIC;
+    }
     config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
-    config.publicKey =
-        getPublicKey(
-            msgCtxt,
-            config.keyEncryptionAlgorithm,
-            kid -> {
-              msgCtxt.setVariable(varName("selected_key_id"), kid);
-              config.keyId = kid;
-            });
     if (config.keyId == null) config.keyId = _getOptionalString(msgCtxt, "key-id");
     config.payload = _getOptionalString(msgCtxt, "payload");
     config.header = _getOptionalString(msgCtxt, "header");

@@ -126,4 +126,14 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYFZ2JDN/KJ3VA9+GcOT3CeZbAVfo
     </Value>
   </AssignVariable>
 
+  <AssignVariable>
+    <Name>my_128bit_secret_key_encoded_with_base16</Name>
+    <Value>000102030405060708090a0b0c0d0e0f</Value>
+  </AssignVariable>
+
+  <AssignVariable>
+    <Name>my_256bit_secret_key_encoded_with_base64url</Name>
+    <Value>MDEyMzQ1Njc4OUFCQ0RFRi1UaGlzLWlzLXNlY3JldCE</Value>
+  </AssignVariable>
+
 </AssignMessage>

@@ -27,10 +27,6 @@ import com.apigee.flow.message.MessageContext;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.crypto.ECDHDecrypter;
-import com.nimbusds.jose.crypto.RSADecrypter;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Map;
 
 public class VerifyJwe extends VerifyBase implements Execution {
@@ -51,11 +47,7 @@ public class VerifyJwe extends VerifyBase implements Execution {
       jweText = jweText.substring(7);
     }
     JWEObject jwe = JWEObject.parse(jweText);
-    JWEDecrypter decrypter =
-        (policyConfig.privateKey instanceof RSAPrivateKey)
-            ? new RSADecrypter(policyConfig.privateKey, policyConfig.deferredCritHeaders)
-            : new ECDHDecrypter(
-                (ECPrivateKey) policyConfig.privateKey, policyConfig.deferredCritHeaders);
+    JWEDecrypter decrypter = getDecrypter(policyConfig);
 
     jwe.decrypt(decrypter);
     if (jwe.getPayload() != null) {

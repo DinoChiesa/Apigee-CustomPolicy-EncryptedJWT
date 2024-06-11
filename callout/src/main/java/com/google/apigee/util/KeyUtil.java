@@ -1,4 +1,4 @@
-// Copyright 2018-2019 Google LLC.
+// Copyright 2018-2019,2024 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
 //
 package com.google.apigee.util;
 
+import com.google.apigee.encoding.Base16;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Base64;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
@@ -119,5 +122,40 @@ public class KeyUtil {
       }
     }
     throw new IllegalStateException("unknown PEM object");
+  }
+
+  public static byte[] decodeSecretKey(String secretKeyString, String keyEncoding) {
+    byte[] key = decodeSecretKey0(secretKeyString, keyEncoding);
+    int L = key.length;
+    if (L > 32) {
+      throw new IllegalStateException("that key is too long.");
+    }
+    return key;
+  }
+
+  private static byte[] decodeSecretKey0(String secretKeyString, String keyEncoding) {
+    secretKeyString = secretKeyString.trim();
+    if (keyEncoding == null || keyEncoding.trim().equals("")) {
+      keyEncoding = "utf-8";
+    } else {
+      keyEncoding = keyEncoding.toLowerCase();
+    }
+
+    if (keyEncoding.equals("utf-8")) {
+      return secretKeyString.getBytes(StandardCharsets.UTF_8);
+    }
+
+    if (keyEncoding.equals("base64")) {
+      return Base64.getDecoder().decode(secretKeyString);
+    }
+
+    if (keyEncoding.equals("base64url")) {
+      return Base64.getUrlDecoder().decode(secretKeyString);
+    }
+
+    if (keyEncoding.equals("base16")) {
+      return Base16.decode(secretKeyString);
+    }
+    throw new IllegalStateException("unsupported key encoding.");
   }
 }

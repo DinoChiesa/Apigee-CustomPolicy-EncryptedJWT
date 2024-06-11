@@ -28,11 +28,7 @@ import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.ECDHEncrypter;
-import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.JSONObjectUtils;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 
 public class GenerateJwe extends GenerateBase implements Execution {
@@ -85,10 +81,7 @@ public class GenerateJwe extends GenerateBase implements Execution {
     msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
 
     JWEObject jwe = new JWEObject(header, new Payload(policyConfig.payload));
-    JWEEncrypter encrypter =
-        (policyConfig.publicKey instanceof RSAPublicKey)
-            ? new RSAEncrypter((RSAPublicKey) policyConfig.publicKey)
-            : new ECDHEncrypter((ECPublicKey) policyConfig.publicKey);
+    JWEEncrypter encrypter = getEncrypter(policyConfig);
 
     jwe.encrypt(encrypter);
     String serialized = jwe.serialize();

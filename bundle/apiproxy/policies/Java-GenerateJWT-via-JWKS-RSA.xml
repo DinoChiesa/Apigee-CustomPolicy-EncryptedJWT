@@ -11,5 +11,5 @@
     <Property name='key-id'>{my_selected_key_id}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240603.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>
 </JavaCallout>

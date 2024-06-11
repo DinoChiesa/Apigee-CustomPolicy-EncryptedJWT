@@ -16,21 +16,6 @@
 //
 // @author: Dino Chiesa
 //
-// Note:
-// If you use the Oracle JDK to run tests, this test, which does
-// 256-bit crypto, requires the Unlimited Strength JCE.
-//
-// Without it, you may get an exception while running this test:
-//
-// java.security.InvalidKeyException: Illegal key size
-//         at javax.crypto.Cipher.checkCryptoPerm(Cipher.java:1039)
-//         ....
-//
-// See http://stackoverflow.com/a/6481658/48082
-//
-// If you use OpenJDK to run the tests, then it's not an issue.
-// In that JDK, there's no restriction on key strength.
-//
 
 package com.google.apigee.callouts;
 
@@ -44,12 +29,10 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -57,10 +40,6 @@ public class TestEncrypt extends CalloutTestBase {
 
   // The address of the JWKS Service offering keys for testing purposes.
   private static final String JWKS_BASE_URL = "https://jwks-service.dinochiesa.net";
-
-  protected void reportThings(Map<String, String> props) {
-    super.reportThings("jwe", props);
-  }
 
   @Test()
   public void encrypt1() {
@@ -85,26 +64,6 @@ public class TestEncrypt extends CalloutTestBase {
     Assert.assertNull(error);
     String output = msgCtxt.getVariableAsString("ejwt_output");
     Assert.assertNotNull(output);
-  }
-
-  static class StringGen {
-    public static final char[] CHARSET =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
-    private static final Random random = new SecureRandom();
-
-    public static String randomString(char[] characterSet, int length) {
-      char[] result = new char[length];
-      for (int i = 0; i < result.length; i++) {
-        // picks a random index out of character set > random character
-        int randomCharIndex = random.nextInt(characterSet.length);
-        result[i] = characterSet[randomCharIndex];
-      }
-      return new String(result);
-    }
-
-    public static String randomString(int length) {
-      return randomString(CHARSET, length);
-    }
   }
 
   @Test()

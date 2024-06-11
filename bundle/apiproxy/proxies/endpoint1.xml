@@ -75,6 +75,21 @@
       <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_ec") and (request.verb = "POST")</Condition>
     </Flow>
 
+    <Flow name="generate 1-aes">
+      <Description>generate an encrypted JWT with an AES key</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWT-AES</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwt_aes") and (request.verb = "POST")</Condition>
+    </Flow>
+
     <Flow name="generate 2-rsa">
       <Description>generate a JWE with an RSA key</Description>
       <Request>
@@ -103,6 +118,21 @@
         </Step>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_ec") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="generate 2-aes">
+      <Description>generate a JWE with an AES key</Description>
+      <Request>
+        <Step>
+          <Name>Java-GenerateJWE-AES</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-Generate-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/generate_jwe_aes") and (request.verb = "POST")</Condition>
     </Flow>
 
     <Flow name="generate 3-rsa">
@@ -244,6 +274,44 @@
         </Step>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe_rsa") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="verify 3">
+      <Description>verify a JWE</Description>
+      <Request>
+        <Step>
+          <Condition>request.formparam.JWE = null</Condition>
+          <Name>RF-Invalid-Request</Name>
+        </Step>
+        <Step>
+          <Name>Java-VerifyJWE-EC</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-VerifyJwe-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe_ec") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name="verify 4">
+      <Description>verify a JWE</Description>
+      <Request>
+        <Step>
+          <Condition>request.formparam.JWE = null</Condition>
+          <Name>RF-Invalid-Request</Name>
+        </Step>
+        <Step>
+          <Name>Java-VerifyJWE-AES</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-Success-VerifyJwe-Response</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/verify_jwe_aes") and (request.verb = "POST")</Condition>
     </Flow>
 
     <Flow name="private_key">
