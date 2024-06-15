@@ -6,5 +6,5 @@
     <Property name='private-key'>{private.my_ec_private_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
 </JavaCallout>

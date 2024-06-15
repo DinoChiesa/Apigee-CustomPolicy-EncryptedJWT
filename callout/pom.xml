@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20240610</version>
+  <version>20240614</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -158,7 +158,7 @@
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.0</version>
         <configuration>
           <argLine>
             -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
@@ -222,7 +222,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.6.3</version>
+                  <version>3.9.0</version>
                 </requireMavenVersion>
               </rules>
             </configuration>

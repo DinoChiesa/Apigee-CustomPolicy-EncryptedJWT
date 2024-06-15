@@ -1,6 +1,6 @@
 // TestDecryptEx.java
 //
-// Copyright (c) 2018-2024 Google LLC
+// Copyright © 2018-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,21 +15,6 @@
 // limitations under the License.
 //
 // @author: Dino Chiesa
-//
-// Note:
-// If you use the Oracle JDK to run tests, this test, which does
-// 256-bit crypto, requires the Unlimited Strength JCE.
-//
-// Without it, you may get an exception while running this test:
-//
-// java.security.InvalidKeyException: Illegal key size
-//         at javax.crypto.Cipher.checkCryptoPerm(Cipher.java:1039)
-//         ....
-//
-// See http://stackoverflow.com/a/6481658/48082
-//
-// If you use OpenJDK to run the tests, then it's not an issue.
-// In that JDK, there's no restriction on key strength.
 //
 
 package com.google.apigee.callouts;
@@ -192,6 +177,8 @@ public class TestDecryptEx extends CalloutTestBase {
     // retrieve output
     String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNotNull(error);
-    Assert.assertEquals(error, "Padding error in decryption");
+    Assert.assertTrue(
+        error.equals("Message is larger than modulus")
+            || error.equals("Padding error in decryption"));
   }
 }

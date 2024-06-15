@@ -1,6 +1,6 @@
 // CalloutTestBase.java
 //
-// Copyright (c) 2018-2024 Google LLC
+// Copyright © 2018-2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,25 +16,11 @@
 //
 // @author: Dino Chiesa
 //
-// Note:
-// If you use the Oracle JDK to run tests, this test, which does
-// 256-bit crypto, requires the Unlimited Strength JCE.
-//
-// Without it, you may get an exception while running this test:
-//
-// java.security.InvalidKeyException: Illegal key size
-//         at javax.crypto.Cipher.checkCryptoPerm(Cipher.java:1039)
-//         ....
-//
-// See http://stackoverflow.com/a/6481658/48082
-//
-// If you use OpenJDK to run the tests, then it's not an issue.
-// In that JDK, there's no restriction on key strength.
-//
 
 package com.google.apigee.callouts;
 
 import com.google.apigee.fakes.FakeExecutionContext;
+import com.google.apigee.fakes.FakeMessage;
 import com.google.apigee.fakes.FakeMessageContext;
 import java.security.SecureRandom;
 import java.util.Map;
@@ -47,12 +33,14 @@ public abstract class CalloutTestBase {
     java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
   }
 
+  FakeMessage message;
   FakeMessageContext msgCtxt;
   FakeExecutionContext exeCtxt;
 
   @BeforeMethod()
   public void testSetup1() {
-    msgCtxt = new FakeMessageContext();
+    message = new FakeMessage();
+    msgCtxt = new FakeMessageContext(message);
     exeCtxt = new FakeExecutionContext();
     System.out.printf("=============================================\n");
   }

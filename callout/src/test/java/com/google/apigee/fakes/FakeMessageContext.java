@@ -26,8 +26,14 @@ import java.util.Map;
 
 public class FakeMessageContext implements MessageContext {
   private Map<String, Object> variables;
+  private Message message;
 
   public FakeMessageContext() {
+    getVariables();
+  }
+
+  public FakeMessageContext(Message message) {
+    this.message = message;
     getVariables();
   }
 
@@ -59,12 +65,16 @@ public class FakeMessageContext implements MessageContext {
     return true;
   }
 
+  public Message getMessage(FlowContext flowContext) {
+    return message;
+  }
+
+  public Message getMessage() {
+    return message;
+  }
+
   /* ========================================================================= */
   /* Everything below this line is not implemented and not needed in this Fake */
-
-  public Message getMessage(FlowContext flowContext) {
-    throw new UnsupportedOperationException();
-  }
 
   public void setMessage(FlowContext flowContext, Message message) {
     throw new UnsupportedOperationException();
@@ -99,10 +109,6 @@ public class FakeMessageContext implements MessageContext {
   }
 
   public Connection getTargetConnection() {
-    throw new UnsupportedOperationException();
-  }
-
-  public Message getMessage() {
     throw new UnsupportedOperationException();
   }
 

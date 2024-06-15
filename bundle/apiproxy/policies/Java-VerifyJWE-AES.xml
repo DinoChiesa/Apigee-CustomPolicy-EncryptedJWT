@@ -7,5 +7,5 @@
     <Property name='secret-key-encoding'>base16</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240610.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
 </JavaCallout>
