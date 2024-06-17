@@ -602,6 +602,14 @@ You will need to upload the output jar, as well as jose-jwt jar and its
 dependencies as resources to your Apigee instance, either with the API Proxy or
 with the organization or environment.
 
+## Support
+
+This callout is open-source software, and is not a supported part of Apigee.  If
+you need assistance, you can try inquiring on [the Google Cloud Community forum
+dedicated to Apigee](https://goo.gle/apigee-community) There is no service-level
+guarantee for responses to inquiries posted to that site.
+
+
 ## Author
 
 Dino Chiesa   
