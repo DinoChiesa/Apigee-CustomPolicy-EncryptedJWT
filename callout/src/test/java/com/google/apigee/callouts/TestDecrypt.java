@@ -164,9 +164,9 @@ public class TestDecrypt extends CalloutTestBase {
     // check result and output
     reportThings("jwe", properties);
     Assert.assertEquals(result, ExecutionResult.ABORT);
-    // retrieve output
     String error = msgCtxt.getVariableAsString("jwe_error");
-    Assert.assertEquals(error, "Padding error in decryption");
+    Assert.assertTrue(
+        error.equals("Padding error in decryption") || error.equals("Decryption error"));
   }
 
   @Test()

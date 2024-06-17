@@ -22,6 +22,7 @@ package com.google.apigee.callouts;
 import com.google.apigee.fakes.FakeExecutionContext;
 import com.google.apigee.fakes.FakeMessage;
 import com.google.apigee.fakes.FakeMessageContext;
+import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
@@ -37,12 +38,16 @@ public abstract class CalloutTestBase {
   FakeMessageContext msgCtxt;
   FakeExecutionContext exeCtxt;
 
-  @BeforeMethod()
-  public void testSetup1() {
+  @BeforeMethod
+  public void beforeMethod(Method method) throws Exception {
+    String methodName = method.getName();
+    String className = method.getDeclaringClass().getName();
+    System.out.printf("\n\n==================================================================\n");
+    System.out.printf("TEST %s.%s()\n", className, methodName);
+
     message = new FakeMessage();
     msgCtxt = new FakeMessageContext(message);
     exeCtxt = new FakeExecutionContext();
-    System.out.printf("=============================================\n");
   }
 
   protected static final String privateKey1 =

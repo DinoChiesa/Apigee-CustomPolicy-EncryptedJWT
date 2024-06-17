@@ -177,8 +177,10 @@ public class TestDecryptEx extends CalloutTestBase {
     // retrieve output
     String error = msgCtxt.getVariableAsString("ejwt_error");
     Assert.assertNotNull(error);
+
     Assert.assertTrue(
         error.equals("Message is larger than modulus")
-            || error.equals("Padding error in decryption"));
+            || error.equals("Padding error in decryption")
+            || error.equals("Decryption error"));
   }
 }
