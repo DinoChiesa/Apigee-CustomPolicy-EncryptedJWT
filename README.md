@@ -175,6 +175,7 @@ key.
    <Property name='key-encryption'>RSA-OAEP-256</Property>
    <Property name='content-encryption'>A256GCM</Property>
    <Property name='payload'>Arbitrary-string-to-encrypt,{variable-name-here}</Property>
+   <Property name='header'>{ "p1": "{variable-name}", "cty": "txt" }</Property>
    <Property name='jwks-uri'>https://jwks-service.dinochiesa.net/.well-known/jwks.json</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
@@ -185,6 +186,24 @@ key.
 This is similar to the above, except the payload is any arbitrary string. The
 result is a JWE, not an encrypted JWT.  Properties relevant to JWT, like
 `expiry`, `not-before`, and `generate-id` are ignored when using `GenerateJwe`.
+
+### Generation of a JWE wrapping a JWT, using a randomly-selected key
+
+```xml
+<JavaCallout name="Java-JWTGeneration-via-JWKS-URI">
+ <Properties>
+   <Property name='key-encryption'>RSA-OAEP-256</Property>
+   <Property name='content-encryption'>A256GCM</Property>
+   <Property name='payload'>{name-of-variable-containing-jwt-here}</Property>
+   <Property name='header'>{ "cty": "JWT" }</Property>
+   <Property name='jwks-uri'>https://jwks-service.dinochiesa.net/.well-known/jwks.json</Property>
+ </Properties>
+ <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+</JavaCallout>
+```
+
+This is similar to the above, except the payload is a JWT, and the `cty` header is `JWT`.
 
 ### Generation of an Encrypted JWT using a provided JWKS
 
@@ -612,7 +631,7 @@ guarantee for responses to inquiries posted to that site.
 
 ## Author
 
-Dino Chiesa   
+Dino Chiesa
 godino@google.com
 
 ## Bugs & Limitations
