@@ -44,9 +44,15 @@ delete_apiproxy() {
     fi
 }
 
-[[ -z "$PROJECT" ]] && echo "No PROJECT variable set" && exit 1
-[[ -z "$APIGEE_ENV" ]] && echo "No APIGEE_ENV variable set" && exit 1
-[[ -z "$APIGEE_HOST" ]] && echo "No APIGEE_HOST variable set" && exit 1
+MISSING_ENV_VARS=()
+[[ -z "$PROJECT" ]] && MISSING_ENV_VARS+=('PROJECT')
+[[ -z "$APIGEE_ENV" ]] && MISSING_ENV_VARS+=('APIGEE_ENV')
+
+[[ ${#MISSING_ENV_VARS[@]} -ne 0 ]] && {
+    printf -v joined '%s,' "${MISSING_ENV_VARS[@]}"
+    printf "You must set these environment variables: %s\n" "${joined%,}"
+    exit 1
+}
 
 TOKEN=$(gcloud auth print-access-token)
 

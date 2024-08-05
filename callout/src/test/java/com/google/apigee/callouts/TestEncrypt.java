@@ -29,7 +29,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -302,6 +304,16 @@ public class TestEncrypt extends CalloutTestBase {
     Assert.assertNull(error);
     String output = msgCtxt.getVariableAsString("jwe_output");
     Assert.assertNotNull(output);
+
+    String encodedHeader = output.split("\\.")[0];
+    String headerInJsonForm =
+        new String(Base64.getDecoder().decode(encodedHeader), StandardCharsets.UTF_8);
+    System.out.printf("JSON: %s\n", headerInJsonForm);
+
+    json = new Gson().fromJson(headerInJsonForm, type);
+    String cty = (String) json.get("cty");
+    Assert.assertNotNull(cty);
+    Assert.assertEquals(cty, "JWT");
   }
 
   @Test()

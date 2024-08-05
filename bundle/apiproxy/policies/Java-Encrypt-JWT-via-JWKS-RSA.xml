@@ -3,6 +3,7 @@
     <Property name='key-encryption'>RSA-OAEP-256</Property>
     <Property name='content-encryption'>A256GCM</Property>
     <Property name='debug'>true</Property>
+    <Property name='header'>{ "cty" : "JWT" }</Property>
     <Property name='payload'>{signed-jwt}</Property>
     <Property name='jwks-uri'>{jwks_uri}</Property>
   </Properties>

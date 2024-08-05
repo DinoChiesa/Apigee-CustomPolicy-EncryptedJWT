@@ -22,9 +22,16 @@ import_and_deploy_apiproxy() {
     apigeecli apis deploy --wait --name "$proxy_name" --ovr --rev "$REV" --org "$PROJECT" --env "$APIGEE_ENV" --token "$TOKEN" --disable-check
 }
 
-[[ -z "$PROJECT" ]] && echo "No PROJECT variable set" && exit 1
-[[ -z "$APIGEE_ENV" ]] && echo "No APIGEE_ENV variable set" && exit 1
-[[ -z "$APIGEE_HOST" ]] && echo "No APIGEE_HOST variable set" && exit 1
+MISSING_ENV_VARS=()
+[[ -z "$PROJECT" ]] && MISSING_ENV_VARS+=('PROJECT')
+[[ -z "$APIGEE_ENV" ]] && MISSING_ENV_VARS+=('APIGEE_ENV')
+[[ -z "$APIGEE_HOST" ]] && MISSING_ENV_VARS+=('APIGEE_HOST')
+
+[[ ${#MISSING_ENV_VARS[@]} -ne 0 ]] && {
+    printf -v joined '%s,' "${MISSING_ENV_VARS[@]}"
+    printf "You must set these environment variables: %s\n" "${joined%,}"
+    exit 1
+}
 
 TOKEN=$(gcloud auth print-access-token)
 
@@ -39,14 +46,14 @@ echo "The Apigee proxy is successfully deployed."
 echo " "
 echo "To call the API manually, use commands like the following:"
 echo " "
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_rsa"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_ec"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_aes"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_rsa"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_ec"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_aes"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_via_jwks_rsa"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_via_jwks_ec"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_via_jwks_rsa"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_via_jwks_ec"
-echo "curl -i -X POST https://${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_signed_jwt_wrapped_in_jwe_rsa"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_rsa"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_ec"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_aes"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_rsa"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_ec"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_aes"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_via_jwks_rsa"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwt_via_jwks_ec"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_via_jwks_rsa"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_jwe_via_jwks_ec"
+echo "curl -i -X POST https://\${APIGEE_HOST}${SAMPLE_PROXY_BASEPATH}/generate_signed_jwt_wrapped_in_jwe_rsa"
