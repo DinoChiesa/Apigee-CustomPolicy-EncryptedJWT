@@ -46,9 +46,12 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
   String getVarPrefix() {
     return "ejwt_";
   }
-  ;
 
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
+
+    if (policyConfig.serializationFormat != null) {
+      throw new IllegalStateException("serialization-format is not supported for JWT.");
+    }
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");
     JWEAlgorithm alg = JWEAlgorithm.parse(policyConfig.keyEncryptionAlgorithm);

@@ -4,7 +4,7 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20240614</version>
+  <version>20241203</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -13,9 +13,8 @@
     <apiproxy.java.rsrc.dir>../bundle/apiproxy/resources/java</apiproxy.java.rsrc.dir>
     <apigee.expressions.version>1.0.0</apigee.expressions.version>
     <apigee.message.flow.version>1.0.0</apigee.message.flow.version>
-    <mockito.all.version>1.10.19</mockito.all.version>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
-    <jmockit.version>1.49</jmockit.version>
+    <jmockit.version>1.49.4</jmockit.version>
     <caffeine.version>2.9.0</caffeine.version>
     <nimbus-jose.version>8.22</nimbus-jose.version>
     <bouncycastle.version>1.70</bouncycastle.version>
@@ -87,8 +86,19 @@
       <scope>test</scope>
     </dependency>
 
+    <!--
+    see https://stackoverflow.com/a/63877276
+
     <dependency>
       <groupId>org.jmockit</groupId>
+      <artifactId>jmockit</artifactId>
+      <version>${jmockit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    -->
+
+    <dependency>
+      <groupId>com.github.hazendaz.jmockit</groupId>
       <artifactId>jmockit</artifactId>
       <version>${jmockit.version}</version>
       <scope>test</scope>
@@ -163,6 +173,7 @@
 
       </plugin>
 
+<!--
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.0</version>
@@ -170,6 +181,38 @@
           <argLine>
             -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
           </argLine>
+        </configuration>
+      </plugin>
+-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <!-- to allow the build to work with current versions of jmockit -->
+          <argLine>
+            -javaagent:"${settings.localRepository}"/com/github/hazendaz/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
+          </argLine>
+          <!--
+          <excludes>
+            <exclude>**/TestParameterizedValidate.java</exclude>
+          </excludes>
+          -->
+          <!-- debug logging for tests -->
+          <systemPropertyVariables>
+            <org.slf4j.simpleLogger.defaultLogLevel>DEBUG</org.slf4j.simpleLogger.defaultLogLevel>
+            <org.slf4j.simpleLogger.showDateTime>true</org.slf4j.simpleLogger.showDateTime>
+            <!--
+                to use slf4j-jdk14
+
+                mvn clean test -Djava.util.logging.config.file=jdk14-logging.properties
+
+                contents of that file should be:
+                  handlers=java.util.logging.ConsoleHandler
+                  .level=ALL
+                  java.util.logging.ConsoleHandler.level=ALL
+            -->
+          </systemPropertyVariables>
         </configuration>
       </plugin>
 

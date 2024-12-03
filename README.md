@@ -27,6 +27,10 @@ This repo contains the Java source code for:
   And in that announcement, stressed that it is time to retire the SHA-1 hash.
   RSA-OAEP depends on the SHA-1 hash. Better to avoid using it, if possible.
 
+* This callout is compiled for use with Java 11, which will work with Apigee X
+  and hybrid. If you have an older version of Apigee, then you will need to
+  re-build the callout on your own.  See the section on [Building](#building-the-jar).
+
 ## License
 
 This code is Copyright (c) 2017-2024 Google LLC, and is released under the
@@ -73,6 +77,14 @@ these key encryption algorithms:
 * A128KW, A192KW, A256KW, A128GCMKW, A192GCMKW, A256GCMKW
 
 This custom policy does not work with the PBES variants of JWA Encryption.
+
+For JWE, the custom policy works with Compact serialization for verification.
+For generation, the policy can generate a json-serialized JWE, but the
+restriction is: it supports only a single recipient.
+
+Per the IETF RFC 7519, JWT are always compact serialized, and that is what this
+custom policy supports for encrypted JWT.
+
 
 ## Policy Configuration
 
@@ -289,6 +301,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 | `secret-key`         | optional. a string representing the secret key. Use this if performing encryption or generation with a symmetric algorithm. You may also specify `secret-key-encoding`. This property is ignored if the `key-ecryption` is not an AES variant. |
 | `secret-key-encoding`| optional. a string representing the encoding for the secret key. If present, one of {`utf-8`,`base64`, `base64url`, `base16` }. Defaults to `utf-8`. Ignored if the `key-ecryption` is not an AES variant. |
 | `content-encryption` | required. name of the content encryption algorithm. One of `A256GCM`, `A128GCM`, `A265GCM`, or one of the CBC algorithms.             |
+| `serialization-format` | optional. one of `compact`, or `json`. (`full` is a synonym of the latter). The serialization format. Supported only with the GenerateJwe class. |
 | `payload`            | optional. For GenerateEncryptedJwt, a JSON string that includes additional properties to be included in the payload of the JWT. For GenerateJwe, this is any arbitrary string. |
 | `header`             | optional. a JSON string that includes additional custom properties for the header of the JWT or JWE.                                  |
 | `crit`               | optional. a comma-separated list of header names to be used as the "crit" header of the JWT.                                          |

@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TestEncrypt extends CalloutTestBase {
+
+  /*
+   * TODO: remove external dependencies from the tests.
+   **/
 
   // The address of the JWKS Service offering keys for testing purposes.
   private static final String JWKS_BASE_URL = "https://jwks-service.dinochiesa.net";
@@ -634,5 +639,76 @@ public class TestEncrypt extends CalloutTestBase {
     Assert.assertNull(error);
     String output = msgCtxt.getVariableAsString("ejwt_output");
     Assert.assertNotNull(output);
+  }
+
+  @Test()
+  public void encrypt20_JWE_EC_PEM_FullSerialization()
+      throws MalformedURLException, IOException, ParseException {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt20");
+    properties.put("public-key", ecPublicKey1);
+    properties.put("key-encryption", "ECDH-ES+A128KW");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("serialization-format", "full");
+    properties.put("payload", "The quick brown fox jumped over the lazy dog.");
+    properties.put("debug", "true");
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNull(error);
+    String jweOutput = msgCtxt.getVariableAsString("jwe_output");
+    Assert.assertNotNull(jweOutput);
+
+    // parse jweOutput as JSON
+    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+    Map<String, String> map = new Gson().fromJson(jweOutput, type);
+    List<String> list = Arrays.asList("protected", "encrypted_key", "iv", "ciphertext", "tag");
+    for (String key : list) {
+      String value = map.get(key);
+      System.out.printf("  %s = %s\n", key, value);
+      Assert.assertNotNull(value);
+    }
+
+    String jweHeader = msgCtxt.getVariableAsString("jwe_header");
+    Assert.assertNotNull(jweHeader);
+    Assert.assertTrue(jweHeader.indexOf("\"kid\"") < 0);
+    String alg = msgCtxt.getVariableAsString("jwe_alg");
+    Assert.assertEquals(alg, "ECDH-ES+A128KW");
+    String enc = msgCtxt.getVariableAsString("jwe_enc");
+    Assert.assertEquals(enc, "A256GCM");
+  }
+
+  @Test()
+  public void encrypt21_JWT_Unsupported_Serialization_Format() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt21");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("serialization-format", "compact"); // not supported
+    properties.put("content-encryption", "A256GCM");
+    properties.put(
+        "payload",
+        "{ \"sub\": \"dino\", \"something\" : \"D6B455B4-D252-4F4B-82B3-DA908FDB5BD3\"}");
+    properties.put("debug", "true");
+
+    GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("ejwt", properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("ejwt_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "serialization-format is not supported for JWT.");
+
+    String output = msgCtxt.getVariableAsString("ejwt_output");
+    Assert.assertNull(output);
   }
 }

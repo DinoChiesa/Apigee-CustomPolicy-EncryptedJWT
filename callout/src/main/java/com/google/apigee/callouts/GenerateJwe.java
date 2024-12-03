@@ -29,6 +29,9 @@ import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jwt.JWTClaimsSet;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class GenerateJwe extends GenerateBase implements Execution {
@@ -39,9 +42,31 @@ public class GenerateJwe extends GenerateBase implements Execution {
   String getVarPrefix() {
     return "jwe_";
   }
-  ;
+
+  public static final List<String> serializationOptions = Arrays.asList("full", "json", "compact");
+
+  private static String convertToJson(String dotSeparatedJwe) {
+    String[] substrings = dotSeparatedJwe.split("\\.");
+    if (substrings.length != 5) {
+      throw new IllegalStateException("internal JWE format error.");
+    }
+    List<String> propnames = Arrays.asList("protected", "encrypted_key", "iv", "ciphertext", "tag");
+    // use JWTClaimSet.Builder to build a json
+    JWTClaimsSet.Builder jsonBuilder = new JWTClaimsSet.Builder();
+
+    for (int i = 0; i < substrings.length; i++) {
+      jsonBuilder.claim(propnames.get(i), substrings[i]);
+    }
+    return jsonBuilder.build().toJSONObject().toString();
+  }
 
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
+    if (policyConfig.serializationFormat != null) {
+      policyConfig.serializationFormat = policyConfig.serializationFormat.toLowerCase();
+      if (!serializationOptions.contains(policyConfig.serializationFormat)) {
+        throw new IllegalStateException("unsupported serialization-format.");
+      }
+    }
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");
     JWEAlgorithm alg = JWEAlgorithm.parse(policyConfig.keyEncryptionAlgorithm);
@@ -85,6 +110,12 @@ public class GenerateJwe extends GenerateBase implements Execution {
 
     jwe.encrypt(encrypter);
     String serialized = jwe.serialize();
+
+    // support the JSON
+    if ("full".equals(policyConfig.serializationFormat)
+        || "compact".equals(policyConfig.serializationFormat)) {
+      serialized = convertToJson(serialized);
+    }
     msgCtxt.setVariable(policyConfig.outputVar, serialized);
   }
 }

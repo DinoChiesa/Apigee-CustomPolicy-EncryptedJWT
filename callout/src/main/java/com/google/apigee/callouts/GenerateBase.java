@@ -211,20 +211,26 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
 
   static class PolicyConfig {
     public boolean debug;
-    public boolean generateId;
-    public boolean compress; /* only for generate */
     public String keyEncryptionAlgorithm;
     public AlgorithmFamily algorithmFamily;
     public String contentEncryptionAlgorithm;
     public PublicKey publicKey;
     public byte[] secretKey;
+
     public String payload;
     public String header;
     public String keyId;
     public String crit;
     public String outputVar;
+    public boolean compress;
+    public boolean generateId;
+
+    /* only for JWT */
     public int expiry;
     public int notBefore;
+
+    /* only for JWE */
+    public String serializationFormat;
 
     public PolicyConfig() {
       algorithmFamily = AlgorithmFamily.NOTSET;
@@ -251,6 +257,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
     if (config.keyId == null) config.keyId = _getOptionalString(msgCtxt, "key-id");
     config.payload = _getOptionalString(msgCtxt, "payload");
+    config.serializationFormat = _getOptionalString(msgCtxt, "serialization-format");
     config.header = _getOptionalString(msgCtxt, "header");
     config.crit = _getOptionalString(msgCtxt, "crit");
     config.outputVar = _getStringProp(msgCtxt, "output", varName("output"));
