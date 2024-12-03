@@ -1,10 +1,14 @@
 # JWE and Encrypted JWT callout
 
-For several years, Apigee has included builtin  policies that generate and
-verify signed JWT. As of November 2020, the built-in policies also can handle Encrypted
-JWT (As defined in [RFC 7516](https://tools.ietf.org/html/rfc7516)).
-But there are not yet built-in policies to handle general JWE. It's in the Apigee roadmap, but
-in the meantime, you can handle JWE (and encrypted JWT) _today_, with a Java callout.
+For several years, Apigee has included builtin policies that generate and verify
+signed JWT. See [RFC 7519](https://tools.ietf.org/html/rfc7519) for a definition
+of JWT, and [RFC 7515](https://tools.ietf.org/html/rfc7515) for the
+specification for signing.  As of November 2020, the built-in policies also can
+handle Encrypted JWT; see [RFC 7516](https://tools.ietf.org/html/rfc7516) for
+the specification on encryption.  As of December 2024, there are not yet
+built-in policies in Apigee to handle general JWE. This capability is in the
+product backlog.  In the meantime, you can handle JWE (and encrypted JWT)
+_today_, with a Java callout.
 
 This repo contains the Java source code for:
 
@@ -79,8 +83,10 @@ these key encryption algorithms:
 This custom policy does not work with the PBES variants of JWA Encryption.
 
 For JWE, the custom policy works with Compact serialization for verification.
+
 For generation, the policy can generate a json-serialized JWE, but the
-restriction is: it supports only a single recipient.
+restriction is: it supports only a single recipient. JWE generartion can use any
+string, InputStream, or byte array as the source of the payload to encrypt.
 
 Per the IETF RFC 7519, JWT are always compact serialized, and that is what this
 custom policy supports for encrypted JWT.
@@ -103,7 +109,7 @@ There is a variety of options. Some examples follow.
    <Property name='public-key'>{my_public_key}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -134,7 +140,7 @@ the above, but it uses an EC public key.
     <Property name='public-key'>{my_public_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -162,7 +168,7 @@ key.
    <Property name='jwks-uri'>https://jwks-service.dinochiesa.net/.well-known/jwks.json</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -191,13 +197,13 @@ key.
    <Property name='jwks-uri'>https://jwks-service.dinochiesa.net/.well-known/jwks.json</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
 This is similar to the above, except the payload is any arbitrary string. The
 result is a JWE, not an encrypted JWT.  Properties relevant to JWT, like
-`expiry`, `not-before`, and `generate-id` are ignored when using `GenerateJwe`.
+`expiry`, `not-before`, and `generate-id` are not supported when using `GenerateJwe`.
 
 ### Generation of a JWE wrapping a JWT, using a randomly-selected key
 
@@ -211,7 +217,7 @@ result is a JWE, not an encrypted JWT.  Properties relevant to JWT, like
    <Property name='jwks-uri'>https://jwks-service.dinochiesa.net/.well-known/jwks.json</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -229,7 +235,7 @@ This is similar to the above, except the payload is a JWT, and the `cty` header 
    <Property name='jwks'>{variable-containing-jwks-json-string}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -254,7 +260,7 @@ Again, the decryptor needs to use the corresponding private key.
    <Property name='key-id'>{my_key_id}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -273,11 +279,10 @@ Again, the decryptor needs to use the corresponding private key.
    <Property name='key-encryption'>A256KW</Property>
    <Property name='content-encryption'>A256GCM</Property>
    <Property name='payload'>{ "sub":"dino", "unk":"600c3efa-e48e-49c8-b6d9-e6bb9b94ad52"}</Property>
-   <Property name='expiry'>20m</Property>
    <Property name='secret-key'>{my-secret-key}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -285,6 +290,26 @@ In this case, the callout obtains the secret key from the string contained in
 the variable `my-secret-key`, using `utf-8` encoding.
 
 The decryptor would need to use the same secret key.
+
+
+### Generation of a JWE using a variable as the source of the payload
+
+Similar to the above, but using the contents of a context variable for the payload.
+This context variable could hold a String, a byte array, or a Java InputStream.
+
+```xml
+<JavaCallout name="Java-JWEGeneration-with-AES">
+ <Properties>
+   <Property name='key-encryption'>A256KW</Property>
+   <Property name='content-encryption'>A256GCM</Property>
+   <Property name='payload-variable'>myVariable1</Property>
+   <Property name='secret-key'>{my-secret-key}</Property>
+ </Properties>
+ <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
+</JavaCallout>
+```
+
 
 
 ### Properties for Generation
@@ -303,13 +328,14 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
 | `content-encryption` | required. name of the content encryption algorithm. One of `A256GCM`, `A128GCM`, `A265GCM`, or one of the CBC algorithms.             |
 | `serialization-format` | optional. one of `compact`, or `json`. (`full` is a synonym of the latter). The serialization format. Supported only with the GenerateJwe class. |
 | `payload`            | optional. For GenerateEncryptedJwt, a JSON string that includes additional properties to be included in the payload of the JWT. For GenerateJwe, this is any arbitrary string. |
+| `payload-variable`   | optional. Supported for GenerateJwe only. Specifies the name of a variable containing a string, a byte array, or an InputStream, that should be encrypted. Specify only one of `payload` or `payload-variable`. |
 | `header`             | optional. a JSON string that includes additional custom properties for the header of the JWT or JWE.                                  |
 | `crit`               | optional. a comma-separated list of header names to be used as the "crit" header of the JWT.                                          |
-| `expiry`             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now. Applies to GenerateEncryptedJwt only.  |
-| `not-before`         | optional. an interval as above, expressing the not-before time of the JWT, measured from now. Can be negative (eg -1m = one minute ago). Applies to GenerateEncryptedJwt only.   |
-| `generate-id`        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim. Applies to GenerateEncryptedJwt only.           |
+| `expiry`             | optional. an interval, like 5m, 1h, 1d, expressing the desired time of expiry of the JWT, measured from now. Supported for GenerateEncryptedJwt only.  |
+| `not-before`         | optional. an interval as above, expressing the not-before time of the JWT, measured from now. Can be negative (eg -1m = one minute ago). Supported for GenerateEncryptedJwt only.   |
+| `generate-id`        | optional. boolean, true or false. Defaults to false. Whether to generate a jti claim. Supported for GenerateEncryptedJwt only.           |
 | `compress`           | optional. boolean, true or false. Defaults to false. Whether to compress the payload before encrypting.                               |
-| `output`             | optional. name of the variable in which to store the output. Defaults to `ejwt_output` or `jwe_output`.                               |
+| `output`             | optional. name of the variable in which to store the output. Defaults to `ejwt_output` or `jwe_output` for GenerateEncryptedJwt or GenerateJwe respectively. |
 
 
 ### Basic Verification of an JWT that had been Encrypted with RSA
@@ -321,7 +347,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
     <Property name='private-key'>{private.my_private_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -345,7 +371,7 @@ These are the properties available on the GenerateJwe and GenerateEncryptedJwt p
    <Property name='private-key'>{private.my_private_key}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -369,7 +395,7 @@ This is like the above, except:
    <Property name='private-key'>{private.my_private_key}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -388,7 +414,7 @@ This is like the above, except:
    <Property name='private-key'>{private.my_private_key}</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.VerifyEncryptedJwt</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -414,7 +440,7 @@ is different:
  </Properties>
  <!-- Verify a JWE containing a non-JSON payloads -->
  <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -434,7 +460,7 @@ is different:
    <Property name='secret-key-encoding'>base16</Property>
  </Properties>
  <ClassName>com.google.apigee.callouts.VerifyJwe</ClassName>
- <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+ <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -612,7 +638,7 @@ mvn -f pom-java8.xml clean package
 The source code includes tests.
 
 If you edit policies offline, copy [the jar file for the custom
-policy](callout/target/apigee-callout-encrypted-jwt-20240614.jar) and all the
+policy](callout/target/apigee-callout-encrypted-jwt-20241203.jar) and all the
 dependencies to your apiproxy/resources/java directory.  If you don't edit proxy
 bundles offline, upload that jar file into the API Proxy via the Apigee API
 Proxy Editor.

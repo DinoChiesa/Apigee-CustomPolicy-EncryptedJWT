@@ -7,5 +7,5 @@
     <Property name='public-key'>{my_rsa_public_key}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20240614.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
 </JavaCallout>

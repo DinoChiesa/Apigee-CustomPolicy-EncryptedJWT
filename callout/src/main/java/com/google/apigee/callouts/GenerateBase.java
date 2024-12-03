@@ -218,6 +218,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     public byte[] secretKey;
 
     public String payload;
+    public String payloadVariable;
     public String header;
     public String keyId;
     public String crit;
@@ -256,6 +257,7 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     }
     config.contentEncryptionAlgorithm = getContentEncryption(msgCtxt);
     if (config.keyId == null) config.keyId = _getOptionalString(msgCtxt, "key-id");
+    config.payloadVariable = _getOptionalString(msgCtxt, "payload-variable");
     config.payload = _getOptionalString(msgCtxt, "payload");
     config.serializationFormat = _getOptionalString(msgCtxt, "serialization-format");
     config.header = _getOptionalString(msgCtxt, "header");
@@ -265,6 +267,10 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     config.notBefore = getNotBefore(msgCtxt);
     config.generateId = _getBooleanProperty(msgCtxt, "generate-id", false);
     config.compress = _getBooleanProperty(msgCtxt, "compress", false);
+    if ((config.payload != null && config.payloadVariable != null)
+        || (config.payload == null && config.payloadVariable == null)) {
+      throw new IllegalStateException("specify one of payload or payload-variable.");
+    }
     return config;
   }
 

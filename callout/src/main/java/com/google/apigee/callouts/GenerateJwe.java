@@ -30,6 +30,9 @@ import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -60,12 +63,32 @@ public class GenerateJwe extends GenerateBase implements Execution {
     return jsonBuilder.build().toJSONObject().toString();
   }
 
+  private static byte[] readAllBytes(InputStream inputStream) throws IOException {
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    int nRead;
+    byte[] data = new byte[1024];
+    while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+      buffer.write(data, 0, nRead);
+    }
+    buffer.flush();
+    return buffer.toByteArray();
+  }
+
   void encrypt(PolicyConfig policyConfig, MessageContext msgCtxt) throws Exception {
     if (policyConfig.serializationFormat != null) {
       policyConfig.serializationFormat = policyConfig.serializationFormat.toLowerCase();
       if (!serializationOptions.contains(policyConfig.serializationFormat)) {
         throw new IllegalStateException("unsupported serialization-format.");
       }
+    }
+    if (policyConfig.expiry != 0) {
+      throw new IllegalStateException("unsupported property for GenerateJwe (expiry).");
+    }
+    if (policyConfig.notBefore != 0) {
+      throw new IllegalStateException("unsupported property for GenerateJwe (not-before).");
+    }
+    if (policyConfig.generateId) {
+      throw new IllegalStateException("unsupported property for GenerateJwe (generate-id).");
     }
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");
@@ -105,7 +128,23 @@ public class GenerateJwe extends GenerateBase implements Execution {
     JWEHeader header = headerBuilder.build();
     msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
 
-    JWEObject jwe = new JWEObject(header, new Payload(policyConfig.payload));
+    JWEObject jwe;
+
+    if (policyConfig.payload != null) {
+      jwe = new JWEObject(header, new Payload(policyConfig.payload));
+    } else {
+      Object payload = (Object) msgCtxt.getVariable(policyConfig.payloadVariable);
+      if (payload instanceof byte[]) {
+        jwe = new JWEObject(header, new Payload((byte[]) payload));
+      } else if (payload instanceof InputStream) {
+        jwe = new JWEObject(header, new Payload(readAllBytes((InputStream) payload)));
+      } else if (payload instanceof String) {
+        jwe = new JWEObject(header, new Payload((String) payload));
+      } else {
+        throw new IllegalStateException(
+            String.format("unsupported payload type (%s).", payload.getClass().getName()));
+      }
+    }
     JWEEncrypter encrypter = getEncrypter(policyConfig);
 
     jwe.encrypt(encrypter);
@@ -113,7 +152,7 @@ public class GenerateJwe extends GenerateBase implements Execution {
 
     // support the JSON
     if ("full".equals(policyConfig.serializationFormat)
-        || "compact".equals(policyConfig.serializationFormat)) {
+        || "json".equals(policyConfig.serializationFormat)) {
       serialized = convertToJson(serialized);
     }
     msgCtxt.setVariable(policyConfig.outputVar, serialized);

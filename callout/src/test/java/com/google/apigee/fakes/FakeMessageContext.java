@@ -44,6 +44,7 @@ public class FakeMessageContext implements MessageContext {
     return variables;
   }
 
+  @SuppressWarnings("unchecked")
   public <T> T getVariable(final String name) {
     return (T) getVariables().get(name);
   }
@@ -53,7 +54,7 @@ public class FakeMessageContext implements MessageContext {
   }
 
   public boolean setVariable(final String name, final Object value) {
-    System.out.printf("set(%s) = %s\n", name, value.toString());
+    System.out.printf("set(%s) = (%s) %s\n", name, value.getClass().getName(), value.toString());
     getVariables().put(name, value);
     return true;
   }

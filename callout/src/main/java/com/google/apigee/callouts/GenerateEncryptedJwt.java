@@ -52,6 +52,9 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
     if (policyConfig.serializationFormat != null) {
       throw new IllegalStateException("serialization-format is not supported for JWT.");
     }
+    if (policyConfig.payloadVariable != null) {
+      throw new IllegalStateException("specify payload for encrypted JWT.");
+    }
     if (policyConfig.keyEncryptionAlgorithm == null)
       throw new IllegalStateException("missing key-encryption.");
     JWEAlgorithm alg = JWEAlgorithm.parse(policyConfig.keyEncryptionAlgorithm);
@@ -91,6 +94,7 @@ public class GenerateEncryptedJwt extends GenerateBase implements Execution {
       }
     }
 
+    // always insert the iat
     Instant now = Instant.now();
     claimsBuilder.issueTime(Date.from(now));
 

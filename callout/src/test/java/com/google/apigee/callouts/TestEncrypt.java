@@ -36,6 +36,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -283,6 +284,8 @@ public class TestEncrypt extends CalloutTestBase {
         resourceRetriever.retrieveResource(new URL(JWKS_BASE_URL + "/keyids?type=rsa"));
     Type type = new TypeToken<Map<String, Object>>() {}.getType();
     Map<String, Object> json = new Gson().fromJson(resource.getContent(), type);
+
+    @SuppressWarnings("unchecked")
     List<Object> ids = (List<Object>) json.get("ids");
     String selectedKeyId = (String) ids.get(0);
 
@@ -392,6 +395,7 @@ public class TestEncrypt extends CalloutTestBase {
         resourceRetriever.retrieveResource(new URL(JWKS_BASE_URL + "/keyids?type=rsa"));
     Type type = new TypeToken<Map<String, Object>>() {}.getType();
     Map<String, Object> json = new Gson().fromJson(resource.getContent(), type);
+    @SuppressWarnings("unchecked")
     List<Object> ids = (List<Object>) json.get("ids");
     String selectedKeyId = (String) ids.get(0);
 
@@ -532,6 +536,7 @@ public class TestEncrypt extends CalloutTestBase {
         resourceRetriever.retrieveResource(new URL(JWKS_BASE_URL + "/keyids?type=rsa"));
     Type type = new TypeToken<Map<String, Object>>() {}.getType();
     Map<String, Object> json = new Gson().fromJson(resource.getContent(), type);
+    @SuppressWarnings("unchecked")
     List<Object> ids = (List<Object>) json.get("ids");
     String selectedKeyId = (String) ids.get(0);
 
@@ -709,6 +714,171 @@ public class TestEncrypt extends CalloutTestBase {
     Assert.assertEquals(error, "serialization-format is not supported for JWT.");
 
     String output = msgCtxt.getVariableAsString("ejwt_output");
+    Assert.assertNull(output);
+  }
+
+  @Test()
+  public void encrypt22_missing_payload() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt22");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("content-encryption", "A256GCM");
+
+    GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("ejwt", properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("ejwt_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "specify one of payload or payload-variable.");
+    String output = msgCtxt.getVariableAsString("ejwt_output");
+    Assert.assertNull(output);
+  }
+
+  @Test()
+  public void encrypt24_both_payload_and_payload_variable() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt24");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", "foobar");
+    properties.put("payload-variable", "var1");
+    msgCtxt.setVariable("var1", StringGen.randomString(28));
+
+    GenerateEncryptedJwt callout = new GenerateEncryptedJwt(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("ejwt", properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("ejwt_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals(error, "specify one of payload or payload-variable.");
+    String output = msgCtxt.getVariableAsString("ejwt_output");
+    Assert.assertNull(output);
+  }
+
+  @Test()
+  public void encrypt25_payload_variable_string() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt25");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload-variable", "var1");
+    msgCtxt.setVariable("var1", StringGen.randomString(28));
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariableAsString("jwe_output");
+    Assert.assertNotNull(output);
+  }
+
+  @Test()
+  public void encrypt26_payload_variable_bytearray() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt26");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload-variable", "var1");
+    properties.put("debug", "true");
+
+    byte[] b = new byte[400];
+    new Random().nextBytes(b);
+    msgCtxt.setVariable("var1", b);
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNull(error);
+    String output = msgCtxt.getVariableAsString("jwe_output");
+    Assert.assertNotNull(output);
+  }
+
+  @Test()
+  public void encrypt27_payload_variable_bytearray_json_ser() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt27");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload-variable", "var1");
+    properties.put("serialization-format", "json");
+    properties.put("debug", "true");
+
+    final int PAYLOAD_LENGTH = 400;
+    byte[] b = new byte[PAYLOAD_LENGTH];
+    new Random().nextBytes(b);
+    msgCtxt.setVariable("var1", b);
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("jwe", properties);
+    Assert.assertEquals(result, ExecutionResult.SUCCESS);
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNull(error);
+    String jweOutput = msgCtxt.getVariableAsString("jwe_output");
+    Assert.assertNotNull(jweOutput);
+
+    // parse jweOutput as JSON
+    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+    Map<String, String> map = new Gson().fromJson(jweOutput, type);
+    List<String> list = Arrays.asList("protected", "encrypted_key", "iv", "ciphertext", "tag");
+    for (String key : list) {
+      String value = map.get(key);
+      System.out.printf("  %s = %s\n", key, value);
+      Assert.assertNotNull(value);
+    }
+
+    // This is a weak test, but... with encryption and base64 encoding the
+    // ciphertext should be larger.
+    String ciphertext = map.get("ciphertext");
+    Assert.assertTrue(PAYLOAD_LENGTH < ciphertext.length());
+  }
+
+  @Test()
+  public void encrypt28_JWE_with_expiry() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("testname", "encrypt28");
+    properties.put("public-key", publicKey1);
+    properties.put("key-encryption", "RSA-OAEP-256");
+    properties.put("content-encryption", "A256GCM");
+    properties.put("payload", "this-is-the-payload-to-encrypt-" + StringGen.randomString(28));
+    properties.put("debug", "true");
+    properties.put("expiry", "1h");
+
+    GenerateJwe callout = new GenerateJwe(properties);
+    ExecutionResult result = callout.execute(msgCtxt, exeCtxt);
+
+    // check result and output
+    reportThings("ejwt", properties);
+    Assert.assertEquals(result, ExecutionResult.ABORT);
+    // retrieve output
+    String error = msgCtxt.getVariableAsString("jwe_error");
+    Assert.assertNotNull(error);
+    Assert.assertEquals("unsupported property for GenerateJwe (expiry).", error);
+    String output = msgCtxt.getVariableAsString("jwe_output");
     Assert.assertNull(output);
   }
 }
