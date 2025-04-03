@@ -74,8 +74,8 @@ public class TestEncryptAES extends CalloutTestBase {
             + " 256 bits \\(32 bytes\\)";
 
     final String notSupported =
-        "The \"[A][^\"]+KW\" algorithm is not supported by the JWE encrypter: Supported algorithms:"
-            + " \\[.+\\]";
+        "The \"?[A][^\"]+KW\"? algorithm is not supported by the JWE encrypter: Supported"
+            + " algorithms: \\[.+\\]";
 
     return new Object[][] {
       // Using a key length that is not one of {16,24,32} results in a specific error.

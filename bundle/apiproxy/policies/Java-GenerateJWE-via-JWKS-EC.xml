@@ -8,5 +8,5 @@
     <Property name='key-id'>{my_selected_key_id}</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateJwe</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20250403.jar</ResourceURL>
 </JavaCallout>

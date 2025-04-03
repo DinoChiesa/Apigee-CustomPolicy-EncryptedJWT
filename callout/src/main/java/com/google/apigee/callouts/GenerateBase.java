@@ -23,9 +23,6 @@ import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.apigee.util.KeyUtil;
 import com.google.apigee.util.TimeResolver;
 import com.nimbusds.jose.JWEEncrypter;
@@ -38,57 +35,53 @@ import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class GenerateBase extends EncryptedJoseBase implements Execution {
-  private static LoadingCache<String, JWKSet> jwksRemoteCache;
-  private static LoadingCache<String, JWKSet> jwksLocalCache;
-  private static final int MAX_CACHE_ENTRIES = 128;
-  private static final int CACHE_EXPIRY_IN_MINUTES = 5;
+  // private static LoadingCache<String, JWKSet> jwksRemoteCache;
+  // private static LoadingCache<String, JWKSet> jwksLocalCache;
+  // private static final int MAX_CACHE_ENTRIES = 128;
+  // private static final int CACHE_EXPIRY_IN_MINUTES = 5;
 
-  static {
-    jwksRemoteCache =
-        Caffeine.newBuilder()
-            // .concurrencyLevel(4)
-            .maximumSize(MAX_CACHE_ENTRIES)
-            .expireAfterAccess(CACHE_EXPIRY_IN_MINUTES, TimeUnit.MINUTES)
-            .build(
-                new CacheLoader<String, JWKSet>() {
-                  public JWKSet load(String uri)
-                      throws MalformedURLException, IOException, ParseException {
-                    // NB: this will throw an IOException on HTTP error.
-                    try {
-                      return JWKSet.load(new URL(uri));
-                    } catch (Exception e1) {
-                      return null;
-                    }
-                  }
-                });
-
-    jwksLocalCache =
-        Caffeine.newBuilder()
-            // .concurrencyLevel(4)
-            .maximumSize(MAX_CACHE_ENTRIES)
-            .expireAfterAccess(CACHE_EXPIRY_IN_MINUTES, TimeUnit.MINUTES)
-            .build(
-                new CacheLoader<String, JWKSet>() {
-                  public JWKSet load(String jwksJson) throws ParseException {
-                    // NB: this can throw an Exception on parse error.
-                    return JWKSet.parse(jwksJson);
-                  }
-                });
-  }
+  // static {
+  //   jwksRemoteCache =
+  //       Caffeine.newBuilder()
+  //           // .concurrencyLevel(4)
+  //           .maximumSize(MAX_CACHE_ENTRIES)
+  //           .expireAfterAccess(CACHE_EXPIRY_IN_MINUTES, TimeUnit.MINUTES)
+  //           .build(
+  //               new CacheLoader<String, JWKSet>() {
+  //                 public JWKSet load(String uri)
+  //                     throws MalformedURLException, IOException, ParseException {
+  //                   // NB: this will throw an IOException on HTTP error.
+  //                   try {
+  //                     return JWKSet.load(new URL(uri));
+  //                   } catch (Exception e1) {
+  //                     return null;
+  //                   }
+  //                 }
+  //               });
+  //
+  //   jwksLocalCache =
+  //       Caffeine.newBuilder()
+  //           // .concurrencyLevel(4)
+  //           .maximumSize(MAX_CACHE_ENTRIES)
+  //           .expireAfterAccess(CACHE_EXPIRY_IN_MINUTES, TimeUnit.MINUTES)
+  //           .build(
+  //               new CacheLoader<String, JWKSet>() {
+  //                 public JWKSet load(String jwksJson) throws ParseException {
+  //                   // NB: this can throw an Exception on parse error.
+  //                   return JWKSet.parse(jwksJson);
+  //                 }
+  //               });
+  // }
 
   public GenerateBase(Map properties) {
     super(properties);
@@ -136,12 +129,14 @@ public abstract class GenerateBase extends EncryptedJoseBase implements Executio
     JWKSet jwks = null;
     String jwksJson = _getOptionalString(msgCtxt, "jwks");
     if (jwksJson != null) {
-      jwks = jwksLocalCache.get(jwksJson);
+      jwks = JWKSet.parse(jwksJson);
+      // jwks = jwksLocalCache.get(jwksJson);
     } else {
       String jwksUri = _getOptionalString(msgCtxt, "jwks-uri");
       if (jwksUri == null)
         throw new IllegalStateException("specify one of {public-key, jwks, jwks-uri}.");
-      jwks = jwksRemoteCache.get(jwksUri);
+      jwks = JWKSet.load(new URL(jwksUri));
+      // jwksRemoteCache.get(jwksUri);
     }
 
     String keyId = _getOptionalString(msgCtxt, "key-id");

@@ -126,7 +126,8 @@ public class GenerateJwe extends GenerateBase implements Execution {
     }
 
     JWEHeader header = headerBuilder.build();
-    msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
+    //    msgCtxt.setVariable(varName("header"), toString(header.toJSONObject()));
+    msgCtxt.setVariable(varName("header"), "I-don't know");
 
     JWEObject jwe;
 

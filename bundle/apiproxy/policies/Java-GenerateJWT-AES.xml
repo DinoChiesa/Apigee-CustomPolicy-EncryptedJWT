@@ -10,5 +10,5 @@
     <Property name='secret-key-encoding'>base64url</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.GenerateEncryptedJwt</ClassName>
-  <ResourceURL>java://apigee-callout-encrypted-jwt-20241203.jar</ResourceURL>
+  <ResourceURL>java://apigee-callout-encrypted-jwt-20250403.jar</ResourceURL>
 </JavaCallout>
