@@ -272,16 +272,18 @@
                 <copy todir="${apiproxy.java.rsrc.dir}">
                   <fileset dir="${project.build.directory}">
                     <include name="${project.build.finalName}.jar"/>
-                    <!-- copy any required dependencies tht are not
-                         already included in the Apigee runtime: -->
                     <include name="lib/*.jar"/>
                   </fileset>
                   <mapper type="flatten"/>
                 </copy>
-                <copy
-                    file="${project.build.directory}/${project.build.finalName}.jar"
-                    tofile="${dist.dir}/${project.build.finalName}-jdk${jdk.target.version}.jar"
-                    overwrite="true"/>
+                <copy todir="${dist.dir}/jdk${jdk.target.version}"
+                      overwrite="true">
+                  <fileset dir="${project.build.directory}">
+                    <include name="${project.build.finalName}.jar"/>
+                    <include name="lib/*.jar"/>
+                  </fileset>
+                  <mapper type="flatten"/>
+                </copy>
               </target>
             </configuration>
           </execution>
