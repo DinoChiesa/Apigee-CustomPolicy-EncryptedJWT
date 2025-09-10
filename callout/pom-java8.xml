@@ -4,18 +4,19 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20250403</version>
+  <version>20250909</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
 
   <properties>
     <apiproxy.java.rsrc.dir>../bundle/apiproxy/resources/java</apiproxy.java.rsrc.dir>
+    <dist.dir>../dist</dist.dir>
     <apigee.expressions.version>1.0.0</apigee.expressions.version>
     <apigee.message.flow.version>1.0.0</apigee.message.flow.version>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.49.4</jmockit.version>
-    <caffeine.version>2.9.0</caffeine.version>
+    <caffeine.version>2.8.5</caffeine.version>
     <nimbus-jose.version>9.37.2</nimbus-jose.version>
     <bouncycastle.version>1.70</bouncycastle.version>
     <gson.version>2.8.9</gson.version>
@@ -27,17 +28,11 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>artifact-registry</id>
-      <url>https://us-maven.pkg.dev/apigee-release/apigee-java-callout-dependencies</url>
-    </repository>
-  </repositories>
 
   <dependencies>
 
     <dependency>
-      <groupId>com.apigee.gateway.libraries</groupId>
+      <groupId>com.apigee.edge</groupId>
       <artifactId>message-flow</artifactId>
       <version>${apigee.message.flow.version}</version>
       <scope>provided</scope>
@@ -45,7 +40,7 @@
     </dependency>
 
     <dependency>
-      <groupId>com.apigee.infra.libraries</groupId>
+      <groupId>com.apigee.edge</groupId>
       <artifactId>expressions</artifactId>
       <version>${apigee.expressions.version}</version>
       <scope>provided</scope>
@@ -111,12 +106,60 @@
       <version>${gson.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
+      <plugin>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>jcp</artifactId>
+        <version>7.1.2</version>
+        <executions>
+          <execution>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>preprocess</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <useTestSources>true</useTestSources>
+          <vars>
+            <JDK8>true</JDK8>
+          </vars>
+          <sources>
+          <source>${project.basedir}/src/test/java-unprocessed</source>
+          </sources>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-test-sources/preprocessed</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -164,7 +207,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.4.2</version>
         <configuration>
           <archive>
             <!-- do not include the pom.xml file in the generated jar -->
@@ -254,6 +297,10 @@
                   </fileset>
                   <mapper type="flatten"/>
                 </copy>
+                <copy
+                    file="${project.build.directory}/${project.build.finalName}.jar"
+                    tofile="${dist.dir}/${project.build.finalName}-jdk${jdk.target.version}.jar"
+                    overwrite="true"/>
               </target>
             </configuration>
           </execution>
@@ -284,7 +331,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.16.2</version>
+        <version>2.18.0</version>
         <executions>
           <execution>
             <phase>compile</phase>

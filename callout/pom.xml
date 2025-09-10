@@ -4,13 +4,14 @@
 
   <groupId>com.google.apigee</groupId>
   <artifactId>apigee-callout-encrypted-jwt</artifactId>
-  <version>20250403</version>
+  <version>20250909</version>
   <name>ApigeeCustomEncryptedJwt</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
 
   <properties>
     <apiproxy.java.rsrc.dir>../bundle/apiproxy/resources/java</apiproxy.java.rsrc.dir>
+    <dist.dir>../dist</dist.dir>
     <apigee.expressions.version>1.0.0</apigee.expressions.version>
     <apigee.message.flow.version>1.0.0</apigee.message.flow.version>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
@@ -114,6 +115,49 @@
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
+
+      <plugin>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>jcp</artifactId>
+        <version>7.1.2</version>
+        <executions>
+          <execution>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>preprocess</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <useTestSources>true</useTestSources>
+          <vars>
+            <JDK11>true</JDK11>
+          </vars>
+          <sources>
+          <source>${project.basedir}/src/test/java-unprocessed</source>
+          </sources>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-test-sources/preprocessed</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -234,6 +278,10 @@
                   </fileset>
                   <mapper type="flatten"/>
                 </copy>
+                <copy
+                    file="${project.build.directory}/${project.build.finalName}.jar"
+                    tofile="${dist.dir}/${project.build.finalName}-jdk${jdk.target.version}.jar"
+                    overwrite="true"/>
               </target>
             </configuration>
           </execution>

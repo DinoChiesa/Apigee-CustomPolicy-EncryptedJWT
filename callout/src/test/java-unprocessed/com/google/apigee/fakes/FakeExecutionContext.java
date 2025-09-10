@@ -1,4 +1,4 @@
-// Copyright © 2024 Google, LLC.
+// Copyright © 2024,2025 Google, LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -75,4 +75,11 @@ public class FakeExecutionContext implements ExecutionContext {
   public void resumeOnNIO(Runnable runnable) {
     throw new UnsupportedOperationException();
   }
+
+  //#ifdef JDK8
+  public org.slf4j.Marker getMarker() {
+    throw new UnsupportedOperationException();
+  }
+  //#endif
+
 }

@@ -1,4 +1,4 @@
-// Copyright © 2024 Google, LLC.
+// Copyright © 2024,2025 Google, LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 package com.google.apigee.fakes;
 
 import com.apigee.flow.execution.ExecutionContext;
+//#ifdef JDK11
 import com.apigee.flow.message.AsyncContent;
+//#endif
 import com.apigee.flow.message.Message;
 import com.apigee.flow.message.MessageContext;
 import com.apigee.flow.message.TransportMessage;
@@ -222,9 +224,11 @@ public class FakeMessage implements Message {
     throw new UnsupportedOperationException();
   }
 
+  //#ifdef JDK11
   public AsyncContent setAsyncContent(ExecutionContext ectx, MessageContext mctx) {
     throw new UnsupportedOperationException();
   }
+  //#endif
 
   public void prepareForResponseFlow() {
     throw new UnsupportedOperationException();
